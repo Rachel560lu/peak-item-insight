@@ -1,0 +1,29 @@
+bin/
+obj/
+*.user
+*.suo
+lib/
+deploy/
+.dotnet-sdk/
+.dotnet-home/
+.nuget/
+dotnet-install.ps1
+
+# Local-only test data and generated release artifacts
+/backups/
+/dist/
+*.dll
+*.exe
+*.pdb
+*.zip
+*.log
+steam_appid.txt
+!/scripts/steam_appid.txt
+
+# Credentials and machine-local settings
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.vs/

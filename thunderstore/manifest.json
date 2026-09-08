@@ -1,0 +1,9 @@
+{
+  "name": "PeakItemInsight",
+  "version_number": "0.1.9",
+  "website_url": "",
+  "description": "Experimental item insights for PEAK: hover or hold items to preview hunger/injury recovery on the HUD and read recognized effects and usage notes.",
+  "dependencies": [
+    "BepInEx-BepInExPack_PEAK-5.4.2403"
+  ]
+}

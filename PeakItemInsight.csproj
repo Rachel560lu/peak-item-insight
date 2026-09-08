@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>PeakItemInsight</AssemblyName>
+    <RootNamespace>PeakItemInsight</RootNamespace>
+    <PeakManagedDir Condition="'$(PeakManagedDir)' == ''">D:\SteamLibrary\steamapps\common\PEAK\PEAK_Data\Managed</PeakManagedDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="tools\**\*.cs" />
+    <EmbeddedResource Remove="tools\**\*" />
+    <None Remove="tools\**\*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Core" Version="5.4.21" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp" HintPath="$(PeakManagedDir)\Assembly-CSharp.dll" Private="false" />
+    <Reference Include="0Harmony" HintPath="C:\Users\midor\AppData\Roaming\r2modmanPlus-local\PEAK\profiles\PeakItemInsight-Test\BepInEx\core\0Harmony.dll" Private="false" />
+    <Reference Include="PhotonUnityNetworking" HintPath="$(PeakManagedDir)\PhotonUnityNetworking.dll" Private="false" />
+    <Reference Include="UnityEngine" HintPath="$(PeakManagedDir)\UnityEngine.dll" Private="false" />
+    <Reference Include="UnityEngine.CoreModule" HintPath="$(PeakManagedDir)\UnityEngine.CoreModule.dll" Private="false" />
+    <Reference Include="UnityEngine.UI" HintPath="$(PeakManagedDir)\UnityEngine.UI.dll" Private="false" />
+    <Reference Include="UnityEngine.UIModule" HintPath="$(PeakManagedDir)\UnityEngine.UIModule.dll" Private="false" />
+    <Reference Include="UnityEngine.ScreenCaptureModule" HintPath="$(PeakManagedDir)\UnityEngine.ScreenCaptureModule.dll" Private="false" />
+    <Reference Include="Unity.TextMeshPro" HintPath="$(PeakManagedDir)\Unity.TextMeshPro.dll" Private="false" />
+  </ItemGroup>
+</Project>
