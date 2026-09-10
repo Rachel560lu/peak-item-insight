@@ -42,9 +42,9 @@ Rescue Claw icon, category, action prompt and remaining uses. This GIF is a stil
 
 为 PEAK 制作的非官方 BepInEx 物品提示 Mod。准星对准或手持物品时，预览已识别的效果，并查看简短的使用说明。
 
-**当前版本：0.2.2 · 已在 [Thunderstore](https://thunderstore.io/c/peak/p/Rachel560lu/PeakItemInsight/) 发布 · 实验版。** 玩家于 2026-09-11 反馈本次实机测试可用，并提供了上方三类演示。六种已核对毒食物的数值及合成 HUD 检查通过，81 项离线检查通过；不将这些示例扩大为“所有影响精力条的物品”全覆盖声明。详见[0.2.2 验证记录](docs/poison-preview-022.md)与[食物毒性核对](docs/food-toxicity-audit.md)。
+**当前发布包：0.2.3 · 插件运行版本：0.2.2 · 已在 [Thunderstore](https://thunderstore.io/c/peak/p/Rachel560lu/PeakItemInsight/) 发布 · 实验版。** 玩家于 2026-09-11 反馈本次实机测试可用，并提供了上方三类演示。六种已核对毒食物的数值及合成 HUD 检查通过，81 项离线检查通过；不将这些示例扩大为“所有影响精力条的物品”全覆盖声明。详见[0.2.2 验证记录](docs/poison-preview-022.md)与[食物毒性核对](docs/food-toxicity-audit.md)。
 
-0.2.2 已按用户授权，以 MIT 许可发布到 Thunderstore。旧 0.1.9 ZIP 不可使用。标准 Modded 全新 profile 启动仍未独立验证；上方 GIF 尚未加入 Thunderstore 页面，等待公开素材地址。见[最新发布记录](docs/release-022.md)。
+源码现已在 GitHub 以 MIT 许可公开。Thunderstore 0.2.3 加入上方三类 GIF 演示与源码链接，沿用已测试的 0.2.2 DLL，没有游戏功能改动。旧 0.1.9 ZIP 不可使用；标准 Modded 全新 profile 启动仍未独立验证。见[最新发布记录](docs/release-023.md)。
 
 ### 功能与预览方式
 
@@ -118,9 +118,9 @@ dotnet build -c Release -p:PeakManagedDir="X:\path\to\PEAK_Data\Managed"
 
 An unofficial BepInEx item-insight mod for PEAK. Hover over or hold an item to preview recognized effects and read concise usage information.
 
-**Current version: 0.2.2 · Experimental · Published on [Thunderstore](https://thunderstore.io/c/peak/p/Rachel560lu/PeakItemInsight/).** On September 11, 2026, the player reported successful in-game testing and supplied the three demonstrations above. All six audited toxic-food resource checks and 81 offline checks passed. This is not a claim of complete coverage of every stamina-affecting item. See the [0.2.2 verification record](docs/poison-preview-022.md) and [food toxicity audit](docs/food-toxicity-audit.md).
+**Current package: 0.2.3 · Plugin runtime: 0.2.2 · Experimental · Published on [Thunderstore](https://thunderstore.io/c/peak/p/Rachel560lu/PeakItemInsight/).** On September 11, 2026, the player reported successful in-game testing and supplied the three demonstrations above. All six audited toxic-food resource checks and 81 offline checks passed. This is not a claim of complete coverage of every stamina-affecting item. See the [0.2.2 verification record](docs/poison-preview-022.md) and [food toxicity audit](docs/food-toxicity-audit.md).
 
-0.2.2 is now published on [Thunderstore](https://thunderstore.io/c/peak/p/Rachel560lu/PeakItemInsight/) under MIT. Do not use old 0.1.9 ZIPs. Standard fresh-profile Modded startup remains independently unverified. The GIFs above are not yet on the public listing; public asset hosting is still needed. See the [current release record](docs/release-022.md).
+The source is now public on GitHub under MIT. Thunderstore 0.2.3 adds the three GIF demonstrations and source links, retaining the tested 0.2.2 DLL with no gameplay changes. Do not use old 0.1.9 ZIPs. Standard fresh-profile Modded startup remains independently unverified. See the [current release record](docs/release-023.md).
 
 ### Features and preview behavior
 
