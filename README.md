@@ -1,12 +1,28 @@
 <p align="center">
-  <img src="docs/assets/peak-item-insight.jpg" alt="PEAK Item Insight — mountain, crosshair and status bar / 山峰、准星与状态条" width="192" height="192">
+  <img src="docs/assets/item-insight-header.png" width="920" alt="PEAK Item Insight Mod — scouts inspecting food with a stamina preview / 童军查看食物与精力条预览" />
 </p>
 
 <h1 align="center">PEAK Item Insight</h1>
 
-<p align="center">使用前，看见变化。<br>See what changes before you use an item.</p>
+<p align="center"><strong>See what changes before you use it.</strong><br />
+Preview recovery and poison on your stamina bar. Know what you're holding.</p>
 
-<p align="center"><a href="#中文">中文</a> · <a href="#english">English</a></p>
+<p align="center"><strong>使用前，看见变化。</strong><br />
+精力条预览恢复与毒性，物品卡说明手中用途。</p>
+
+<p align="center">
+  <a href="https://thunderstore.io/c/peak/p/Rachel560lu/PeakItemInsight/"><img src="https://img.shields.io/badge/Download-Thunderstore-8cdb65?style=for-the-badge" alt="Download on Thunderstore" /></a>
+  <a href="https://thunderstore.io/c/peak/p/Rachel560lu/PeakItemInsight/"><img src="https://img.shields.io/thunderstore/dt/Rachel560lu/PeakItemInsight?style=for-the-badge&amp;color=8cdb65&amp;cacheSeconds=300" alt="Thunderstore total downloads" /></a>
+  <a href="https://thunderstore.io/c/peak/p/Rachel560lu/PeakItemInsight/versions"><img src="https://img.shields.io/thunderstore/v/Rachel560lu/PeakItemInsight?style=for-the-badge&amp;color=345b63&amp;label=version&amp;cacheSeconds=300" alt="Latest Thunderstore package version" /></a>
+  <img src="https://img.shields.io/badge/BepInEx-5-345b63?style=for-the-badge" alt="BepInEx 5" />
+</p>
+
+<p align="center">
+  <a href="https://thunderstore.io/c/peak/p/Rachel560lu/PeakItemInsight/">Download</a> ·
+  <a href="#中文">简体中文</a> ·
+  <a href="#english">English</a> ·
+  <a href="https://github.com/Rachel560lu/peak-item-insight/issues">Report an issue</a>
+</p>
 
 ## 实机演示 / Gameplay demos
 

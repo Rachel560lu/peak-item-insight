@@ -1,0 +1,7 @@
+# README header artwork
+
+Generated using the built-in imagegen tool, using the user-supplied Sprint Lock README screenshot as a style/composition reference. This is illustrative mod artwork, not a gameplay screenshot. The prior square logo is retained unchanged.
+
+## Final prompt
+
+Use case: ads-marketing. Asset type: wide illustrated GitHub README banner for an unofficial PEAK game mod. Input image 1 is only a style and layout reference: use the colorful landscape banner inside the phone screenshot, NOT the phone UI or README layout. Create a finished standalone landscape banner approximately 2.15:1 aspect ratio. Match the reference PEAK mountain-adventure illustration feeling, painterly purple and peach sunset sky, distant jagged sunlit mountain and little round-headed colorful scouts on a rocky foreground. Adapt the foreground action to Item Insight: a scout examining a berry and mushroom with a subtle green targeting ring; a small simple green/yellow/purple stamina bar motif integrated tastefully near the bottom. Dominant huge rough-edged white lettering "PEAK", beneath it smaller clearly legible white rounded text with dark purple outline "Item Insight Mod". Exact spelling, no other text. Keep title within safe margins, legible when scaled to 540px wide. Output ONLY the full-bleed banner, no browser, no phone, no surrounding white page, no badges, no watermark. Similar visual hierarchy and palette to the reference banner, fresh composition themed around item inspection.
