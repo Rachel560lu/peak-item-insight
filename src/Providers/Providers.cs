@@ -13,82 +13,29 @@ internal interface IItemPreviewProvider
 
 internal sealed class DirectStatusProvider : IItemPreviewProvider
 {
-    public bool CanHandle(Item item) => item.GetComponentsInChildren<ItemAction>(true).Length > 0;
+    public bool CanHandle(Item item) => true;
 
     public void Populate(Item item, ItemPreview preview)
     {
+        ItemEffectReader.Read(item, preview);
         var character = Character.localCharacter;
-        var afflictions = character != null ? character.refs.afflictions : null;
-        if (character == null || afflictions == null)
-            return;
-
+        if (character == null || character.refs.afflictions == null) return;
         if (character.data.isSkeleton || character.isZombie || character.isScoutmaster)
+        { preview.Warnings.Add(Labels.SpecialState); return; }
+        if (ItemDataReader.TryGetInt(item, DataEntryKey.ItemUses, out var uses) && uses == 0)
+        { preview.Warnings.Add(Labels.EmptyItem); return; }
+
+        var afflictions = character.refs.afflictions;
+        StatusProjector.Populate(preview,
+            type => type == CharacterAfflictions.STATUSTYPE.Petrify ? character.data.petrifyAmount * .01f : afflictions.GetCurrentStatus(type),
+            type => type == CharacterAfflictions.STATUSTYPE.Petrify ? 1f : afflictions.GetStatusCap(type), character.statusesLocked);
+        if (preview.HasExtraStamina)
         {
-            preview.Warnings.Add(Labels.SpecialState);
-            return;
+            preview.ExtraBefore = character.data.extraStamina;
+            preview.ExtraAfter = character.statusesLocked ? preview.ExtraBefore
+                : PreviewMath.Apply(preview.ExtraBefore, preview.ExtraAfter,
+                    Mathf.Max(0, 1 - character.data.petrifyAmount * .01f));
         }
-        var usesKnown = ItemDataReader.TryGetInt(item, DataEntryKey.ItemUses, out var uses);
-        if (usesKnown && uses == 0)
-        {
-            preview.Warnings.Add(Labels.EmptyItem);
-            return;
-        }
-
-        var active = item.GetComponentsInChildren<ItemAction>(true).Where(a => IsActive(a, item)).ToArray();
-        var consumes = (usesKnown ? uses == 1 : item.totalUses <= 1) && active.Any(a =>
-            (a is Action_Consume || a is Action_ConsumeAndSpawn) && (a.OnPressed || a.OnCastFinished));
-        var relevant = active.Where(a => a.OnPressed || a.OnCastFinished || (a.OnConsumed && consumes)).ToArray();
-        if (active.Any(a => a.OnHeld || a.OnCancelled || a.OnConsumed && !consumes && !a.OnPressed && !a.OnCastFinished))
-            preview.Warnings.Add(Labels.Conditional);
-
-        if (relevant.Any(a => !(a is Action_ModifyStatus) && !(a is Action_RestoreHunger) && !(a is Action_GiveExtraStamina) &&
-                             !(a is Action_Consume) && !(a is Action_ConsumeAndSpawn)))
-            preview.Warnings.Add(Labels.Partial);
-
-        var amounts = new System.Collections.Generic.Dictionary<CharacterAfflictions.STATUSTYPE, float>();
-        foreach (var action in relevant)
-        {
-            if (action is Action_ModifyStatus modify && !modify.ifSkeleton && modify.statusType != CharacterAfflictions.STATUSTYPE.Petrify)
-            {
-                AddAmount(modify.statusType, modify.changeAmount);
-                if (modify.statusType == CharacterAfflictions.STATUSTYPE.Poison && modify.changeAmount < 0)
-                    AddAmount(CharacterAfflictions.STATUSTYPE.Spores, modify.changeAmount);
-            }
-            else if (action is Action_RestoreHunger hunger)
-                AddAmount(CharacterAfflictions.STATUSTYPE.Hunger, -hunger.restorationAmount);
-            else if (action is Action_GiveExtraStamina extra)
-            {
-                if (!preview.HasExtraStamina) preview.ExtraBefore = preview.ExtraAfter = character.data.extraStamina;
-                preview.HasExtraStamina = true;
-                preview.ExtraAfter = PreviewMath.Apply(preview.ExtraAfter, extra.amount, Mathf.Max(0, 1 - character.data.petrifyAmount * .01f));
-            }
-        }
-
-        void AddAmount(CharacterAfflictions.STATUSTYPE type, float amount)
-        {
-            amounts.TryGetValue(type, out var existing);
-            amounts[type] = existing + amount;
-        }
-
-        foreach (var effect in amounts)
-        {
-            var before = afflictions.GetCurrentStatus(effect.Key);
-            var cap = afflictions.GetStatusCap(effect.Key);
-            var after = character.statusesLocked ? before : PreviewMath.Apply(before, effect.Value, cap);
-            preview.Statuses.Add(new StatusDelta(effect.Key, before, after));
-            if (after >= cap - 0.001f)
-                preview.Warnings.Add(Labels.ReachesLimit(effect.Key));
-        }
-    }
-
-    private static bool IsActive(ItemAction action, Item item)
-    {
-        if (!action.enabled) return false;
-        // A world FakeItem references an inactive prefab root. Respect all child
-        // toggles, but do not require the asset root to be active in a scene.
-        for (var node = action.transform; node != null && node != item.transform; node = node.parent)
-            if (!node.gameObject.activeSelf) return false;
-        return true;
     }
 }
 
@@ -107,8 +54,8 @@ internal sealed class InstanceResourceProvider : IItemPreviewProvider
         if (ItemDataReader.TryGetFloat(item, DataEntryKey.Fuel, out var fuel))
             preview.Resources.Add(new ResourceLine(Labels.Fuel, $"{Mathf.Max(0f, fuel):0.#}"));
 
-        if (item.cooking != null && item.cooking.canBeCooked)
-            preview.Resources.Add(new ResourceLine(Labels.Cooked, item.cooking.timesCookedLocal > 0 ? $"x{item.cooking.timesCookedLocal}" : Labels.No));
+        if (item.cooking != null && item.cooking.canBeCooked && item.cooking.timesCookedLocal > 0)
+            preview.Resources.Add(new ResourceLine(Labels.Cooked, $"x{item.cooking.timesCookedLocal}"));
     }
 }
 
@@ -119,7 +66,7 @@ internal sealed class PitonProvider : IItemPreviewProvider
 
     public void Populate(Item item, ItemPreview preview)
     {
-        preview.Instructions.Add(Labels.PitonInstruction);
+        preview.Description = Labels.PitonInstruction;
     }
 }
 
@@ -140,14 +87,38 @@ internal sealed class PromptProvider : IItemPreviewProvider
 
     private static void AddUnique(ItemPreview preview, string text)
     {
-        if (!preview.Instructions.Contains(text))
+        if (text.Trim().Equals("eat", StringComparison.OrdinalIgnoreCase) ||
+            text.Trim().Equals("drink", StringComparison.OrdinalIgnoreCase)) return;
+        if (!preview.Instructions.Contains(text) && preview.Description.Length == 0)
             preview.Instructions.Add(text);
     }
 }
 
 internal static class Labels
 {
-    private static bool Chinese => Application.systemLanguage == SystemLanguage.ChineseSimplified;
+    internal static bool Chinese => PresentationOptions.Language?.Value == "Chinese" ||
+        PresentationOptions.Language?.Value != "English" &&
+        (LocalizedText.CURRENT_LANGUAGE == LocalizedText.Language.SimplifiedChinese ||
+         LocalizedText.CURRENT_LANGUAGE == LocalizedText.Language.TraditionalChinese);
+    internal static string Text(string zh, string en) => Chinese ? zh : en;
+    internal static string ItemName(Item item)
+    {
+        if (item.UIData == null) return Text("未知物品", "Unknown item");
+        if (PresentationOptions.Language?.Value == "Auto" || PresentationOptions.Language == null) return item.GetName();
+        var language = Chinese ? LocalizedText.Language.SimplifiedChinese : LocalizedText.Language.English;
+        var key = LocalizedText.GetNameIndex(item.UIData.itemName);
+        return LocalizedText.GetText(key, language);
+    }
+    internal static string ItemDescription(Item item)
+    {
+        if (item.UIData == null) return "";
+        var key = LocalizedText.GetDescriptionIndex(item.UIData.itemName);
+        var language = PresentationOptions.Language?.Value == "English" ? LocalizedText.Language.English :
+            PresentationOptions.Language?.Value == "Chinese" ? LocalizedText.Language.SimplifiedChinese : LocalizedText.CURRENT_LANGUAGE;
+        if (LocalizedText.mainTable != null && LocalizedText.mainTable.ContainsKey(key))
+            return LocalizedText.GetText(key, language);
+        return "";
+    }
     public static string Source(PreviewSource source) => source == PreviewSource.Held
         ? (Chinese ? "手持" : "Held") : (Chinese ? "准星" : "Hover");
     public static string Uses => Chinese ? "剩余次数" : "Uses";
@@ -163,7 +134,7 @@ internal static class Labels
     public static string EmptyItem => Chinese ? "已无剩余使用次数。" : "No uses remaining.";
     public static string SpecialState => Chinese ? "特殊角色状态：无法可靠预测。" : "Special character state: exact preview unavailable.";
     public static string Conditional => Chinese ? "持续/取消/消耗触发的条件效果未完整计入。" : "Conditional held/cancel/consume effects are not fully included.";
-    public static string Partial => Chinese ? "仅预览已识别的即时效果；其他效果未完整计入，不能据此判断无毒。" : "Known immediate effects only; other effects may apply. Not a safety guarantee.";
+    public static string Partial => Chinese ? "部分效果尚未识别。" : "Some effects are not yet supported.";
     public static string ExtraStamina => Chinese ? "额外精力" : "Extra stamina";
 
     public static string ReachesLimit(CharacterAfflictions.STATUSTYPE type) => Chinese
@@ -180,10 +151,13 @@ internal static class Labels
                 case CharacterAfflictions.STATUSTYPE.Hunger: return "饥饿";
                 case CharacterAfflictions.STATUSTYPE.Cold: return "寒冷";
                 case CharacterAfflictions.STATUSTYPE.Poison: return "毒素";
+                case CharacterAfflictions.STATUSTYPE.Spores: return "孢子";
                 case CharacterAfflictions.STATUSTYPE.Curse: return "诅咒";
                 case CharacterAfflictions.STATUSTYPE.Drowsy: return "困倦";
                 case CharacterAfflictions.STATUSTYPE.Weight: return "负重";
                 case CharacterAfflictions.STATUSTYPE.Hot: return "炎热";
+                case CharacterAfflictions.STATUSTYPE.Petrify: return "石化";
+                case CharacterAfflictions.STATUSTYPE.Thorns: return "荆棘";
             }
         }
 

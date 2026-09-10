@@ -1,24 +1,14 @@
 # Changelog
 
-## 0.1.9 — local testing candidate
+## 0.2.2 — first public release candidate
 
-- Added injury recovery pulses on the recoverable portion of the native injury segment.
-- Added held-item fallback when no item is hovered, with a Hover/Held source label.
-- Pause the used item's preview during use and recalculate after use.
-- Keep hunger and injury recovery pulses independent and synchronized.
-- Added player-facing release documentation and package validation.
+- Preview hovered items with held-item fallback.
+- Pulse hunger and injury recovery inside the affected native status segment.
+- Preview recognized poison/spore/status increases, including poison when the native poison slot starts hidden or empty.
+- Include item-only cumulative timed effects with delay and duration in the card; totals remain estimates.
+- Add extra/infinite stamina cues and game-style bilingual cards with icons, risk warnings and useful charges.
+- Read real runtime poison components rather than hardcoding food names or overwriting cooking-dependent effects.
+- Validate six audited poison-food variants and pass 81 offline regression checks.
+- Include the MIT License. Player testing supplied poisonous-food, safe-food and card demonstrations; full item/multiplayer compatibility is not claimed.
 
-Automated and synthetic tests are not real-game acceptance. Injury/held acceptance and standard clean-profile startup validation remain open.
-
-## 0.1.8 — local testing
-
-- Replaced the separate hunger recovery block with an in-place pulse toward healthy green.
-- Handle full, partial and zero hunger recovery; clear previews when the target is lost.
-- Hunger recovery has player-confirmed in-game evidence.
-
-## Earlier local prototypes
-
-- Introduced hover detection, immediate-effect prediction and usage information.
-- Iterated on runtime loading, diagnostics and HUD rendering.
-
-These entries describe local development versions, not previous public Thunderstore releases.
+Earlier version numbers were local development builds, not previous public Thunderstore releases.

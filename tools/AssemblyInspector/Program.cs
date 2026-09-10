@@ -3,15 +3,18 @@ using Mono.Cecil.Cil;
 
 var assemblyPath = args.FirstOrDefault(a => a.EndsWith(".dll")) ?? @"D:\SteamLibrary\steamapps\common\PEAK\PEAK_Data\Managed\Assembly-CSharp.dll";
 var module = ModuleDefinition.ReadModule(assemblyPath);
-var requested = args.Where(a => !a.EndsWith(".dll")).ToArray();
+var fieldsOnly = args.Contains("--fields");
+var methodFilter = args.FirstOrDefault(a => a.StartsWith("--method="))?.Substring(9);
+var exact = args.Contains("--exact");
+var requested = args.Where(a => !a.EndsWith(".dll") && !a.StartsWith("--")).ToArray();
 
 if (requested.Length > 0)
 {
-    foreach (var type in module.GetTypes().Where(t => requested.Any(r => t.FullName.Contains(r))))
+    foreach (var type in module.GetTypes().Where(t => requested.Any(r => exact ? t.Name == r : t.FullName.Contains(r))))
     {
         Console.WriteLine($"TYPE {type.FullName} : {type.BaseType}");
         foreach (var field in type.Fields) Console.WriteLine($"FIELD {field.FullName}");
-        foreach (var method in type.Methods)
+        foreach (var method in type.Methods.Where(m => !fieldsOnly && (methodFilter == null || m.Name == methodFilter)))
         {
             Console.WriteLine($"METHOD {method.FullName}");
             if (method.HasBody) foreach (var instruction in method.Body.Instructions) Console.WriteLine(instruction);

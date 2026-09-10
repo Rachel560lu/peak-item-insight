@@ -19,3 +19,4 @@ $env:DOTNET_CLI_TELEMETRY_OPTOUT = "1"
     -c $Configuration `
     --configfile (Join-Path $projectRoot "NuGet.Config") `
     -p:PeakManagedDir=$PeakManagedDir
+if ($LASTEXITCODE -ne 0) { throw "Build failed with exit code $LASTEXITCODE." }

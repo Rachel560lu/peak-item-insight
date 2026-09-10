@@ -1,4 +1,8 @@
-# 0.1.9 release checklist
+# Release checklist
+
+Current 0.2.2 release: see [release-022.md](release-022.md). Published to Thunderstore under Rachel560lu on 2026-09-11 with MIT licensing; 81 offline checks pass and the DLL matches the tested build. Fresh-profile and compatibility limitations remain documented. The 0.1.9 record below is historical, not the current package status.
+
+## Historical 0.1.9 release checklist
 
 Status: local package candidate only. Packaging completion does not authorize uploading or establish gameplay compatibility.
 

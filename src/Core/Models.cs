@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace PeakItemInsight.Core;
 
@@ -30,16 +31,39 @@ internal readonly struct ResourceLine
 
 internal sealed class ItemPreview
 {
+    public Texture? Icon { get; set; }
+    public string Category { get; set; } = "";
+    public string Description { get; set; } = "";
+    public bool IsFood { get; set; }
+    public bool CompleteEffects { get; set; }
+    public bool PrefabOnly { get; set; }
+    public RiskLevel PoisonRisk { get; set; }
+    public RiskLevel SporeRisk { get; set; }
+    public List<EffectFact> Effects { get; } = new List<EffectFact>();
+    public List<string> Unsupported { get; } = new List<string>();
     public ushort ItemId { get; set; }
     public PreviewSource Source { get; set; }
     public int TargetInstanceId { get; set; }
     public string Name { get; set; } = "Unknown item";
     public string? DebugId { get; set; }
     public bool HasExtraStamina { get; set; }
+    public bool InfiniteStamina { get; set; }
     public float ExtraBefore { get; set; }
     public float ExtraAfter { get; set; }
     public List<StatusDelta> Statuses { get; } = new List<StatusDelta>();
     public List<ResourceLine> Resources { get; } = new List<ResourceLine>();
     public List<string> Instructions { get; } = new List<string>();
     public List<string> Warnings { get; } = new List<string>();
+}
+
+internal readonly struct EffectFact
+{
+    public EffectFact(CharacterAfflictions.STATUSTYPE type, float amount, float duration = 0, float delay = 0, bool clears = false)
+    { Type = type; Amount = amount; Duration = duration; Delay = delay; Clears = clears; }
+    public CharacterAfflictions.STATUSTYPE Type { get; }
+    public float Amount { get; }
+    public float Duration { get; }
+    public float Delay { get; }
+    public bool Clears { get; }
+    public bool Timed => Duration > 0 || Delay > 0;
 }

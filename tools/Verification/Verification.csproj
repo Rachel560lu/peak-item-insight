@@ -5,9 +5,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../src/Core/PreviewMath.cs" Link="PreviewMath.cs" />
+    <Compile Include="../../src/Core/EffectProjection.cs" Link="EffectProjection.cs" />
+    <Compile Include="../../src/Core/AuditedPoisonCases.cs" Link="AuditedPoisonCases.cs" />
     <Compile Include="../../src/Core/HungerPulseMath.cs" Link="HungerPulseMath.cs" />
     <Compile Include="../../src/Core/PreviewTarget.cs" Link="PreviewTarget.cs" />
     <Compile Include="../../src/Core/SessionEvidence.cs" Link="SessionEvidence.cs" />
+    <Compile Include="../../src/Core/RiskEvidence.cs" Link="RiskEvidence.cs" />
+    <Compile Include="../../src/Core/StatusGhostLayout.cs" Link="StatusGhostLayout.cs" />
     <Reference Include="Mono.Cecil" HintPath="C:\Users\midor\AppData\Roaming\r2modmanPlus-local\PEAK\profiles\PeakItemInsight-Test\BepInEx\core\Mono.Cecil.dll" />
   </ItemGroup>
 </Project>

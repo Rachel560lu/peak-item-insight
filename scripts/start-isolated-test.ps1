@@ -16,7 +16,8 @@ try {
     if ($SmokeTest) { $arguments += '-insightSmokeTest' }
     if ($ExitAfterSmoke) { $arguments += '-insightSmokeTestExit' }
     if ($WorldTest) { $arguments += '-insightWorldTest' }
-    $testProcess = Start-Process -FilePath (Join-Path $gameDir 'PEAK.exe') -WorkingDirectory $gameDir -ArgumentList $arguments -PassThru
+    $windowStyle = if ($SmokeTest) { 'Hidden' } else { 'Normal' }
+    $testProcess = Start-Process -FilePath (Join-Path $gameDir 'PEAK.exe') -WorkingDirectory $gameDir -ArgumentList $arguments -WindowStyle $windowStyle -PassThru
     Write-Output "TEST_PID=$($testProcess.Id) START=$($testProcess.StartTime.ToString('O'))"
     $testProcess.WaitForExit()
     Write-Output "TEST_EXIT=$($testProcess.ExitCode)"

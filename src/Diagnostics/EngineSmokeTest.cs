@@ -17,8 +17,10 @@ internal sealed class EngineSmokeTest
     private HudGhostOverlay? _ghost;
     private HungerRecoveryOverlay? _hunger;
     private StatusRecoveryOverlays? _recoveries;
+    private StatusIncreaseOverlay? _optimized;
     private bool _captured;
     private float _capturedAt;
+    private bool _englishShown;
     public void Tick()
     {
         if (!_enabled || _stage >= 2 || Time.frameCount < 120 || SceneManager.GetActiveScene().name != "Title") return;
@@ -52,11 +54,20 @@ internal sealed class EngineSmokeTest
                 SessionTrace.Write("SMOKE_GHOST_GAIN_PASS", $"width={_ghost.SegmentWidth}");
                 _hunger = HungerPulseSmokeTest.Run(_panel.transform);
                 _recoveries = RecoveryRoutingSmokeTest.Run(_panel);
+                _optimized = OptimizationSmokeTest.Run(_panel);
                 _since = Time.unscaledTime;
                 _stage = 1;
             }
             else if (_captured && Time.unscaledTime - _capturedAt >= 2f)
             {
+                if (!_englishShown)
+                {
+                    OptimizationSmokeTest.ShowEnglish(_panel!);
+                    _englishShown = true;
+                    _capturedAt = Time.unscaledTime;
+                    ScreenCapture.CaptureScreenshot(SessionTrace.ScreenshotPath.Replace(".png", "-en.png"));
+                    return;
+                }
                 var rect = _panel!.transform.Find("SyntheticBar").GetComponent<RectTransform>();
                 _ghost!.RenderProbe(rect, 500, .6f, .4f);
                 if (!_ghost.SegmentVisible || Math.Abs(_ghost.SegmentWidth - 100) > .1f)
@@ -68,6 +79,7 @@ internal sealed class EngineSmokeTest
                 _panel!.Hide();
                 _hunger!.Dispose();
                 _recoveries!.Dispose();
+                _optimized!.Dispose();
                 if (_panel.IsVisible) throw new InvalidOperationException("Panel failed to hide.");
                 UnityEngine.Object.Destroy(_panel.gameObject);
                 UnityEngine.Object.Destroy(_ghost.gameObject);
@@ -91,6 +103,7 @@ internal sealed class EngineSmokeTest
             if (_ghost != null) UnityEngine.Object.Destroy(_ghost.gameObject);
             _hunger?.Dispose();
             _recoveries?.Dispose();
+            _optimized?.Dispose();
             _stage = 2;
             if (Array.Exists(Environment.GetCommandLineArgs(), a => a == "-insightSmokeTestExit"))
                 Application.Quit(2);

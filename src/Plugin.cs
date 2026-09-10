@@ -10,7 +10,7 @@ public sealed class Plugin : BaseUnityPlugin
 {
     public const string PluginGuid = "dev.rachel.peakiteminsight";
     public const string PluginName = "PEAK Item Insight";
-    public const string PluginVersion = "0.1.9";
+    public const string PluginVersion = "0.2.2";
 
     private ConfigEntry<bool> _enabled = null!;
     private ConfigEntry<float> _hoverDelay = null!;
@@ -33,6 +33,14 @@ public sealed class Plugin : BaseUnityPlugin
         _offsetX = Config.Bind("UI", "OffsetX", 32f, "Horizontal offset from screen centre.");
         _offsetY = Config.Bind("UI", "OffsetY", -90f, "Vertical offset from screen centre.");
         _showDebugIds = Config.Bind("Debug", "ShowDebugIds", false, "Show stable item IDs in the tooltip.");
+        Core.PresentationOptions.Language = Config.Bind("UI", "Language", "Auto",
+            new ConfigDescription("Card language; Auto follows the game.", new AcceptableValueList<string>("Auto", "Chinese", "English")));
+        Core.PresentationOptions.Details = Config.Bind("UI", "ShowDetails", false, "Show projected before/after values.");
+        Core.PresentationOptions.Opacity = Config.Bind("UI", "BackgroundOpacity", .88f,
+            new ConfigDescription("Card background opacity.", new AcceptableValueRange<float>(.4f, 1f)));
+        Core.PresentationOptions.Animate = Config.Bind("UI", "AnimateRecovery", true, "Pulse recoverable status regions; false uses a steady tint.");
+        Core.PresentationOptions.PulseStrength = Config.Bind("UI", "RecoveryStrength", 1f,
+            new ConfigDescription("Recovery overlay opacity.", new AcceptableValueRange<float>(.2f, 1f)));
 
         Runtime = new RuntimeController();
         Runtime.Initialize(

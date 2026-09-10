@@ -1,6 +1,13 @@
 {
-  "plugin_version": "0.1.9",
-  "dll_sha256": "3191AF5279D0CB0A74A85B6CC3EDACF16809D58145CAE3D94B36DBEDBF052E81",
-  "evidence_document": "docs/recovery-held-019.md",
-  "public_release_approved": false
+  "plugin_version": "0.2.2",
+  "dll_sha256": "AE223C26B485397450E33CF510329CD2CC03E739D30694C9AE2E76028F907F01",
+  "evidence_document": "docs/release-022.md",
+  "public_release_approved": true,
+  "publication_status": "published",
+  "published_url": "https://thunderstore.io/c/peak/p/Rachel560lu/PeakItemInsight/",
+  "zip_sha256": "C81B10B9CC03AD64938713DB7F101EB5B8C9C0ADAB59A39A25B3CD5182C29402",
+  "license": "MIT",
+  "offline_checks_passed": 81,
+  "standard_fresh_profile_startup_verified": false,
+  "acceptance_scope": "User-reported in-game acceptance and supplied poison/safe-food/card demonstrations; not exhaustive all-item or multiplayer validation."
 }

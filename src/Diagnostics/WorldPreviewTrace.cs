@@ -19,6 +19,8 @@ internal static class WorldPreviewTrace
     {
         if (!Enabled) return;
         var character = Character.localCharacter;
+        var knownUses = ItemDataReader.TryGetInt(item, DataEntryKey.ItemUses, out var uses);
+        SessionTrace.Write("WORLD_EFFECT_FACTS", $"source={preview.Source} item={item.itemID} totalUses={item.totalUses} knownUses={knownUses} uses={uses} poison={preview.PoisonRisk} spores={preview.SporeRisk} facts=[{string.Join(";", preview.Effects.Select(e=>$"{e.Type}:{e.Amount:R} duration={e.Duration:R} delay={e.Delay:R}"))}] unsupported=[{string.Join(",", preview.Unsupported.Distinct())}]");
         SessionTrace.Write("WORLD_PREDICTION", $"frame={Time.frameCount} world={worldId} item={item.itemID} name={item.name} total={character.refs.afflictions.statusSum:R} max={character.GetMaxStamina():R} locked={character.statusesLocked} statuses=[{string.Join(";", preview.Statuses.Select(s => $"{s.Type}:{s.Before:R}->{s.After:R}"))}] extra={preview.ExtraBefore:R}->{preview.ExtraAfter:R} warnings=[{string.Join(";", preview.Warnings)}]");
         foreach (var a in item.GetComponentsInChildren<ItemAction>(true))
         {

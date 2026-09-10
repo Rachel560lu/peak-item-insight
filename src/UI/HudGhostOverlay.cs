@@ -13,6 +13,10 @@ internal sealed class HudGhostOverlay : MonoBehaviour
     private ItemPreview? _preview;
     private bool _probe;
     private readonly StatusRecoveryOverlays _recovery = new StatusRecoveryOverlays();
+    private readonly StatusIncreaseOverlay _increases = new StatusIncreaseOverlay();
+    private readonly ExtraStaminaOverlay _extra = new ExtraStaminaOverlay();
+    private readonly System.Collections.Generic.Dictionary<CharacterAfflictions.STATUSTYPE, HungerRecoveryOverlay> _otherRecoveries =
+        new System.Collections.Generic.Dictionary<CharacterAfflictions.STATUSTYPE, HungerRecoveryOverlay>();
     private float _pulseStart;
     private float _nextTrace;
     public bool SegmentVisible => _segment != null && _segment.gameObject.activeInHierarchy;
@@ -35,7 +39,7 @@ internal sealed class HudGhostOverlay : MonoBehaviour
     public void Show(ItemPreview preview)
     {
         if (_preview == null) _pulseStart = Time.unscaledTime;
-        _preview = preview.Statuses.Count > 0 || preview.HasExtraStamina ? preview : null;
+        _preview = preview.Statuses.Count > 0 || preview.HasExtraStamina || preview.InfiniteStamina ? preview : null;
         if (_preview == null)
             HideSegment();
     }
@@ -77,16 +81,39 @@ internal sealed class HudGhostOverlay : MonoBehaviour
         var hunger = FindNativeStatus(bar, CharacterAfflictions.STATUSTYPE.Hunger);
         var injury = FindNativeStatus(bar, CharacterAfflictions.STATUSTYPE.Injury);
         _recovery.Render(_preview!, healthy, hunger, injury, Time.unscaledTime - _pulseStart);
+        foreach (var type in StatusTypes.Previewable)
+        {
+            if (type == CharacterAfflictions.STATUSTYPE.Hunger || type == CharacterAfflictions.STATUSTYPE.Injury) continue;
+            if (!_otherRecoveries.TryGetValue(type, out var overlay))
+                _otherRecoveries[type] = overlay = new HungerRecoveryOverlay(type.ToString());
+            RenderRecovery(overlay, bar, healthy, type);
+        }
+        _increases.Render(bar, _preview!, healthy, Time.unscaledTime - _pulseStart);
+        _extra.Render(bar, _preview!, healthy, Time.unscaledTime - _pulseStart);
         if (Time.unscaledTime >= _nextTrace)
         {
             _nextTrace = Time.unscaledTime + 2;
             TraceRecovery(CharacterAfflictions.STATUSTYPE.Hunger, "HUNGER", hunger, healthy, _recovery.Hunger);
             TraceRecovery(CharacterAfflictions.STATUSTYPE.Injury, "INJURY", injury, healthy, _recovery.Injury);
+            var poison = StatusRecoveryOverlays.Find(_preview!, CharacterAfflictions.STATUSTYPE.Poison);
+            if (poison.HasValue)
+                SessionTrace.Write("POISON_PULSE", $"item={_preview!.ItemId} source={_preview.Source} before={poison.Value.Before:0.####} after={poison.Value.After:0.####} visible={_increases.Visible} segments={_increases.AddedCount} visibleWidth={_increases.VisibleAddedWidth:0.##} opacity={_increases.AddedOpacity:0.##}");
         }
+    }
+
+    private void RenderRecovery(HungerRecoveryOverlay overlay, StaminaBar? bar, Image? healthy, CharacterAfflictions.STATUSTYPE type)
+    {
+        var delta = StatusRecoveryOverlays.Find(_preview!, type);
+        var source = FindNativeStatus(bar, type);
+        if (delta.HasValue && source != null && healthy != null)
+            overlay.Render(source, healthy, delta.Value.Before, delta.Value.After, Time.unscaledTime - _pulseStart);
+        else overlay.Hide();
     }
 
     private static Image? FindNativeStatus(StaminaBar? bar, CharacterAfflictions.STATUSTYPE type)
     {
+        if (type == CharacterAfflictions.STATUSTYPE.Petrify && bar != null && bar.petrifyAffliction != null)
+            return NativeFill(bar.petrifyAffliction.rtf, bar.petrifyAffliction.icon);
         if (bar != null && bar.afflictions != null)
             foreach (var badge in bar.afflictions)
                 if (badge != null && !badge.isPetrify && badge.afflictionType == type)
@@ -106,7 +133,7 @@ internal sealed class HudGhostOverlay : MonoBehaviour
         SessionTrace.Write(label + "_PULSE", $"source={_preview!.Source} target={_preview.TargetInstanceId} item={_preview.ItemId} before={delta.Value.Before} after={delta.Value.After} fraction={HungerPulseMath.Fraction(delta.Value.Before, delta.Value.After)} nativeWidth={source.rectTransform.rect.width} overlayWidth={overlay.Width} visible={overlay.Visible} alpha={overlay.Opacity}");
     }
 
-    private static Image? NativeFill(RectTransform? rect, Image? icon)
+    internal static Image? NativeFill(RectTransform? rect, Image? icon)
     {
         if (rect == null) return null;
         var direct = rect.GetComponent<Image>();
@@ -168,11 +195,17 @@ internal sealed class HudGhostOverlay : MonoBehaviour
         if (_segment != null)
             _segment.gameObject.SetActive(false);
         _recovery.Hide();
+        _increases.Hide();
+        _extra.Hide();
+        foreach (var overlay in _otherRecoveries.Values) overlay.Hide();
     }
 
     private void OnDestroy()
     {
         if (_segment != null) Destroy(_segment.gameObject);
         _recovery.Dispose();
+        _increases.Dispose();
+        _extra.Dispose();
+        foreach (var overlay in _otherRecoveries.Values) overlay.Dispose();
     }
 }

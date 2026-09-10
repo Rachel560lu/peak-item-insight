@@ -32,7 +32,7 @@ internal sealed class HungerRecoveryOverlay
         _maskImage!.color = Color.white;
         CopyStyle(healthy, _green!);
         var colour = healthy.color;
-        colour.a = HungerPulseMath.Alpha(elapsed);
+        colour.a = (PresentationOptions.Animation ? HungerPulseMath.Alpha(elapsed) : .65f) * PresentationOptions.Strength;
         _green!.color = colour;
 
         // Use the real segment as our coordinate system: follows native layout,

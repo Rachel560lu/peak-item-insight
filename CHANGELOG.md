@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.2.2 — 2026-09-11 / first Thunderstore release
+
+- Published under MIT as Rachel560lu-PeakItemInsight-0.2.2 with bilingual player documentation. User-confirmed gameplay demos cover poison, safe-food recovery and item cards; broader compatibility remains unverified.
+
+- Harden new poison/status previews against inactive native slots with zero height or empty filled images, without changing the native slot or player state.
+- Share the production status projector with loaded-asset regression tests. Require all six audited toxic fruit/mushroom IDs, rates, delays and durations to match; test hover/held source labels, zero/existing/capped poison, pulse phases and clearing.
+- Keep audited values as test expectations, not runtime item-ID overrides, so disabled/cooked effects are not reintroduced.
+- Add rate-limited poison HUD diagnostics including projected delta, active geometry and opacity. Real in-level raycast/equip acceptance remains separate from synthetic tests.
+
+## 0.2.1 — development / not released
+
+- Fix direct-consumption `OnConsumed` effects being incorrectly gated by a one-use counter. Charge depletion remains a separate last-use condition.
+- Include timed poison/cold/drowsiness in an item-only cumulative timeline, with delay, duration, ordering and caps. Card labels these as estimates; existing buffs, natural recovery, environment and quantized game ticks are not simulated.
+- Remove source labels, uncooked/no rows and generic food explanation. Keep independent poison/spore risk, signed effects and useful charges; timed rows show cumulative amounts.
+- Extend gain/recovery routing beyond poison/spores, including petrify; add extra-stamina and infinite-stamina visual cues. Gain copies pulse on the same 1.4-second cycle; native state is restored on hide.
+- Add actual loaded-food `OnConsumed` poison regression tests and a coverage inventory. Unknown actions, random area effects, thorns, target-dependent relics and special characters prevent an all-item coverage claim.
+- 74 offline checks pass; title-screen synthetic/native-shaped UI tests are separate from pending real-world acceptance. Nothing published or pushed.
+
+## 0.2.0 — development / not released
+
+- Add separate raw effect facts, instantaneous projections and poison/spore risk assessment. Caps, cancellation and prefab-only data cannot falsely establish safety.
+- Parse direct status actions, immediate status afflictions, timed poison and the audited PEAK 2.4.b level-specific mushroom mapping. Timed effects are labeled but excluded from exact immediate HUD ranges.
+- Add native-style poison/spore increase segments and icons, independent recovery pulses, and mixed recovery/harm rendering. Owned image copies preserve native sprite style; a scoped visibility override restores native badges on hide/dispose.
+- Redesign cards with game fonts, icons, type/risk hierarchy, signed effect lines, rounded translucent background and border. Remove default mini-bars; add game-following Chinese/English, details and animation options.
+- Retain hover priority and held fallback. Periodically refresh conditional data and presentation changes even if the coarse state hash is unchanged.
+- Add risk/layout/API tests, Unity synthetic coverage, loaded-asset inspection and bilingual screenshots. Full world-item/consumption and cross-resolution acceptance remains pending; do not promote old 0.1.9 release evidence to this build.
+
 ## 0.1.9
 
 - Add current-hand preview with explicit Hover/Held source labels. A hovered item always wins, including tools/unknown items; otherwise fall back to the currently equipped instance, not inventory contents.

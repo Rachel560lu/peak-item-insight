@@ -31,7 +31,7 @@ internal static class RecoveryRoutingSmokeTest
                 pair.Render(preview, healthy, hunger, injury, .7f);
                 panel.Show(preview, 1, 32, -90);
                 Canvas.ForceUpdateCanvases();
-                Require(panel.TitleText.Contains(Labels.Source(key.Source)) && panel.TitleText.Contains(preview.Name), "panel and target agree");
+                Require(preview.Source == key.Source && panel.TitleText.Contains(preview.Name) && !panel.TitleText.Contains(Labels.Source(key.Source)), "panel target agrees without source clutter");
             }
             Route(1, 2); Require(pair.Hunger.Visible && !pair.Injury.Visible, "hover food outranks held bandage");
             Route(null, 2); Require(!pair.Hunger.Visible && pair.Injury.Visible && Near(pair.Injury.Width, 25), "held injury quarter");

@@ -27,6 +27,7 @@
     <Reference Include="UnityEngine.CoreModule" HintPath="$(PeakManagedDir)\UnityEngine.CoreModule.dll" Private="false" />
     <Reference Include="UnityEngine.UI" HintPath="$(PeakManagedDir)\UnityEngine.UI.dll" Private="false" />
     <Reference Include="UnityEngine.UIModule" HintPath="$(PeakManagedDir)\UnityEngine.UIModule.dll" Private="false" />
+    <Reference Include="UnityEngine.TextRenderingModule" HintPath="$(PeakManagedDir)\UnityEngine.TextRenderingModule.dll" Private="false" />
     <Reference Include="UnityEngine.ScreenCaptureModule" HintPath="$(PeakManagedDir)\UnityEngine.ScreenCaptureModule.dll" Private="false" />
     <Reference Include="Unity.TextMeshPro" HintPath="$(PeakManagedDir)\Unity.TextMeshPro.dll" Private="false" />
   </ItemGroup>

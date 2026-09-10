@@ -1,64 +1,78 @@
 # PEAK Item Insight
 
-Preview recognized item effects before using them. An experimental, unofficial PEAK mod.
+See what changes before you use an item. 使用前，看见变化。
 
-**0.1.9 is a testing candidate, not a fully validated stable release.** Hunger recovery has player-confirmed in-game evidence. Injury recovery and held-item behavior have automated/synthetic coverage but still need real-game acceptance. Clean mod-manager installation and startup remain unverified; an intermittent mod-loading problem in the development environment is unresolved.
+An unofficial, experimental PEAK mod by Rachel560lu. Version **0.2.2**.
 
-## What you see
+## Features
 
-- Aim at an item to see its recognized effects and available usage information.
-- When nothing is targeted, the currently held item becomes the preview source. A hovered item takes priority. The panel indicates Hover/Held.
-- For hunger or injury recovery, only the recoverable portion of the existing native HUD status segment pulses toward healthy green. The unchanged portion keeps its original appearance. This is a prediction, not an actual heal.
-- Example: hunger is 30 and the food removes 10: one third of the hunger segment pulses. If hunger is 5 and the food removes 10, the entire hunger segment pulses. With no hunger, no hunger recovery pulse is expected.
-- Empty hands plus no target clears the preview. Looking away while holding an item intentionally keeps a held-item preview. The used item's preview pauses during use and recalculates afterward.
-- Poison, extra stamina and other recognized effects appear as text; they do not yet have equivalent native HUD pulses.
+- **Hover or hold:** aim at a pick-up-able item to preview it. With no hovered target, the held item is previewed instead. Hover takes priority.
+- **Recovery on the native HUD:** the recoverable part of hunger or injury pulses toward healthy green. Hunger 30 and food -10: one third pulses. Hunger 5 and food -10: the whole hunger segment pulses. Zero recovery does not pulse.
+- **Harm before consumption:** recognized poison, spores and other status increases have pulsing HUD previews, including a new poison segment when you are not already poisoned. Extra/infinite stamina have separate cues.
+- **Timed poison:** the card shows recognized delay, duration and cumulative poison. You do not need to wait out the poison delay while hovering. Totals are item-only estimates, not guaranteed final states.
+- **Readable item cards:** game-style icons and fonts, item type, separate poison/spore warnings, signed effects and useful charges. Chinese/English follows the game or your setting.
+- Empty hands plus no target clears the preview. Looking away while holding an item keeps the held preview. The used item's preview pauses during use and refreshes afterward.
 
-## 中文说明
+## 中文
 
-这是非官方实验版物品提示 Mod。准星对准物品时显示其已识别效果；没有悬停目标时，改为预览手持物品。
+这是 Rachel560lu 制作的非官方实验版 Mod，范围是**可拾取物品**。准星对准物品时显示预览；没有悬停目标时，预览手持物品。
 
-饥饿和伤势预览直接显示在原有状态条上：**只有预计能恢复的那一段，在原色和健康绿色之间柔和闪烁**。例如饥饿 30、食物减饥饿 10，则黄色区域的三分之一闪烁；饥饿 5、食物可减 10，则整段黄色闪烁。没有对应负面状态时，不会出现恢复闪烁。预览不会真正使用物品或治疗角色。
+- 饥饿／伤势预计恢复的部分，在原色与健康绿色之间闪烁；完整、部分、零恢复分别处理。
+- 已识别的毒素、孢子和其他状态增加也有原生 HUD 闪烁预览；当前没有中毒时，也会显示新增毒素区域。
+- 持续中毒显示延迟、持续时间与累计估计量；无需悬停到毒性延迟结束才出现预览。
+- 简介卡显示图标、类别、毒性／孢子风险、单次效果与有用的剩余次数，不再重复显示“准星／手持”或“烹饪：否”。
+- 空手看地板会清除预览；手持看地板保留预览；使用期间暂停，使用后重新计算。
 
-空手看地板会清除预览；手持物品看地板仍显示手持预览。使用中的物品暂停预览，使用后重新计算。毒素、额外精力等目前仅提供已识别的文字信息。
+**累计毒素是物品自身效果的估计，不包含自然恢复、环境、已有增益和完整游戏时间步进。未知不等于无毒。** 并非所有物品、烹饪变种和特殊角色均已适配；多人及其他 HUD Mod 的兼容性尚未验证。
 
-**限制：**并非完整物品图鉴或无毒保证。随机、持续、条件性及特殊角色效果可能不完整；多次使用物品的单次预测仍需逐项核对。部分名称/动作仍为英文，中文界面选择目前依赖系统语言。饥饿闪烁已有实机确认，0.1.9 的伤势和手持预览仍待实机验收。普通管理器启动兼容性尚未完成验证。
+## Installation / 安装
 
-## Installation for testers
+Development testing used Windows and PEAK 2.4.b. User testing confirmed working previews; a completely fresh standard mod-manager startup has not yet been independently verified.
 
-Development testing used Windows, PEAK 2.4.b and BepInEx 5.4.23.3. Compatibility with other game builds, platforms, other mods and multiplayer roles has not been established.
+1. Close PEAK and back up saves. Use a separate mod-manager profile for the first run.
+2. Install PeakItemInsight and dependency `BepInEx-BepInExPack_PEAK-5.4.2403` through your manager. For a local candidate ZIP, use the manager's local-import option.
+3. Start **Modded PEAK**. Check the current BepInEx log for `PEAK Item Insight 0.2.2 loaded`.
+4. Manual installation: with BepInEx working, copy the included `BepInEx/plugins/PeakItemInsight/PeakItemInsight.dll` into the matching profile path. Keep only one plugin DLL.
 
-1. Close PEAK normally and back up your saves. Create a separate test profile in your mod manager; do not overwrite your everyday profile.
-2. Install the declared dependency, `BepInEx-BepInExPack_PEAK-5.4.2403`, in that profile.
-3. Import this local ZIP if your manager supports local package imports. Alternatively, with a working BepInEx profile, copy only `BepInEx/plugins/PeakItemInsight/PeakItemInsight.dll` from the ZIP into the matching profile directory. Keep only one copy of the plugin.
-4. Start the modded game from the manager. This is the intended standard workflow, **not yet a certified clean-install path for this candidate**. Check that the current session's BepInEx log says `PEAK Item Insight 0.1.9 loaded` before testing previews.
+首次使用请备份存档，并使用独立 profile。安装本 Mod 及所需 BepInEx 后，从管理器启动 Modded PEAK；日志应显示本次运行加载了 0.2.2。不要同时保留多个版本的 DLL。
 
-This package does not contain BepInEx itself, game assemblies, saves, or the developer's custom local launcher. If normal startup does not load the mod, report it; do not replace game files with undocumented workarounds.
+## Configuration / 配置
 
-## Configuration
+After the first successful load, close the game before editing `BepInEx/config/dev.rachel.peakiteminsight.cfg`.
 
-After successful loading, edit `BepInEx/config/dev.rachel.peakiteminsight.cfg` in your test profile while the game is closed:
-
-| Section / setting | Default | Purpose |
+| Setting | Default | Purpose / 用途 |
 | --- | --- | --- |
-| General / Enabled | true | Enable previews |
-| General / HoverDelaySeconds | 0.12 | Preview delay, 0–1 seconds |
-| UI / PanelScale | 1 | Panel scale, 0.5–2 |
-| UI / OffsetX | 32 | Horizontal panel offset from screen centre |
-| UI / OffsetY | -90 | Vertical panel offset from screen centre |
-| Debug / ShowDebugIds | false | Include item IDs for troubleshooting |
+| General / Enabled | true | Enable previews / 总开关 |
+| General / HoverDelaySeconds | 0.12 | Hover delay / 悬停延迟 |
+| UI / Language | Auto | Auto, Chinese or English / 自动、中、英 |
+| UI / PanelScale | 1 | Card scale / 卡片大小 |
+| UI / OffsetX, OffsetY | 32, -90 | Card position / 卡片位置 |
+| UI / ShowDetails | false | Before/after values / 变化前后数值 |
+| UI / BackgroundOpacity | 0.88 | Background opacity / 背景透明度 |
+| UI / AnimateRecovery | true | Pulse; false uses steady tint / 关闭后为固定着色 |
+| UI / RecoveryStrength | 1 | Recovery overlay opacity / 恢复预览强度 |
+| Debug / ShowDebugIds | false | Item IDs / 诊断 ID |
 
-## Accuracy and safety
+## Accuracy and compatibility
 
-Recognized immediate effects are estimates based on current item/player state. Random, delayed, conditional and special-character effects are incomplete. Remaining-use behavior needs item-by-item validation. A missing poison effect must **not** be interpreted as proof that food is safe. Read incomplete-effect warnings.
+The mod reads current item/player data and draws UI; it does not consume items, change gameplay status or send gameplay network actions. Preview-owned UI copies and temporary native-image visibility changes are restored when the preview clears.
 
-The plugin is designed to read state and draw UI; it does not call item-use actions, change player status, or send gameplay network events. That design does not replace multiplayer compatibility testing. Use a solo test session first.
+Recognized immediate and timed effects are supported, but target-dependent tools, random area effects, special characters, environmental interactions and some conditional/cooking variants remain incomplete. Mushroom mapping must be available for mapping-dependent effects. **No poison preview is not proof of safety: check the card's risk and incomplete-effect warnings.** Environmental thorns and spore clouds are not targetable-item features of this mod.
 
-## Troubleshooting and removal
+81 offline checks pass, with separate loaded-asset/synthetic HUD coverage for six audited poison-food variants. Player-supplied recordings demonstrate poisonous food, safe-food recovery and item cards. These checks do not certify every food, multiplayer or compatibility with other mods.
 
-- No panel anywhere: verify the current run loaded the plugin, `Enabled` is true, and there is only one installed DLL. A historical log is not proof of loading in the current process.
-- Panel but no pulse: check for actual hunger/injury and a recognized recovery effect. Zero recovery does not pulse. Poison/extra stamina are text-only in this build.
-- Overlapping or small panel: adjust `PanelScale`, `OffsetX` and `OffsetY`.
-- To report a problem, include mod/game versions, item and cooking state, hover versus held, status before use, reproduction steps and a screenshot. Supply relevant excerpts from `BepInEx/LogOutput.log` and, when needed, `BepInEx/InsightDiagnostics`. Redact personal paths, usernames and any room/account details before sharing. Diagnostics are written locally and are not automatically uploaded by this plugin.
-- To remove it, close PEAK, then disable/uninstall only PeakItemInsight in the manager, or remove its plugin folder from the test profile. No save reset is required by this plugin. Do not remove shared BepInEx dependencies needed by other mods.
+## Troubleshooting / 问题反馈
 
-Publisher/contact details and licensing are pending release review. This candidate is not a declaration of an open-source license. Not affiliated with or endorsed by the PEAK developers.
+- No card: confirm the current session loaded 0.2.2, `Enabled` is true and only one DLL is installed.
+- Card but no recovery pulse: check that the relevant status exists and the item can reduce it. Zero recovery deliberately has no pulse.
+- Poison warning but no poison pulse: record the item/variant, existing status and whether it is hovered or held; this needs investigation, not an assumption that the food is safe.
+- Overlap or tiny text: adjust `PanelScale`, `OffsetX` and `OffsetY`.
+- For a report, include mod/game versions, item and cooking state, hover/held, reproduction steps and a screenshot. Share relevant BepInEx log excerpts only after removing personal paths, usernames and room/account details. Diagnostics stay local; the mod does not automatically upload them.
+
+## Removal / 卸载
+
+Close PEAK, then disable/uninstall PeakItemInsight in the manager, or remove only its plugin folder. No save reset is required by this mod. Leave shared BepInEx dependencies used by other mods intact.
+
+## License and credits
+
+Copyright (c) 2026 Rachel560lu. Released under the **MIT License**, included in the package. Game assets and dependencies retain their respective owners' rights and are not relicensed by this notice. Not affiliated with or endorsed by the PEAK developers.

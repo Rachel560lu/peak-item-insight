@@ -33,6 +33,7 @@ internal sealed class RuntimeController
     private string _lastTargetType = "";
     private bool _hasTicked;
     private float _nextErrorLog;
+    private float _nextRefresh;
 
     public void Initialize(
         ConfigEntry<bool> enabled,
@@ -112,10 +113,11 @@ internal sealed class RuntimeController
                 return;
 
             var state = PreviewStateKey.Capture(_candidate);
-            if (_candidate == _visibleItem && state.Equals(_lastState))
+            if (_candidate == _visibleItem && state.Equals(_lastState) && Time.unscaledTime < _nextRefresh)
                 return;
 
-            var preview = _orchestrator.Build(_candidate, _showDebugIds.Value);
+            var preview = _orchestrator.Build(_candidate, _showDebugIds.Value,
+                selected.Source == PreviewSource.Hover && _hoverResolver.CurrentTargetType == "FakeItem");
             preview.Source = _target.Source;
             preview.TargetInstanceId = _target.InstanceId;
             EnsureUi();
@@ -129,6 +131,7 @@ internal sealed class RuntimeController
             }
             _visibleItem = _candidate;
             _lastState = state;
+            _nextRefresh = Time.unscaledTime + .25f;
         }
         catch (Exception exception)
         {

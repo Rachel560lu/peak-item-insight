@@ -16,12 +16,14 @@ internal sealed class PreviewOrchestrator
         _log = log;
     }
 
-    public ItemPreview Build(Item item, bool showDebugId)
+    public ItemPreview Build(Item item, bool showDebugId, bool prefabOnly = false)
     {
         var preview = new ItemPreview
         {
             ItemId = item.itemID,
-            Name = string.IsNullOrWhiteSpace(item.UIData?.itemName) ? item.GetItemName() : item.UIData.itemName,
+            Name = Labels.ItemName(item),
+            Icon = item.UIData?.icon,
+            PrefabOnly = prefabOnly,
             DebugId = showDebugId ? $"item:{item.itemID}" : null
         };
 
@@ -35,13 +37,14 @@ internal sealed class PreviewOrchestrator
             catch (Exception exception)
             {
                 _log.LogWarning($"{provider.GetType().Name} failed for item {item.itemID}: {exception.Message}");
+                preview.CompleteEffects = false;
+                if (!preview.Warnings.Contains(Labels.Partial)) preview.Warnings.Add(Labels.Partial);
             }
         }
 
-        var delta = 0f;
-        foreach (var status in preview.Statuses) delta += status.After - status.Before;
-        if ((preview.Statuses.Count > 0 || preview.HasExtraStamina) && Math.Abs(delta) < 0.0001f && Math.Abs(preview.ExtraAfter - preview.ExtraBefore) < .0001f)
-            preview.Warnings.Add(Labels.NoChange);
+        ItemEffectReader.AssessRisks(preview);
+        var nativeDescription = Labels.ItemDescription(item);
+        if (!string.IsNullOrWhiteSpace(nativeDescription)) preview.Description = nativeDescription;
         if (preview.HasExtraStamina)
             preview.Resources.Add(new ResourceLine(Labels.ExtraStamina, $"{preview.ExtraBefore * 100:0} → {preview.ExtraAfter * 100:0}"));
 

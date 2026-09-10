@@ -153,11 +153,106 @@ Check("compiled runtime selects source before prediction", () => {
 });
 Check("compiled production preview does not call gameplay mutations", () => {
     using var mod = ModuleDefinition.ReadModule(dll);
-    var forbidden = new HashSet<string> { "RunAction", "AddStatus", "SubtractStatus", "SetStatus", "Consume", "RPC", "RPCA", "AddExtraStamina", "SetData", "Interact", "Interact_CastFinished" };
+    var forbidden = new HashSet<string> { "RunAction", "AddStatus", "SubtractStatus", "SetStatus", "Consume", "RPC", "RPCA", "AddExtraStamina", "SetData", "Interact", "Interact_CastFinished", "AdjustStatus", "AddAffliction", "ClearPoisonAfflictions", "RunRandomEffect", "GetItemName", "GetData" };
     var violations = mod.GetTypes().SelectMany(t => t.Methods).Where(m => m.HasBody)
         .SelectMany(m => m.Body.Instructions.Select(i => (method: m, instruction: i)))
         .Where(x => x.instruction.Operand is MethodReference r && forbidden.Contains(r.Name)).ToArray();
     if (violations.Length > 0) throw new Exception(string.Join(", ", violations.Select(v => v.method.FullName)));
+});
+Check("risk: capped poison is still poisonous", () => Expect(RiskEvidence.Assess(true, true, false) == RiskLevel.Present));
+Check("risk: partial harmful facts outrank unknown", () => Expect(RiskEvidence.Assess(true, false, true) == RiskLevel.Present));
+Check("risk: absent requires complete instance evidence", () => {
+    Expect(RiskEvidence.Assess(false, true, false) == RiskLevel.Absent);
+    Expect(RiskEvidence.Assess(false, false, false) == RiskLevel.Unknown);
+    Expect(RiskEvidence.Assess(false, true, true) == RiskLevel.Unknown);
+});
+Check("layout: new poison reserves its native ordered slot", () => {
+    var r = StatusGhostLayout.Build(1000, new[] { 100f, 0f, 50f }, new[] { 0f, 100f, 0f });
+    Near(r[0].CurrentStart, 750); Near(r[1].AddedStart, 850); Near(r[2].CurrentStart, 950);
+});
+Check("layout: increased existing spores only draws increment", () => {
+    var r = StatusGhostLayout.Build(1000, new[] { 100f }, new[] { 50f });
+    Near(r[0].CurrentStart, 900); Near(r[0].AddedStart, 850); Near(r[0].AddedWidth, 50);
+});
+Check("layout: no gain keeps actual minimum badge width", () => {
+    var r = StatusGhostLayout.Build(500, new[] { 12f, 30f }, new[] { 0f, 0f });
+    Near(r[0].CurrentStart, 458); Near(r[0].CurrentWidth, 12);
+});
+Check("layout: 10000 ordered non-overlapping spans", () => {
+    var random = new Random(200);
+    for (var i = 0; i < 10000; i++) {
+        var c = Enumerable.Range(0, 8).Select(_ => (float)random.NextDouble() * 100).ToArray();
+        var a = Enumerable.Range(0, 8).Select(_ => (float)random.NextDouble() * 50).ToArray();
+        var r = StatusGhostLayout.Build(1000, c, a);
+        for (var j = 0; j < r.Length; j++) {
+            Expect(Math.Abs(r[j].AddedStart + r[j].AddedWidth - r[j].CurrentStart) < .001f);
+            if (j + 1 < r.Length) Expect(Math.Abs(r[j].CurrentStart + r[j].CurrentWidth - r[j + 1].AddedStart) < .001f);
+        }
+    }
+});
+Check("compiled HUD dispatches additions and restores owned groups", () => {
+    using var mod = ModuleDefinition.ReadModule(dll);
+    var hud = mod.Types.Single(t => t.Name == "HudGhostOverlay");
+    Expect(hud.Methods.Single(m => m.Name == "RenderRecoveries").Body.Instructions.Any(i =>
+        i.Operand is MethodReference m && m.DeclaringType.Name == "StatusIncreaseOverlay" && m.Name == "Render"));
+    Expect(hud.Methods.Single(m => m.Name == "HideSegment").Body.Instructions.Any(i =>
+        i.Operand is MethodReference m && m.DeclaringType.Name == "StatusIncreaseOverlay" && m.Name == "Hide"));
+});
+Check("installed mushroom case 8 remains immediate 25 spores", () => {
+    var type = game.GetTypes().Single(t => t.FullName == "Action_RandomMushroomEffect/<RunRandomEffect>d__9");
+    var method = type.Methods.Single(m => m.Name == "MoveNext");
+    var switches = method.Body.Instructions.Where(i => i.OpCode == OpCodes.Switch).ToArray();
+    var entry = ((Instruction[])switches[1].Operand)[8];
+    var block = method.Body.Instructions.SkipWhile(i => i != entry).Take(12).ToArray();
+    Expect(block.Any(i => i.OpCode == OpCodes.Ldc_I4_S && Convert.ToInt32(i.Operand) == 10));
+    Expect(block.Any(i => i.OpCode == OpCodes.Ldc_R4 && Math.Abs((float)i.Operand - .25f) < .00001f));
+    Expect(block.Any(i => i.Operand is MethodReference m && m.Name == "AdjustStatus"));
+});
+Check("installed cosmetic animation action is side-effect-free", () => {
+    var method = game.Types.Single(t => t.Name == "Action_PlayAnimation").Methods.Single(m => m.Name == "RunAction");
+    Expect(method.Body.Instructions.All(i => i.OpCode == OpCodes.Ret || i.OpCode == OpCodes.Nop));
+});
+Check("consume: direct single-use fruit needs no charge data", () => Expect(ConsumptionRule.FiresConsumed(true, false, false, 0)));
+Check("consume: direct action ignores positive charge counter", () => Expect(ConsumptionRule.FiresConsumed(true, false, true, 4)));
+Check("consume: depleted item is unusable", () => Expect(!ConsumptionRule.FiresConsumed(true, false, true, 0)));
+Check("consume: final charged use only", () => {
+    Expect(ConsumptionRule.FiresConsumed(false, true, true, 1));
+    Expect(!ConsumptionRule.FiresConsumed(false, true, true, 2));
+    Expect(!ConsumptionRule.FiresConsumed(false, true, true, -1));
+    Expect(!ConsumptionRule.FiresConsumed(false, true, false, 0));
+});
+Check("timeline: poison uses active duration not delay", () => Near(EffectProjection.Project(0, 2, new[] { new ProjectedEffect(.025f, 8, 3) }), .2f));
+Check("timeline: existing poison and cap", () => Near(EffectProjection.Project(.95f, 1, new[] { new ProjectedEffect(.025f, 8, 3) }), 1));
+Check("timeline: healing before delayed harm clamps first", () => Near(EffectProjection.Project(.1f, 1, new[] { new ProjectedEffect(-.5f), new ProjectedEffect(.3f, 0, 10) }), .3f));
+Check("timeline: staggered opposite rates", () => Near(EffectProjection.Project(0, 1, new[] { new ProjectedEffect(-.1f, 5), new ProjectedEffect(.1f, 5, 2) }), .2f));
+Check("timeline: zero and locked", () => {
+    Near(EffectProjection.Project(.3f, 1, Array.Empty<ProjectedEffect>()), .3f);
+    Near(EffectProjection.Project(.3f, 1, new[] { new ProjectedEffect(.2f, 8) }, true), .3f);
+});
+Check("compiled reader uses consumption predicate", () => {
+    using var mod = ModuleDefinition.ReadModule(dll);
+    var method = mod.Types.Single(t=>t.Name=="ItemEffectReader").Methods.Single(m=>m.Name=="Read");
+    Expect(method.Body.Instructions.Any(i=>i.Operand is MethodReference m && m.DeclaringType.Name=="ConsumptionRule"));
+    Expect(!method.Body.Instructions.Any(i=>i.Operand is FieldReference f && f.Name=="totalUses"));
+});
+foreach (var poison in AuditedPoisonCases.All)
+{
+    Check("audited poison timeline: " + poison.Name, () => {
+        var effect = new[] { new ProjectedEffect(poison.Rate, poison.Duration, poison.Delay) };
+        Near(EffectProjection.Project(0, 1, effect), poison.Total);
+        Near(EffectProjection.Project(.2f, 1, effect), .2f + poison.Total);
+        Near(EffectProjection.Project(.95f, 1, effect), 1);
+        Near(EffectProjection.Project(.2f, 1, effect, true), .2f);
+        var spans = StatusGhostLayout.Build(700, new[] { 0f }, new[] { poison.Total * 700 });
+        Near(spans[0].AddedWidth, poison.Total * 700);
+    });
+}
+Check("compiled production and asset tests share status projector", () => {
+    using var mod = ModuleDefinition.ReadModule(dll);
+    foreach (var typeName in new[] { "DirectStatusProvider", "OptimizationSmokeTest" })
+        Expect(mod.Types.Single(t => t.Name == typeName).Methods.Where(m => m.HasBody)
+            .SelectMany(m => m.Body.Instructions).Any(i => i.Operand is MethodReference m &&
+                m.DeclaringType.Name == "StatusProjector" && m.Name == "Populate"));
 });
 Console.WriteLine($"RESULT passed={passed} failed={failed}");
 Environment.ExitCode = failed > 0 ? 1 : 0;
