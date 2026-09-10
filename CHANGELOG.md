@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.3 — documentation-only package
+
+- Add the three gameplay/card GIFs to Thunderstore and link public GitHub source and issues.
+- Preserve the tested 0.2.2 DLL without rebuilding or changing gameplay; runtime log version remains 0.2.2.
+
 ## 0.2.2 — 2026-09-11 / first Thunderstore release
 
 - Published under MIT as Rachel560lu-PeakItemInsight-0.2.2 with bilingual player documentation. User-confirmed gameplay demos cover poison, safe-food recovery and item cards; broader compatibility remains unverified.

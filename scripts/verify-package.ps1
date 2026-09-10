@@ -26,7 +26,9 @@ try {
     $manifest = Read-EntryText ($archive.GetEntry('manifest.json')) | ConvertFrom-Json
     if ($manifest.name -cne 'PeakItemInsight') { throw 'Unexpected package name.' }
     if ($manifest.version_number -notmatch '^\d+\.\d+\.\d+$') { throw 'Version must be numeric major.minor.patch.' }
-    if ($manifest.version_number -ne $evidence.plugin_version) { throw 'Manifest differs from evidence-pinned version.' }
+    $packageVersion = if ($evidence.package_version) { $evidence.package_version } else { $evidence.plugin_version }
+    if ($manifest.version_number -ne $packageVersion) { throw 'Manifest differs from evidence-pinned package version.' }
+    if ($packageVersion -ne $evidence.plugin_version -and $evidence.change_type -ne 'documentation_only') { throw 'Different package/plugin versions require documentation-only evidence.' }
     if (-not $manifest.description -or $manifest.description.Length -gt 250) { throw 'Invalid description length.' }
     if ($null -eq $manifest.website_url) { throw 'website_url is required (empty string is allowed).' }
     if ($manifest.website_url -and $manifest.website_url -notmatch '^https?://\S+$') { throw 'Invalid website_url.' }
@@ -34,7 +36,8 @@ try {
     foreach ($name in @('README.md', 'CHANGELOG.md')) {
         $content = Read-EntryText ($archive.GetEntry($name))
         if ([string]::IsNullOrWhiteSpace($content)) { throw "Empty $name" }
-        if ($content -match '(?i)[A-Z]:[\\/]|AppData[\\/]|steam_appid\.txt|session-\d+-') { throw "Potential local development data in $name" }
+        # A drive prefix must not be the final letter of https://.
+        if ($content -match '(?i)(?<![a-z])[A-Z]:[\\/]|AppData[\\/]|steam_appid\.txt|session-\d+-') { throw "Potential local development data in $name" }
     }
     $bytes = Read-EntryBytes ($archive.GetEntry('icon.png'))
     if ([BitConverter]::ToString($bytes, 0, 8) -ne '89-50-4E-47-0D-0A-1A-0A') { throw 'Icon is not PNG.' }
@@ -51,6 +54,7 @@ try {
     [pscustomobject]@{
         FormatValidation = 'PASS (local checks only)'
         Version = $manifest.version_number
+        PluginVersion = $evidence.plugin_version
         Files = $names
         DllSHA256 = $dllHash
         ZipSHA256 = (Get-FileHash -LiteralPath $ZipPath -Algorithm SHA256).Hash

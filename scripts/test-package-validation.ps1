@@ -11,7 +11,8 @@ $cases = @(
     @{ Name = 'missing-readme'; Target = 'README.md'; Replacement = $null; Expected = 'entry count' },
     @{ Name = 'tampered-dll'; Target = 'BepInEx/plugins/PeakItemInsight/PeakItemInsight.dll'; Replacement = 'not the verified DLL'; Expected = 'DLL does not match' },
     @{ Name = 'extra-file'; Target = 'private-log.txt'; Replacement = 'must not ship'; Expected = 'entry count' },
-    @{ Name = 'invalid-icon'; Target = 'icon.png'; Replacement = 'not a PNG image'; Expected = 'not PNG' }
+    @{ Name = 'invalid-icon'; Target = 'icon.png'; Replacement = 'not a PNG image'; Expected = 'not PNG' },
+    @{ Name = 'local-path'; Target = 'README.md'; Replacement = 'Private file: C:\Users\example\file.txt'; Expected = 'local development data' }
 )
 foreach ($case in $cases) {
     $copy = Join-Path $directory ($case.Name + '.zip')
@@ -31,4 +32,4 @@ foreach ($case in $cases) {
     if (-not $rejection -or $rejection -notmatch $case.Expected) { throw "Validator test failed: $($case.Name); result: $rejection" }
     Write-Output "PASS rejected $($case.Name): $rejection"
 }
-Write-Output 'RESULT valid candidate accepted; 4 invalid packages rejected. No game or installed profile touched.'
+Write-Output "RESULT valid candidate accepted; $($cases.Count) invalid packages rejected. No game or installed profile touched."

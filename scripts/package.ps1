@@ -6,13 +6,15 @@ $manifest = Get-Content -LiteralPath (Join-Path $material 'manifest.json') -Raw 
 $evidence = Get-Content -LiteralPath (Join-Path $material 'release-evidence.json') -Raw | ConvertFrom-Json
 $source = Get-Content -LiteralPath (Join-Path $root 'src/Plugin.cs') -Raw
 $version = [regex]::Match($source, 'PluginVersion\s*=\s*"([^"]+)"').Groups[1].Value
-if ($version -ne $manifest.version_number -or $version -ne $evidence.plugin_version) { throw 'Source/manifest/evidence version mismatch.' }
+$packageVersion = if ($evidence.package_version) { $evidence.package_version } else { $evidence.plugin_version }
+if ($version -ne $evidence.plugin_version -or $manifest.version_number -ne $packageVersion) { throw 'Source/plugin or manifest/package evidence version mismatch.' }
+if ($packageVersion -ne $version -and $evidence.change_type -ne 'documentation_only') { throw 'Different package/plugin versions require explicit documentation-only evidence.' }
 $dll = Join-Path $root 'dist/PeakItemInsight.dll'
 if ((Get-FileHash -LiteralPath $dll -Algorithm SHA256).Hash -ne $evidence.dll_sha256) { throw 'DLL differs from evidence pin. Test and review before updating the evidence.' }
 & (Join-Path $PSScriptRoot 'create-package-icon.ps1')
 $folder = Join-Path $root ('dist/package-' + [Guid]::NewGuid().ToString('N'))
 $null = New-Item -ItemType Directory -Path $folder
-$zipPath = Join-Path $folder ("PeakItemInsight-$version.zip")
+$zipPath = Join-Path $folder ("PeakItemInsight-$packageVersion.zip")
 $archive = [System.IO.Compression.ZipFile]::Open($zipPath, [System.IO.Compression.ZipArchiveMode]::Create)
 try {
     $files = @('manifest.json', 'README.md', 'CHANGELOG.md', 'icon.png')
@@ -27,4 +29,4 @@ $report = & (Join-Path $PSScriptRoot 'verify-package.ps1') -ZipPath $zipPath
 $report | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $folder 'validation.json') -Encoding UTF8
 Write-Output "Validated local candidate: $zipPath"
 $report
-Write-Warning 'NOT uploaded. License, standard startup and real-game acceptance gates remain; see docs/release-checklist.md.'
+Write-Warning 'This command does not upload. Review current release evidence and known limitations before publishing.'

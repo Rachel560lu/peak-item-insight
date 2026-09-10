@@ -2,7 +2,39 @@
 
 See what changes before you use an item. 使用前，看见变化。
 
-An unofficial, experimental PEAK mod by Rachel560lu. Version **0.2.2**.
+An unofficial, experimental PEAK mod by Rachel560lu. Package **0.2.3**, containing the unchanged, tested **0.2.2** plugin. This update adds demonstrations and public source links only.
+
+[Source code / 源码](https://github.com/Rachel560lu/peak-item-insight) · [Report an issue / 问题反馈](https://github.com/Rachel560lu/peak-item-insight/issues)
+
+## Gameplay demos / 实机演示
+
+Player-recorded footage at original speed; trailing pause menus trimmed. These examples are not exhaustive item or multiplayer verification.
+
+实机原速录制，裁去末尾暂停菜单。以下展示具体交互，不代表全部物品或多人环境均已验证。
+
+### Poisonous food / 有毒食物
+
+Recognized poison appears as a purple pulsing region on the stamina HUD before consumption.
+
+食用前，精力条以紫色闪烁预览预计新增的毒素占用。
+
+![Poisonous food preview / 有毒食物预览](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/1fec93acc0c3a149054df1003fdd34f40e414f15/docs/assets/demos/poisonous-food.gif)
+
+### Non-poisonous food / 无毒食物
+
+The affected hunger segment pulses toward healthy green to show expected recovery.
+
+预计恢复的饥饿区域在原色与健康绿色之间闪烁。
+
+![Non-poisonous food preview / 无毒食物预览](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/1fec93acc0c3a149054df1003fdd34f40e414f15/docs/assets/demos/non-poisonous-food.gif)
+
+### Item information / 物品简介
+
+Icon, category, action and remaining uses. This example is a static GIF converted from a screenshot.
+
+图标、类别、使用方法与剩余次数。本素材来自截图，因此 GIF 为静态图。
+
+![Item information card / 物品简介卡](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/1fec93acc0c3a149054df1003fdd34f40e414f15/docs/assets/demos/item-description.gif)
 
 ## Features
 

@@ -1,6 +1,12 @@
 # Changelog
 
-## 0.2.2 — first public release candidate
+## 0.2.3 — demonstration and source-link update
+
+- Add poisonous-food, safe-food and item-card GIF demonstrations to the public page.
+- Link the public MIT-licensed GitHub repository and issue tracker.
+- Documentation-only package: the DLL is byte-identical to the tested 0.2.2 plugin, whose in-game log version remains 0.2.2. No gameplay changes or additional dependencies.
+
+## 0.2.2 — first public release
 
 - Preview hovered items with held-item fallback.
 - Pulse hunger and injury recovery inside the affected native status segment.
