@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.4 — 2026-09-11 / player-page and cover update
+
+- Replace the Thunderstore package cover with the new Item Insight artwork.
+- Streamline both READMEs around download, gameplay demos, usage and common settings.
+- Preserve the same 0.2.2 gameplay DLL; this package changes presentation only.
+
 ## 0.2.3 — 2026-09-11 / documentation-only package
 
 - Add the three gameplay/card GIFs to Thunderstore and link public GitHub source and issues.

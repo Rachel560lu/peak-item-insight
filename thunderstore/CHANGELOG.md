@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.4 — player-page and cover update
+
+- Replace the package cover with the new Item Insight artwork.
+- Streamline the bilingual README around download, gameplay demos, usage and common settings.
+- Keep the same gameplay DLL and dependencies as 0.2.3.
+
 ## 0.2.3 — demonstration and source-link update
 
 - Add poisonous-food, safe-food and item-card GIF demonstrations to the public page.

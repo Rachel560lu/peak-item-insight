@@ -1,8 +1,8 @@
 {
   "name": "PeakItemInsight",
-  "version_number": "0.2.3",
+  "version_number": "0.2.4",
   "website_url": "https://github.com/Rachel560lu/peak-item-insight",
-  "description": "Preview item effects before use: pulsing native stamina HUD for recovery and poison, plus bilingual item cards. Works on hovered and held items. Timed effects are estimates; experimental release.",
+  "description": "Preview recovery, poison and item effects before use. Works while aiming at or holding items, with bilingual item cards.",
   "dependencies": [
     "BepInEx-BepInExPack_PEAK-5.4.2403"
   ]
