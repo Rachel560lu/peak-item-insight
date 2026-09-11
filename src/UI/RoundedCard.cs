@@ -26,6 +26,7 @@ internal sealed class RoundedCard : MaskableGraphic
     }
     private static void Draw(VertexHelper vh, Rect r, float radius, Color tint, bool fill)
     {
+        radius = Mathf.Max(0, Mathf.Min(radius, Mathf.Min(r.width, r.height) * .5f));
         var start = vh.currentVertCount;
         vh.AddVert(r.center, tint, Vector2.zero);
         const int perCorner = 8;

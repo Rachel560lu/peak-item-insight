@@ -18,6 +18,7 @@ internal static class WorldPreviewTrace
     public static void Preview(Item item, ItemPreview preview, int? worldId)
     {
         if (!Enabled) return;
+        SessionTrace.Write("WORLD_PREVIEW_DIAGNOSTICS", $"item={item.itemID} diagnostics=[{string.Join(";", preview.Diagnostics.Distinct())}]");
         var character = Character.localCharacter;
         var knownUses = ItemDataReader.TryGetInt(item, DataEntryKey.ItemUses, out var uses);
         SessionTrace.Write("WORLD_EFFECT_FACTS", $"source={preview.Source} item={item.itemID} totalUses={item.totalUses} knownUses={knownUses} uses={uses} poison={preview.PoisonRisk} spores={preview.SporeRisk} facts=[{string.Join(";", preview.Effects.Select(e=>$"{e.Type}:{e.Amount:R} duration={e.Duration:R} delay={e.Delay:R}"))}] unsupported=[{string.Join(",", preview.Unsupported.Distinct())}]");

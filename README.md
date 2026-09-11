@@ -26,7 +26,23 @@ Preview recovery and poison on your stamina bar. Know what you're holding.</p>
 
 ## 实机演示 / Gameplay demos
 
-### 有毒食物 / Poisonous food
+### 能量饮料 / Energy drink
+
+从准星悬停到拿在手里，使用前查看状态变化。
+
+Preview status changes before use, both while aiming and while holding the drink.
+
+![能量饮料预览 / Energy drink preview](docs/assets/demos/energy-drink.gif)
+
+### 有毒蘑菇 / Poisonous mushroom
+
+同时查看饥饿恢复和预计增加的毒素占用。
+
+See hunger recovery alongside the expected poison increase.
+
+![有毒蘑菇预览 / Poisonous mushroom preview](docs/assets/demos/poisonous-mushroom.gif)
+
+### 有毒莓果 / Poisonous berry
 
 食用前查看毒性提示，紫色闪烁区域显示预计增加的毒素占用。
 
@@ -34,11 +50,19 @@ See poison warnings before eating. The purple pulse previews the expected poison
 
 ![有毒食物预览 / Poisonous food preview](docs/assets/demos/poisonous-food.gif)
 
-### 恢复精力 / Recovery preview
+### 绷带 / Bandage
 
-饥饿或伤势中可以恢复的部分，在原色与健康绿色之间闪烁。
+拿起绷带，伤势中可以恢复的部分在原色与健康绿色之间闪烁。
 
-The recoverable part of hunger or injury pulses between its original color and healthy green.
+Hold a bandage to see the recoverable injury segment pulse between its original color and healthy green.
+
+![绷带恢复预览 / Bandage recovery preview](docs/assets/demos/bandage.gif)
+
+### 无毒蘑菇 / Safe mushroom
+
+食用前查看可以恢复的饥饿区域。
+
+Preview the hunger you can recover before eating.
 
 ![食物恢复预览 / Food recovery preview](docs/assets/demos/non-poisonous-food.gif)
 

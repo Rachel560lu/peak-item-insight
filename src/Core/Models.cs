@@ -54,6 +54,8 @@ internal sealed class ItemPreview
     public List<ResourceLine> Resources { get; } = new List<ResourceLine>();
     public List<string> Instructions { get; } = new List<string>();
     public List<string> Warnings { get; } = new List<string>();
+    // Developer diagnostics never belong in the player-facing description.
+    public List<string> Diagnostics { get; } = new List<string>();
 }
 
 internal readonly struct EffectFact

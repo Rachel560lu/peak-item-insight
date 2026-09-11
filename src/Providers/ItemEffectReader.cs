@@ -74,8 +74,8 @@ internal static class ItemEffectReader
             { preview.CompleteEffects = false; preview.Unsupported.Add(action.GetType().Name); }
         }
         AssessRisks(preview);
-        if (!preview.CompleteEffects) preview.Warnings.Add(Labels.Partial);
-        if (preview.PrefabOnly) preview.Warnings.Add(Labels.Text("世界物品：基于预制体，实例状态未确认。",
+        if (!preview.CompleteEffects) preview.Diagnostics.Add(Labels.Partial);
+        if (preview.PrefabOnly) preview.Diagnostics.Add(Labels.Text("世界物品：基于预制体，实例状态未确认。",
             "World item: prefab data; instance state unverified."));
         if (preview.Effects.Any(e => e.Timed)) preview.Warnings.Add(Labels.Text("闪烁含持续效果累计预估；不计自然恢复、环境及已有增益。", "Pulse includes estimated timed totals; excludes natural recovery, environment and existing buffs."));
         if (!preview.IsFood && preview.Effects.Any(e => e.Type == CharacterAfflictions.STATUSTYPE.Injury && e.Amount < 0))

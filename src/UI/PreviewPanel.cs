@@ -124,7 +124,6 @@ internal sealed class PreviewPanel : MonoBehaviour
         foreach (var warning in preview.Warnings.Distinct())
             body.Append("<size=15><color=#E7BA81>").Append(Escape(warning)).AppendLine("</color></size>");
         if (preview.DebugId != null) body.AppendLine("<size=13>" + Escape(preview.DebugId) + "</size>");
-        if (body.Length == 0) body.Append(Labels.NoPreview);
         return body.ToString().TrimEnd();
     }
 

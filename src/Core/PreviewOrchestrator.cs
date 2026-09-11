@@ -38,7 +38,7 @@ internal sealed class PreviewOrchestrator
             {
                 _log.LogWarning($"{provider.GetType().Name} failed for item {item.itemID}: {exception.Message}");
                 preview.CompleteEffects = false;
-                if (!preview.Warnings.Contains(Labels.Partial)) preview.Warnings.Add(Labels.Partial);
+                if (!preview.Diagnostics.Contains(Labels.Partial)) preview.Diagnostics.Add(Labels.Partial);
             }
         }
 

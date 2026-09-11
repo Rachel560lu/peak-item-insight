@@ -89,19 +89,39 @@ internal static class OptimizationSmokeTest
             var extraOverlay = new ExtraStaminaOverlay();
             try
             {
+                full.sizeDelta = new Vector2(700, 180);
+                full.pivot = new Vector2(.5f, .5f);
+                full.localScale = new Vector3(1.2f, .8f, 1);
+                extraTemplate.rectTransform.sizeDelta = new Vector2(0, 200);
                 foreach (var source in new[] { PreviewSource.Hover, PreviewSource.Held })
                 {
                     var bonus = new ItemPreview { Source = source, HasExtraStamina = true, ExtraBefore = 0, ExtraAfter = .2f };
                     extraOverlay.Render(bar, bonus, healthy, .7f);
                     Require(extraOverlay.ExtraVisible && !extraTemplate.gameObject.activeSelf, "extra gain with inactive native template: " + source);
+                    Require(Math.Abs(extraOverlay.ExtraBounds.height - 26) < .01f && Math.Abs(extraOverlay.ExtraBounds.width - 140) < .01f,
+                        "bonus uses visible fill height, not tall container or stale hidden template: " + source);
+                    var mainTop = full.InverseTransformPoint(healthy.rectTransform.TransformPoint(new Vector3(healthy.rectTransform.rect.xMin, healthy.rectTransform.rect.yMax)));
+                    Require(Math.Abs(extraOverlay.ExtraBounds.yMin - mainTop.y - 8) < .01f && extraOverlay.TrackVisible,
+                        "bonus track immediately above main fill with nonzero pivot: " + source);
+                    extraTemplate.rectTransform.sizeDelta = new Vector2(70, 26);
+                    extraTemplate.rectTransform.anchoredPosition = new Vector2(12, 40);
+                    extraTemplate.gameObject.SetActive(true);
+                    bonus.ExtraBefore = .1f; bonus.ExtraAfter = .4f;
+                    extraOverlay.Render(bar, bonus, healthy, .7f);
+                    var nativeLeft = full.InverseTransformPoint(extraTemplate.rectTransform.TransformPoint(new Vector3(0, 13)));
+                    Require(Math.Abs(extraOverlay.ExtraBounds.xMin - nativeLeft.x - 70) < .01f &&
+                        Math.Abs(extraOverlay.ExtraBounds.center.y - nativeLeft.y) < .01f, "existing bonus row alignment: " + source);
+                    Require(extraTemplate.rectTransform.sizeDelta == new Vector2(70, 26), "native bonus geometry unchanged");
+                    extraTemplate.gameObject.SetActive(false); extraTemplate.rectTransform.sizeDelta = new Vector2(0, 200);
                     bonus.ExtraBefore = bonus.ExtraAfter;
                     extraOverlay.Render(bar, bonus, healthy, .7f); Require(!extraOverlay.ExtraVisible, "extra cap: " + source);
                     bonus.InfiniteStamina = true; extraOverlay.Render(bar, bonus, healthy, .7f);
                     Require(extraOverlay.InfiniteVisible, "infinite stamina: " + source);
-                    extraOverlay.Hide(); Require(!extraOverlay.InfiniteVisible && !extraOverlay.ExtraVisible, "extra hide");
+                    extraOverlay.Hide(); Require(!extraOverlay.InfiniteVisible && !extraOverlay.ExtraVisible && !extraOverlay.TrackVisible, "extra hide");
                 }
             }
-            finally { extraOverlay.Dispose(); }
+            finally { extraOverlay.Dispose(); full.sizeDelta = new Vector2(700, 26); full.pivot = Vector2.zero; full.localScale = Vector3.one; }
+            SessionTrace.Write("SMOKE_BONUS_GEOMETRY_PASS", "fullHeight=180 hiddenTemplateHeight=200 visibleHeight=26 gainWidth=140 gap=8; scaled parent+nonzero pivot+native row+hover/held+hide; synthetic HUD");
             var bounded = new ItemPreview { CompleteEffects = true, IsFood = true };
             bounded.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Poison, .2f));
             bounded.Statuses.Add(new StatusDelta(CharacterAfflictions.STATUSTYPE.Poison, 2, 2));
@@ -127,6 +147,7 @@ internal static class OptimizationSmokeTest
             // Read actual loaded assets as data only: stronger than hand-authored facts,
             // but does not prove the in-level hover mapping or consumption result.
             var assets = Resources.FindObjectsOfTypeAll<Item>().Where(i => i != null && i.UIData != null).ToArray();
+            CheckToolCards(assets);
             var checkedCount = 0;
             var poisonChecked = 0;
             var audited = new HashSet<ushort>();
@@ -203,6 +224,82 @@ internal static class OptimizationSmokeTest
             return overlay;
         }
         catch { overlay.Dispose(); throw; }
+    }
+    private static void CheckToolCards(Item[] assets)
+    {
+        var previous = PresentationOptions.Language!.Value;
+        try
+        {
+            foreach (var language in new[] { "Chinese", "English", "Auto" })
+            {
+                PresentationOptions.Language.Value = language;
+                var chinese = Labels.Chinese;
+                foreach (var name in new[] { "Scout Cannon", "Passport" })
+                {
+                    var item = assets.FirstOrDefault(i => i.UIData.itemName == name);
+                    Require(item != null, "real tool fixture loaded: " + name);
+                    var preview = new ItemPreview();
+                    ItemEffectReader.Read(item!, preview);
+                    new PromptProvider().Populate(item!, preview);
+                    var body = PreviewPanel.FormatBody(preview);
+                    Require(!body.Contains(Labels.Partial), "internal partial diagnostic excluded: " + name);
+                    Require(body.Contains(chinese ? (name == "Passport" ? "打开护照" : "调整角度") :
+                        (name == "Passport" ? "Open your passport" : "adjust its angle")), "localized tool description: " + language + " / " + name);
+                    if (chinese) Require(!body.Contains("open") && !body.Contains("place") && !body.Contains("change angle"), "no raw action keys");
+                    if (name == "Passport") Require(preview.Diagnostics.Contains(Labels.Partial), "unsupported passport diagnostic retained outside card");
+                }
+                foreach (var key in new[] { "open", "place", "change angle" })
+                    Require(!string.IsNullOrWhiteSpace(Labels.InteractPrompt(key)) &&
+                        (!chinese || !Labels.InteractPrompt(key).Equals(key, StringComparison.OrdinalIgnoreCase)), "localized action lookup: " + key);
+                foreach (var name in new[] { "Piton", "Remedy Fungus" })
+                {
+                    var item = assets.FirstOrDefault(i => i.UIData.itemName == name);
+                    Require(item != null, "real beginner tool fixture loaded: " + name);
+                    // Exercise the production orchestration order: a late native
+                    // description must not replace these instructions with a key.
+                    using var log = new BepInEx.Logging.ManualLogSource("ToolCardSmoke");
+                    var orchestrator = new PreviewOrchestrator(new IItemPreviewProvider[]
+                    { new InstanceResourceProvider(), new PitonProvider(), new PromptProvider() }, log);
+                    foreach (var source in new[] { PreviewSource.Hover, PreviewSource.Held })
+                    {
+                        var preview = orchestrator.Build(item!, false, true); preview.Source = source;
+                        var body = PreviewPanel.FormatBody(preview);
+                        if (name == "Piton")
+                        {
+                            Require(new PitonProvider().CanHandle(item!), "piton matched by native item identity");
+                            Require(body.Contains(chinese ? "没有固定使用次数" : "no rest-use limit") &&
+                                body.Contains(chinese ? "锈蚀岩钉会断裂" : "rusty pitons"), "normal and rusty pitons distinguished");
+                            var spike = item!.GetComponentInChildren<ClimbingSpikeComponent>(true);
+                            Require(spike != null && spike.hammeredVersionPrefab != null, "actual piton hammered prefab present");
+                            Require(spike!.hammeredVersionPrefab!.GetComponentInChildren<ClimbHandle>(true) != null &&
+                                spike.hammeredVersionPrefab.GetComponentInChildren<ShittyPiton>(true) == null,
+                                "deployable normal piton has handhold but not timed breaking component");
+                        }
+                        else
+                        {
+                            Require(body.Contains(chinese ? "丢下或投掷" : "Drop or throw") &&
+                                body.Contains(chinese ? "自己和队友" : "nearby teammates") &&
+                                body.Contains(chinese ? "毒素与孢子" : "poison and spores") &&
+                                body.Contains(chinese ? "留在云内" : "Stay in the cloud"), "remedy cloud use and targets described");
+                            var cloud = item!.GetComponentInChildren<ShelfShroom>(true);
+                            Require(cloud != null && cloud.breakOnCollision && cloud.instantiateOnBreak != null, "actual remedy collision-to-cloud component present; components=" +
+                                string.Join(",", item.GetComponentsInChildren<MonoBehaviour>(true).Where(c => c != null).Select(c => c.GetType().Name)));
+                            SessionTrace.Write("REMEDY_CLOUD_ASSET", "prefab=" + cloud!.instantiateOnBreak!.name + " minImpactSpeed=" + cloud.minBreakVelocity);
+                            Require(preview.Statuses.Count == 0, "area cloud not misrepresented as unconditional self-use prediction");
+                        }
+                        Require(!body.Contains(Labels.Partial), "beginner descriptions have no internal diagnostics");
+                    }
+                }
+                var uncertain = new ItemPreview { IsFood = true, CompleteEffects = false };
+                ItemEffectReader.AssessRisks(uncertain);
+                Require(uncertain.PoisonRisk == RiskLevel.Unknown && uncertain.SporeRisk == RiskLevel.Unknown,
+                    "removing diagnostic does not falsely mark unknown food safe");
+            }
+            Require(PreviewPanel.FormatBody(new ItemPreview()).Length == 0, "empty tool card does not add no-preview filler");
+            SessionTrace.Write("SMOKE_TOOL_CARDS_PASS", "loaded Scout Cannon+Passport; Chinese+English+Auto; localized prompts; diagnostic hidden but retained; risk preserved; no empty-card filler");
+            SessionTrace.Write("SMOKE_BEGINNER_TOOLS_PASS", "loaded Piton+Remedy Fungus; native deployment/cloud components; Chinese+English+Auto; hover/held; production description order");
+        }
+        finally { PresentationOptions.Language.Value = previous; }
     }
     internal static void ShowEnglish(PreviewPanel panel)
     {

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.5 — 2026-09-12 / UI fixes and refreshed demos
+
+- Size bonus-stamina previews from the visible native fill, not the HUD container or a hidden placeholder. Add a stable thin track; preserve game-owned UI.
+- Localize action keys and add concise Chinese/English Scout Cannon and Passport descriptions.
+- Explain normal piton reuse versus breakable rusty map pitons; add Remedy Fungus drop/throw, group-healing and stay-in-cloud instructions in Chinese/English.
+- Keep unsupported-effect and prefab diagnostics in test logs, not player cards. Poison/spore safety checks remain unchanged.
+- Add Unity regressions for oversized hidden templates, nonzero pivots, existing bonus rows, both target sources and real loaded bilingual tool cards.
+- Refresh the bilingual gameplay demos: energy drink, poisonous mushroom, poisonous berry, bandage, then the existing safe mushroom and item card.
+
 ## 0.2.4 — 2026-09-11 / player-page and cover update
 
 - Replace the Thunderstore package cover with the new Item Insight artwork.

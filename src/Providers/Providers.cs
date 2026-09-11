@@ -61,7 +61,7 @@ internal sealed class InstanceResourceProvider : IItemPreviewProvider
 
 internal sealed class PitonProvider : IItemPreviewProvider
 {
-    public bool CanHandle(Item item) => item.GetComponentInChildren<ShittyPiton>(true) != null ||
+    public bool CanHandle(Item item) => item.UIData?.itemName == "Piton" || item.GetComponentInChildren<ClimbingSpikeComponent>(true) != null ||
                                         item.name.IndexOf("piton", StringComparison.OrdinalIgnoreCase) >= 0;
 
     public void Populate(Item item, ItemPreview preview)
@@ -77,6 +77,7 @@ internal sealed class PromptProvider : IItemPreviewProvider
     public void Populate(Item item, ItemPreview preview)
     {
         var data = item.UIData;
+        if (preview.Description.Length == 0) preview.Description = Labels.ItemDescription(item);
         if (data.hasMainInteract && !string.IsNullOrWhiteSpace(data.mainInteractPrompt))
             AddUnique(preview, data.mainInteractPrompt);
         if (data.hasSecondInteract && !data.hideSecondInteract && !string.IsNullOrWhiteSpace(data.secondaryInteractPrompt))
@@ -89,7 +90,8 @@ internal sealed class PromptProvider : IItemPreviewProvider
     {
         if (text.Trim().Equals("eat", StringComparison.OrdinalIgnoreCase) ||
             text.Trim().Equals("drink", StringComparison.OrdinalIgnoreCase)) return;
-        if (!preview.Instructions.Contains(text) && preview.Description.Length == 0)
+        text = Labels.InteractPrompt(text);
+        if (text.Length > 0 && !preview.Instructions.Contains(text) && preview.Description.Length == 0)
             preview.Instructions.Add(text);
     }
 }
@@ -112,12 +114,46 @@ internal static class Labels
     internal static string ItemDescription(Item item)
     {
         if (item.UIData == null) return "";
+        // Native assets have action keys but no useful description for these tools.
+        if (item.UIData.itemName == "Scout Cannon")
+            return Text("放置大炮并调整角度，用它发射角色或物品。", "Place the cannon and adjust its angle to launch scouts or items.");
+        if (item.UIData.itemName == "Passport")
+            return Text("打开护照。", "Open your passport.");
+        if (item.UIData.itemName == "Piton") return PitonInstruction;
+        if (item.UIData.itemName == "Remedy Fungus")
+            return Text("丢下或投掷，碰撞破裂后释放治疗云，为范围内的自己和队友治疗伤势，并清除毒素与孢子。留在云内可持续获得治疗；不是直接食用。",
+                "Drop or throw; it bursts on impact into a healing cloud for you and nearby teammates. It heals injury and removes poison and spores. Stay in the cloud for continued healing; do not eat it.");
         var key = LocalizedText.GetDescriptionIndex(item.UIData.itemName);
         var language = PresentationOptions.Language?.Value == "English" ? LocalizedText.Language.English :
             PresentationOptions.Language?.Value == "Chinese" ? LocalizedText.Language.SimplifiedChinese : LocalizedText.CURRENT_LANGUAGE;
         if (LocalizedText.mainTable != null && LocalizedText.mainTable.ContainsKey(key))
             return LocalizedText.GetText(key, language);
         return "";
+    }
+    internal static string InteractPrompt(string prompt)
+    {
+        // UIData stores localization KEYS, not text to display. Resolve without
+        // GetText(key, true)'s silent English fallback when Chinese is selected.
+        var key = prompt.Trim().ToUpperInvariant();
+        var language = PresentationOptions.Language?.Value == "English" ? LocalizedText.Language.English :
+            PresentationOptions.Language?.Value == "Chinese" ? LocalizedText.Language.SimplifiedChinese : LocalizedText.CURRENT_LANGUAGE;
+        var index = (int)language;
+        if (LocalizedText.platformSpecificTable != null && LocalizedText.platformSpecificTable.TryGetValue(key, out var platform) &&
+            index >= 0 && index < platform.Count && !string.IsNullOrWhiteSpace(platform[index])) return platform[index];
+        if (LocalizedText.mainTable != null && LocalizedText.mainTable.ContainsKey(key))
+        {
+            var translated = LocalizedText.GetText(key, language);
+            if (!string.IsNullOrWhiteSpace(translated)) return translated;
+        }
+        if (!Chinese) return prompt.Trim();
+        switch (key)
+        {
+            case "OPEN": return "打开";
+            case "PLACE": return "放置";
+            case "CHANGE ANGLE": return "调整角度";
+        }
+        // Preserve already localized text, never leak untranslated action keys.
+        return prompt.Any(c => c >= '\u3400' && c <= '\u9fff') ? prompt.Trim() : "";
     }
     public static string Source(PreviewSource source) => source == PreviewSource.Held
         ? (Chinese ? "手持" : "Held") : (Chinese ? "准星" : "Hover");
@@ -127,8 +163,8 @@ internal static class Labels
     public static string Cooked => Chinese ? "烹饪" : "Cooked";
     public static string No => Chinese ? "否" : "No";
     public static string PitonInstruction => Chinese
-        ? "放置在可攀爬墙面；抓住它休息并恢复体力。"
-        : "Place on a climbable wall. Hold it to rest and recover stamina.";
+        ? "放置在可攀爬墙面，抓住它休息并恢复精力；同时限1人。普通岩钉可反复休息，没有固定使用次数。注意：地图自带的锈蚀岩钉会断裂。"
+        : "Place on a climbable wall and grab it to rest and recover stamina. One scout at a time. A normal piton has no rest-use limit. Beware: rusty pitons found on the map can break.";
     public static string NoPreview => Chinese ? "未检测到可预览的效果。" : "No previewable effect detected.";
     public static string NoChange => Chinese ? "当前状态下无净精力变化；各状态变化见上方。" : "No net stamina change at current state; see individual effects above.";
     public static string EmptyItem => Chinese ? "已无剩余使用次数。" : "No uses remaining.";
