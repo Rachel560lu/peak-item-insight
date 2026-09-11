@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.5 — preview fixes and clearer item cards
+
+- Fix the floating flashing block near the stamina bar when previewing bonus stamina.
+- Improve Chinese/English descriptions for the Scout Cannon, Passport, Piton and Remedy Fungus.
+- Explain piton reuse and Remedy Fungus group healing; remove generic internal diagnostic messages from item cards.
+- Refresh gameplay demos: energy drink, poisonous mushroom, poisonous berry, bandage, safe mushroom and item information.
+
+修复精力条外的闪烁方块，完善童军大炮、护照、岩钉和灵药菇的中英文说明，移除无用诊断文案，并更新六组演示。
+
 ## 0.2.4 — player-page and cover update
 
 - Replace the package cover with the new Item Insight artwork.
