@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.10 — 2026-09-13 / README update
+
+- Separate English and Chinese demos, English first. Add the new English GIF and retain both Chinese demos.
+- 演示分为英文和中文，英文在前；新增英文 GIF，保留两张中文演示。
+- Documentation only; the tested 0.2.9 Mod DLL is unchanged. 仅更新文档，Mod 功能不变。
+
 ## 0.2.9 — 2026-09-12 / Simpler timed effects
 
 - Timed items show one final change per status, using the same snapshot as the stamina preview. Remove raw rates, durations and delay text.

@@ -14,7 +14,7 @@ Preview recovery and poison on your stamina bar, and see what each item does.
 
 Energy and sports drinks: compact effect summaries and stamina previews before use.
 
-![English gameplay demo](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/main/docs/assets/demos/gameplay-english.gif)
+![English gameplay demo](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/ca9162c/docs/assets/demos/gameplay-english.gif)
 
 ### 中文演示
 
