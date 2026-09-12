@@ -8,19 +8,23 @@ Preview recovery and poison on your stamina bar, and see what each item does.
 
 [Download / 下载](https://thunderstore.io/c/peak/p/Rachel560lu/PeakItemInsight/) · [简体中文](#中文) · [English](#english) · [Report an issue / 问题反馈](https://github.com/Rachel560lu/peak-item-insight/issues)
 
-## 实机演示 / Gameplay demo
+## Gameplay demo
 
-能量饮料与运动饮料：查看简洁的效果提示和精力条变化。
+### English
 
 Energy and sports drinks: compact effect summaries and stamina previews before use.
 
-![能量饮料与运动饮料 / Energy and sports drinks](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/v0.2.9/docs/assets/demos/drinks-029.gif)
+![English gameplay demo](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/main/docs/assets/demos/gameplay-english.gif)
+
+### 中文演示
+
+能量饮料与运动饮料：查看简洁的效果提示和精力条变化。
+
+![能量饮料与运动饮料](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/v0.2.9/docs/assets/demos/drinks-029.gif)
 
 混合坚果：原装风格的额外精力条闪烁预览。
 
-Trail mix: bonus stamina preview with native-style UI.
-
-![混合坚果额外精力 / Trail mix bonus stamina](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/v0.2.9/docs/assets/demos/trail-mix-029.gif)
+![混合坚果额外精力](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/v0.2.9/docs/assets/demos/trail-mix-029.gif)
 
 ## 中文
 

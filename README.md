@@ -24,19 +24,23 @@ Preview recovery and poison on your stamina bar. Know what you're holding.</p>
   <a href="https://github.com/Rachel560lu/peak-item-insight/issues">Report an issue</a>
 </p>
 
-## 实机演示 / Gameplay demo
+## Gameplay demo
 
-能量饮料与运动饮料：查看简洁的效果提示和精力条变化。
+### English
 
 Energy and sports drinks: compact effect summaries and stamina previews before use.
 
-![能量饮料与运动饮料 / Energy and sports drinks](docs/assets/demos/drinks-029.gif)
+![English gameplay demo](docs/assets/demos/gameplay-english.gif)
+
+### 中文演示
+
+能量饮料与运动饮料：查看简洁的效果提示和精力条变化。
+
+![能量饮料与运动饮料](docs/assets/demos/drinks-029.gif)
 
 混合坚果：原装风格的额外精力条闪烁预览。
 
-Trail mix: bonus stamina preview with native-style UI.
-
-![混合坚果额外精力 / Trail mix bonus stamina](docs/assets/demos/trail-mix-029.gif)
+![混合坚果额外精力](docs/assets/demos/trail-mix-029.gif)
 
 ## 中文
 
