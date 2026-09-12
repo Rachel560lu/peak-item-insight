@@ -1,6 +1,6 @@
 # 极简模式开发记录
 
-日期：2026-09-12；开发版 0.2.7，尚未公开发布。
+日期：2026-09-12；0.2.7 已发布到 GitHub 与 Thunderstore。
 
 ## 已实现
 
@@ -12,7 +12,14 @@
 - ResourceKind 识别次数、剩余量和燃料，不从本地化卡片文字解析数值。烹饪字段、调试信息不出现在极简视图。
 - 特殊道具保留用途；普通岩钉与锈蚀岩钉准确区分。普通治疗用品已有数值时不重复描述。
 - 仅有一个物品信息视图；HUD 保持独立。暂停／阻塞输入、无目标和场景切换统一隐藏。屏幕尺寸改变后重排。
-- GitHub 与 Thunderstore README 的本地文件均更新中英极简界面设置说明，尚未推送。
+- GitHub 与 Thunderstore README 均已发布中英极简界面设置说明，并标明旧录像中的卡片布局。
+
+## 发布记录
+
+- 用户授权后将源码提交 `71e9617` 推送至 main，创建 GitHub Release `v0.2.7`，附带安装 ZIP。
+- Thunderstore 返回 Success，公开页面确认 `Rachel560lu-PeakItemInsight-0.2.7`。保留原分类并加入 AI Generated 分类。
+- 公开下载 ZIP 的 SHA256 与候选包逐字节一致：`B0B2AC40EAF25E4195FE072FC0F8D521C35775FF1F16272A2B859DA526AF9F60`。五种无效包回归检查全部通过。
+- [GitHub Release](https://github.com/Rachel560lu/peak-item-insight/releases/tag/v0.2.7) · [Thunderstore](https://thunderstore.io/c/peak/p/Rachel560lu/PeakItemInsight/v/0.2.7/)
 
 ## 测试证据
 
