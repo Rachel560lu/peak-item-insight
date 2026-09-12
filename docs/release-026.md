@@ -1,6 +1,6 @@
 # Release 0.2.6
 
-Prepared on 2026-09-12 with explicit user authorization to publish code and the five supplied gameplay clips to GitHub and Thunderstore.
+Published on 2026-09-12 with explicit user authorization to publish code and the five supplied gameplay clips to GitHub and Thunderstore.
 
 ## Changes and validation
 
@@ -37,4 +37,8 @@ Public ZIP contains manifest, bilingual README, changelog, existing cover, MIT l
 - Local package validation passed; five malformed-package regression cases were rejected.
 - Candidate ZIP SHA256: `82171C96E3EA82E54EC80D11A6CEB24284DF8946C0947AC2444BAD1CF6012C9E`.
 
-Publication and downloadable archive verification will be recorded after the services confirm success.
+- GitHub code/README commit `fd66afc` pushed to main. Public README retrieval confirms the new GIFs and no bandage embed.
+- Thunderstore returned **Success!** and listed the package in PEAK under the existing Mods, Items, Quality Of Life and Client Side categories.
+- Public listing displays `Rachel560lu-PeakItemInsight-0.2.6` and matching install/manual download links. All ten GIFs were loaded with valid dimensions, in the expected order.
+- Re-downloaded the public ZIP without installing it: archive hash matches the candidate byte-for-byte; DLL and archive verification passed.
+- Release page: <https://thunderstore.io/c/peak/p/Rachel560lu/PeakItemInsight/v/0.2.6/>.
