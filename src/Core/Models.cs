@@ -17,16 +17,20 @@ internal readonly struct StatusDelta
     public float After { get; }
 }
 
+internal enum ResourceKind { Other, Uses, Remaining, Fuel, Cooked }
+
 internal readonly struct ResourceLine
 {
-    public ResourceLine(string label, string value)
+    public ResourceLine(string label, string value, ResourceKind kind = ResourceKind.Other)
     {
         Label = label;
         Value = value;
+        Kind = kind;
     }
 
     public string Label { get; }
     public string Value { get; }
+    public ResourceKind Kind { get; }
 }
 
 internal sealed class ItemPreview
@@ -34,6 +38,8 @@ internal sealed class ItemPreview
     public Texture? Icon { get; set; }
     public string Category { get; set; } = "";
     public string Description { get; set; } = "";
+    public string CompactUse { get; set; } = "";
+    public List<string> CompactNotes { get; } = new List<string>();
     public bool IsFood { get; set; }
     public bool CompleteEffects { get; set; }
     public bool PrefabOnly { get; set; }

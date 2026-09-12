@@ -300,5 +300,70 @@ Check("compiled extra renderer uses native visuals not RoundedCard", () => {
         i.Operand is MethodReference m && m.DeclaringType.Name == "NativeVisualCopy" && m.Name == "Create"));
     Expect(!extra.Fields.Any(f => f.FieldType.Name == "RoundedCard"));
 });
+Check("minimal: food potency retained while HUD recovery is capped", () => {
+    var p = new ItemPreview { IsFood = true, PoisonRisk = RiskLevel.Absent, SporeRisk = RiskLevel.Absent };
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Hunger, -.15f));
+    p.Statuses.Add(new StatusDelta(CharacterAfflictions.STATUSTYPE.Hunger, .05f, 0));
+    var rows = MinimalRows.Build(p, true);
+    Expect(rows.Count == 1 && rows[0].Text == "-15"); Near(p.Statuses[0].Before, .05f);
+});
+Check("minimal: timed poison and hunger retained with no duplicate danger", () => {
+    var p = new ItemPreview { IsFood = true, PoisonRisk = RiskLevel.Present, SporeRisk = RiskLevel.Absent };
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Hunger, -.05f));
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Poison, .025f, 4, 2));
+    var zh = MinimalRows.Build(p, true); var en = MinimalRows.Build(p, false);
+    Expect(zh.Count == 2 && zh[0].Text == "-5" && zh[1].Text == "+10 / 4秒 · 延迟2秒");
+    Expect(en[1].Text == "+10 / 4s · after 2s");
+});
+Check("minimal: immediate reduction never cancels delayed harm", () => {
+    var p = new ItemPreview();
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Drowsy, -.5f));
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Drowsy, .5f, delay: 10));
+    var rows = MinimalRows.Build(p, false);
+    Expect(rows.Count == 2 && rows[0].Text == "-50" && rows[1].Text == "+50 · after 10s");
+});
+Check("minimal: capped poison stays visible", () => {
+    var p = new ItemPreview { IsFood = true, PoisonRisk = RiskLevel.Present, SporeRisk = RiskLevel.Absent };
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Poison, .1f));
+    p.Statuses.Add(new StatusDelta(CharacterAfflictions.STATUSTYPE.Poison, 1, 1));
+    Expect(MinimalRows.Build(p, false).Single().Text == "+10");
+});
+Check("minimal: unknown risk and known spores remain explicit", () => {
+    var p = new ItemPreview { IsFood = true, PoisonRisk = RiskLevel.Unknown, SporeRisk = RiskLevel.Present };
+    var rows = MinimalRows.Build(p, false);
+    Expect(rows.Count == 2 && rows[0].Text == "?" && rows[1].Text == "Present");
+});
+Check("minimal: bonus uses actual gain and handles full capacity", () => {
+    var p = new ItemPreview { HasExtraStamina = true, ExtraBefore = .9f, ExtraAfter = 1 };
+    Expect(MinimalRows.Build(p, false).Single().Text == "+10");
+    p.ExtraBefore = 1; Expect(MinimalRows.Build(p, false).Single().Text == "+0");
+});
+Check("minimal: clear and structured uses survive without cooking/debug clutter", () => {
+    var p = new ItemPreview { DebugId = "secret", Description = "long description" };
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Injury, 0, clears: true));
+    p.Resources.Add(new ResourceLine("次数", "3 / 4", ResourceKind.Uses));
+    p.Resources.Add(new ResourceLine("烹饪", "x2", ResourceKind.Cooked));
+    p.Diagnostics.Add("unsupported");
+    var rows = MinimalRows.Build(p, true); Expect(rows.Count == 2 && rows[0].Text == "清除" && rows[1].Text == "3 / 4 次数");
+});
+Check("minimal: no empty view and special instructions preserved", () => {
+    var p = new ItemPreview(); Expect(MinimalRows.Build(p, false).Count == 0);
+    p.CompactUse = "Drop/throw: stay in cloud"; Expect(MinimalRows.Build(p, false).Single().Text == p.CompactUse);
+});
+Check("minimal: infinite stamina conditions preserved", () => {
+    var p = new ItemPreview { InfiniteStamina = true }; p.CompactNotes.Add("8s after climbing starts");
+    var rows = MinimalRows.Build(p, false); Expect(rows.Count == 2 && rows[0].Lightning && rows[1].Text.Contains("climbing starts"));
+});
+Check("minimal-only: legacy Detailed setting cannot restore removed card", () => {
+    using var mod = ModuleDefinition.ReadModule(dll);
+    Expect(!mod.Types.Any(t => t.Name == "PreviewPanel" || t.Name == "RoundedCard"));
+    var plugin = mod.Types.Single(t => t.Name == "Plugin");
+    var strings = plugin.Methods.Where(m => m.HasBody).SelectMany(m => m.Body.Instructions)
+        .Where(i => i.OpCode == OpCodes.Ldstr).Select(i => (string)i.Operand).ToArray();
+    Expect(!strings.Intersect(new[] { "DisplayMode", "PanelScale", "OffsetX", "OffsetY", "ShowDetails", "BackgroundOpacity" }).Any());
+    var runtime = mod.Types.Single(t => t.Name == "RuntimeController");
+    Expect(runtime.Methods.Single(m => m.Name == "Tick").Body.Instructions.Any(i => i.Operand is MethodReference m &&
+        m.DeclaringType.Name == "MinimalPreviewPanel" && m.Name == "Show"));
+});
 Console.WriteLine($"RESULT passed={passed} failed={failed}");
 Environment.ExitCode = failed > 0 ? 1 : 0;

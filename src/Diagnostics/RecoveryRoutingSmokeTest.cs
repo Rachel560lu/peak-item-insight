@@ -10,7 +10,7 @@ namespace PeakItemInsight.Diagnostics;
 // Actual production selection + paired renderer, supplied synthetic UI/data only.
 internal static class RecoveryRoutingSmokeTest
 {
-    public static StatusRecoveryOverlays Run(PreviewPanel panel)
+    public static StatusRecoveryOverlays Run(MinimalPreviewPanel panel)
     {
         var healthy = Make("PairHealth", panel.transform, 60, 500, Color.green);
         var hunger = Make("PairHunger", panel.transform, 580, 100, Color.yellow);
@@ -29,9 +29,9 @@ internal static class RecoveryRoutingSmokeTest
                 var preview = key.InstanceId == 1 ? food : key.InstanceId == 2 ? bandage : new ItemPreview { Name = "Synthetic tool" };
                 preview.Source = key.Source; preview.TargetInstanceId = key.InstanceId;
                 pair.Render(preview, healthy, hunger, injury, .7f);
-                panel.Show(preview, 1, 32, -90);
+                panel.Show(preview);
                 Canvas.ForceUpdateCanvases();
-                Require(preview.Source == key.Source && panel.TitleText.Contains(preview.Name) && !panel.TitleText.Contains(Labels.Source(key.Source)), "panel target agrees without source clutter");
+                Require(preview.Source == key.Source && panel.LastTargetName.Contains(preview.Name) && !panel.LastTargetName.Contains(Labels.Source(key.Source)), "panel target agrees without source clutter");
             }
             Route(1, 2); Require(pair.Hunger.Visible && !pair.Injury.Visible, "hover food outranks held bandage");
             Route(null, 2); Require(!pair.Hunger.Visible && pair.Injury.Visible && Near(pair.Injury.Width, 25), "held injury quarter");

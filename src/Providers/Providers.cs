@@ -46,16 +46,16 @@ internal sealed class InstanceResourceProvider : IItemPreviewProvider
     public void Populate(Item item, ItemPreview preview)
     {
         if (item.totalUses > 1 && ItemDataReader.TryGetInt(item, DataEntryKey.ItemUses, out var remainingUses))
-            preview.Resources.Add(new ResourceLine(Labels.Uses, remainingUses < 0 ? "∞" : $"{Math.Max(0, remainingUses)} / {item.totalUses}"));
+            preview.Resources.Add(new ResourceLine(Labels.Uses, remainingUses < 0 ? "∞" : $"{Math.Max(0, remainingUses)} / {item.totalUses}", ResourceKind.Uses));
 
         if (ItemDataReader.TryGetFloat(item, DataEntryKey.UseRemainingPercentage, out var remaining))
-            preview.Resources.Add(new ResourceLine(Labels.Remaining, $"{Mathf.RoundToInt(Mathf.Clamp01(remaining) * 100f)}%"));
+            preview.Resources.Add(new ResourceLine(Labels.Remaining, $"{Mathf.RoundToInt(Mathf.Clamp01(remaining) * 100f)}%", ResourceKind.Remaining));
 
         if (ItemDataReader.TryGetFloat(item, DataEntryKey.Fuel, out var fuel))
-            preview.Resources.Add(new ResourceLine(Labels.Fuel, $"{Mathf.Max(0f, fuel):0.#}"));
+            preview.Resources.Add(new ResourceLine(Labels.Fuel, $"{Mathf.Max(0f, fuel):0.#}", ResourceKind.Fuel));
 
         if (item.cooking != null && item.cooking.canBeCooked && item.cooking.timesCookedLocal > 0)
-            preview.Resources.Add(new ResourceLine(Labels.Cooked, $"x{item.cooking.timesCookedLocal}"));
+            preview.Resources.Add(new ResourceLine(Labels.Cooked, $"x{item.cooking.timesCookedLocal}", ResourceKind.Cooked));
     }
 }
 
@@ -129,6 +129,17 @@ internal static class Labels
         if (LocalizedText.mainTable != null && LocalizedText.mainTable.ContainsKey(key))
             return LocalizedText.GetText(key, language);
         return "";
+    }
+    internal static string CompactUse(Item item, string description)
+    {
+        switch (item.UIData?.itemName)
+        {
+            case "Piton": return Text("墙面休息点 · 限1人；普通岩钉不限次，锈蚀岩钉会断裂。", "Wall rest point · one scout; normal pitons reusable, rusty pitons break.");
+            case "Remedy Fungus": return Text("丢下／投掷：留在治疗云内，治疗自己与队友，清毒／孢子。", "Drop/throw: stay in cloud to heal yourself and teammates; clears poison/spores.");
+            case "Scout Cannon": return Text("放置并调整角度：发射角色／物品。", "Place and aim: launch scouts/items.");
+            case "Passport": return "";
+            default: return description;
+        }
     }
     internal static string InteractPrompt(string prompt)
     {

@@ -45,6 +45,10 @@ internal sealed class PreviewOrchestrator
         ItemEffectReader.AssessRisks(preview);
         var nativeDescription = Labels.ItemDescription(item);
         if (!string.IsNullOrWhiteSpace(nativeDescription)) preview.Description = nativeDescription;
+        // Numeric healing effects already explain a bandage/medkit. Preserve
+        // short use instructions for utilities and mystical target-dependent tools.
+        if (!preview.IsFood && (preview.Effects.Count == 0 || (item.itemTags & Item.ItemTags.Mystical) != 0))
+            preview.CompactUse = Labels.CompactUse(item, preview.Description);
         if (preview.HasExtraStamina)
             preview.Resources.Add(new ResourceLine(Labels.ExtraStamina, $"{preview.ExtraBefore * 100:0} → {preview.ExtraAfter * 100:0}"));
 

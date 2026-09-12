@@ -15,14 +15,11 @@ internal sealed class RuntimeController
 {
     private ConfigEntry<bool> _enabled = null!;
     private ConfigEntry<float> _hoverDelay = null!;
-    private ConfigEntry<float> _scale = null!;
-    private ConfigEntry<float> _offsetX = null!;
-    private ConfigEntry<float> _offsetY = null!;
     private ConfigEntry<bool> _showDebugIds = null!;
     private ManualLogSource _log = null!;
     private HoverResolver _hoverResolver = null!;
     private PreviewOrchestrator _orchestrator = null!;
-    private PreviewPanel _panel = null!;
+    private MinimalPreviewPanel _minimalPanel = null!;
     private HudGhostOverlay _ghostOverlay = null!;
     private Item? _candidate;
     private Item? _visibleItem;
@@ -38,17 +35,11 @@ internal sealed class RuntimeController
     public void Initialize(
         ConfigEntry<bool> enabled,
         ConfigEntry<float> hoverDelay,
-        ConfigEntry<float> scale,
-        ConfigEntry<float> offsetX,
-        ConfigEntry<float> offsetY,
         ConfigEntry<bool> showDebugIds,
         ManualLogSource log)
     {
         _enabled = enabled;
         _hoverDelay = hoverDelay;
-        _scale = scale;
-        _offsetX = offsetX;
-        _offsetY = offsetY;
         _showDebugIds = showDebugIds;
         _log = log;
         _hoverResolver = new HoverResolver();
@@ -80,7 +71,8 @@ internal sealed class RuntimeController
                 _scene = scene; _character = character; _gui = gui;
                 _hoverGate.Reset(); _candidate = null; _target = default; Hide();
             }
-            if (!_enabled.Value || Character.localCharacter == null || MainCameraMovement.IsSpectating || Time.timeScale == 0f)
+            if (!_enabled.Value || Character.localCharacter == null || MainCameraMovement.IsSpectating || Time.timeScale == 0f ||
+                GUIManager.instance != null && GUIManager.instance.windowBlockingInput)
             {
                 _hoverGate.Reset();
                 _candidate = null;
@@ -122,7 +114,7 @@ internal sealed class RuntimeController
             preview.TargetInstanceId = _target.InstanceId;
             EnsureUi();
             _ghostOverlay.Show(preview);
-            _panel.Show(preview, _scale.Value, _offsetX.Value, _offsetY.Value);
+            _minimalPanel.Show(preview);
             // Commit only after both renderers succeed, so failures can retry.
             if (_visibleItem != _candidate)
             {
@@ -147,8 +139,8 @@ internal sealed class RuntimeController
 
     private void EnsureUi()
     {
-        if (_panel == null)
-            _panel = PreviewPanel.Create();
+        if (_minimalPanel == null)
+            _minimalPanel = MinimalPreviewPanel.Create();
         if (_ghostOverlay == null)
             _ghostOverlay = HudGhostOverlay.Create();
     }
@@ -158,16 +150,16 @@ internal sealed class RuntimeController
         if (_visibleItem != null) SessionTrace.Write("HIDE");
         _visibleItem = null;
         _lastState = default;
-        if (_panel != null)
-            _panel.Hide();
+        if (_minimalPanel != null)
+            _minimalPanel.Hide();
         if (_ghostOverlay != null)
             _ghostOverlay.Hide();
     }
 
     public void Dispose()
     {
-        if (_panel != null)
-            UnityEngine.Object.Destroy(_panel.gameObject);
+        if (_minimalPanel != null)
+            UnityEngine.Object.Destroy(_minimalPanel.gameObject);
         if (_ghostOverlay != null)
             UnityEngine.Object.Destroy(_ghostOverlay.gameObject);
     }

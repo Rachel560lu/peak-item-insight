@@ -10,6 +10,10 @@ Preview recovery and poison on your stamina bar, and see what each item does.
 
 ## 实机演示 / Gameplay demos
 
+**0.2.7：默认且仅保留极简界面。** 以原生字体和状态图标显示效果，精力条闪烁预览保持不变。以下已有录像展示旧版信息卡布局。
+
+**0.2.7 uses the minimal interface exclusively.** Compact effects use game fonts and status icons; stamina-bar previews remain available. Existing recordings below show the previous card layout.
+
 ### 能量饮料 / Energy drink
 
 从准星悬停到拿在手里，使用前查看状态变化。
@@ -76,7 +80,7 @@ Read what a special Scout item does and the cost of using it.
 
 ### 灵药菇 / Remedy Fungus
 
-简介卡说明投掷或放下后的群体治疗，以及留在治疗云中的用法。
+效果提示说明投掷或放下后的群体治疗，以及留在治疗云中的用法。
 
 The card explains how to drop or throw it for group healing and stay within its healing cloud.
 
@@ -88,7 +92,7 @@ The card explains how to drop or throw it for group healing and stay within its 
 
 See what an item does, its effects and remaining uses.
 
-![物品简介卡 / Item information card](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/c2b4644e7073a084c239e917222b2d3788ef895f/docs/assets/demos/item-description.gif)
+![物品效果提示 / Item compact effect information](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/c2b4644e7073a084c239e917222b2d3788ef895f/docs/assets/demos/item-description.gif)
 
 ## 中文
 
@@ -102,7 +106,7 @@ See what an item does, its effects and remaining uses.
 
 ### 怎么使用
 
-- **准星对准物品：**显示该物品的效果预览和简介卡。
+- **准星对准物品：**显示该物品的效果预览和效果提示。
 - **拿在手里：**没有瞄准其他物品时，显示手持物品的预览。
 - **恢复效果：**预计恢复的饥饿、伤势区域闪绿光，只标出实际可恢复的部分。
 - **额外精力：**使用原生闪电和白框；当前没有额外精力时预览在上方，已有时在下方衔接，仅新增部分闪烁。
@@ -116,17 +120,18 @@ See what an item does, its effects and remaining uses.
 首次启动后，退出游戏，在管理器的 **Config editor** 中找到 **dev.rachel.peakiteminsight**：
 
 - **Language：**跟随游戏，或选择中文／英文。
-- **PanelScale：**调整简介卡大小。
-- **OffsetX / OffsetY：**调整简介卡位置。
+- **MinimalScale / MinimalOffsetX / MinimalOffsetY：**调整极简模式大小与位置。
 - **AnimateRecovery：**开启或关闭闪烁；关闭后使用固定颜色预览。
 
-默认设置即可使用，无需手动配置。
+默认直接使用极简界面，无需选择模式。
+
+极简模式中的饥饿、伤势等数值是物品本次效果；精力条只闪烁当前能实际改变的部分。毒性等持续效果旁会显示累计时长与延迟；问号代表风险尚未确认。
 
 ### 遇到问题？
 
 - **完全没有提示：**确认从 **Start modded** 启动，并且管理器中已启用本 Mod。
 - **有卡片但没有恢复闪烁：**确认角色有对应的饥饿或伤势，且物品能恢复它。
-- **卡片太小或挡住视线：**调整卡片大小与位置。
+- **效果提示太小或挡住视线：**调整效果提示大小与位置。
 - **其他问题：**[提交反馈](https://github.com/Rachel560lu/peak-item-insight/issues)，附上物品名称、问题截图和出现问题的操作步骤。
 
 卸载时，退出游戏后在管理器中禁用或卸载 **PeakItemInsight** 即可。
@@ -143,7 +148,7 @@ Close the game before installing or updating. For your first modded run, back up
 
 ### How to use
 
-- **Aim at an item:** see its effect preview and information card.
+- **Aim at an item:** see its effect preview and compact effect information.
 - **Hold an item:** when you are not aiming at another item, see the held item's preview.
 - **Recovery:** the recoverable hunger or injury segment pulses green, showing only the amount you can recover.
 - **Bonus stamina:** native lightning and outline appear above the main bar when you have none, or extend the lower bonus bar when you do. Only the gain pulses.
@@ -157,17 +162,18 @@ Previews do not use items for you. There is no recovery pulse when you have no c
 After the first launch, close the game and find **dev.rachel.peakiteminsight** in your manager's **Config editor**:
 
 - **Language:** follow the game, or choose Chinese / English.
-- **PanelScale:** resize the item card.
-- **OffsetX / OffsetY:** reposition the card.
+- **MinimalScale / MinimalOffsetX / MinimalOffsetY:** resize and reposition the minimal display.
 - **AnimateRecovery:** turn pulsing on or off; off uses a steady preview color.
 
-The defaults work out of the box.
+The minimal interface is always enabled; no mode selection is needed.
+
+Minimal hunger/injury numbers describe this item's effect per use; the stamina pulse shows the amount your current state can actually change. Timed effects include duration and delay. A question mark means the risk is not confirmed.
 
 ### Need help?
 
 - **No preview at all:** launch with **Start modded** and check that the mod is enabled.
 - **Card but no recovery pulse:** check that you have hunger or injury the item can restore.
-- **Card too small or in the way:** adjust its size and position.
+- **Effect text too small or in the way:** adjust its size and position.
 - **Something else:** [report an issue](https://github.com/Rachel560lu/peak-item-insight/issues) with the item name, a screenshot and the steps that caused it.
 
 To uninstall, close the game and disable or remove **PeakItemInsight** in your mod manager.

@@ -1,0 +1,58 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+
+namespace PeakItemInsight.Core;
+
+internal readonly struct MinimalRow
+{
+    public MinimalRow(string text, CharacterAfflictions.STATUSTYPE? status = null, bool lightning = false)
+    { Text = text; Status = status; Lightning = lightning; }
+    public string Text { get; }
+    public CharacterAfflictions.STATUSTYPE? Status { get; }
+    public bool Lightning { get; }
+}
+
+// Pure presentation of the same snapshot used by the HUD. Never parse card text.
+internal static class MinimalRows
+{
+    private static string Number(float value) => value.ToString("0.#", CultureInfo.InvariantCulture);
+    public static List<MinimalRow> Build(ItemPreview preview, bool chinese)
+    {
+        var rows = new List<MinimalRow>();
+        foreach (var effect in preview.Effects)
+        {
+            if (!effect.Clears && Math.Abs(effect.Amount) < .00001f) continue;
+            var total = effect.Amount * (effect.Duration > 0 ? effect.Duration : 1) * 100;
+            var text = effect.Clears ? (chinese ? "清除" : "Clear") : (total > 0 ? "+" : "") + Number(total);
+            if (effect.Duration > 0) text += chinese ? $" / {Number(effect.Duration)}秒" : $" / {Number(effect.Duration)}s";
+            if (effect.Delay > 0) text += chinese ? $" · 延迟{Number(effect.Delay)}秒" : $" · after {Number(effect.Delay)}s";
+            rows.Add(new MinimalRow(text, effect.Type));
+        }
+        if (preview.Effects.Count == 0)
+            foreach (var status in preview.Statuses)
+            {
+                var delta = (status.After - status.Before) * 100;
+                if (Math.Abs(delta) > .00001f) rows.Add(new MinimalRow((delta > 0 ? "+" : "") + Number(delta), status.Type));
+            }
+        AddRisk(rows, preview, preview.PoisonRisk, CharacterAfflictions.STATUSTYPE.Poison, chinese);
+        AddRisk(rows, preview, preview.SporeRisk, CharacterAfflictions.STATUSTYPE.Spores, chinese);
+        if (preview.HasExtraStamina)
+            rows.Add(new MinimalRow("+" + Number(Math.Max(0, preview.ExtraAfter - preview.ExtraBefore) * 100), lightning: true));
+        if (preview.InfiniteStamina) rows.Add(new MinimalRow("∞", lightning: true));
+        foreach (var note in preview.CompactNotes.Distinct()) rows.Add(new MinimalRow(note));
+        foreach (var resource in preview.Resources)
+            if (resource.Kind == ResourceKind.Uses || resource.Kind == ResourceKind.Remaining || resource.Kind == ResourceKind.Fuel)
+                rows.Add(new MinimalRow(resource.Value + " " + resource.Label));
+        if (preview.CompactUse.Length > 0) rows.Add(new MinimalRow(preview.CompactUse));
+        return rows;
+    }
+
+    private static void AddRisk(List<MinimalRow> rows, ItemPreview preview, RiskLevel risk, CharacterAfflictions.STATUSTYPE type, bool chinese)
+    {
+        if (risk == RiskLevel.Absent || !preview.IsFood && risk != RiskLevel.Present) return;
+        if (risk == RiskLevel.Present && preview.Effects.Any(e => e.Type == type && e.Amount > 0)) return;
+        rows.Add(new MinimalRow(risk == RiskLevel.Present ? (chinese ? "有" : "Present") : "?", type));
+    }
+}

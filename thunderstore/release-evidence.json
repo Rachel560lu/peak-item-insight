@@ -1,15 +1,13 @@
 {
-  "plugin_version": "0.2.6",
-  "package_version": "0.2.6",
+  "plugin_version": "0.2.7",
+  "package_version": "0.2.7",
   "change_type": "code_and_documentation",
-  "dll_sha256": "8AE11E865FE1D6C0DF8746467F3A0EEAF81B9F276351EDC31BB301117AFD8BA7",
-  "evidence_document": "docs/release-026.md",
+  "dll_sha256": "93A0206456314F7702D6F77E9CC78E5BBFC6AB130C2D9C2BBD6154FFEF8B921C",
+  "evidence_document": "docs/minimal-mode-027.md",
   "public_release_approved": true,
-  "publication_status": "published",
-  "zip_sha256": "82171C96E3EA82E54EC80D11A6CEB24284DF8946C0947AC2444BAD1CF6012C9E",
-  "published_url": "https://thunderstore.io/c/peak/p/Rachel560lu/PeakItemInsight/v/0.2.6/",
+  "publication_status": "candidate",
   "license": "MIT",
-  "offline_checks_passed": 88,
+  "offline_checks_passed": 98,
   "standard_fresh_profile_startup_verified": false,
-  "acceptance_scope": "User-supplied gameplay recordings show new bonus above, existing bonus below, first aid and special-item cards. Final 0.2.6 isolated engine smoke passed. Not exhaustive all-item or multiplayer validation."
+  "acceptance_scope": "User accepted minimal UI in game. Minimal-only DLL passed 98 checks and Unity smoke PID 27960. Not exhaustive multiplayer or cross-resolution validation."
 }

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.7 — 2026-09-12 / Minimal interface
+
+- Replace the detailed card with a compact, background-free interface using game fonts and status icons. No mode selection is needed.
+- Keep stamina-bar previews, signed effects, poison/spore risks, duration, remaining uses and useful item instructions.
+- Position information near the inventory; support Chinese/English, adjustable size and offsets.
+- Remove legacy card settings. Existing minimal-interface settings remain compatible.
+
+- 仅保留极简界面：原生字体与状态图标、无背景，无需切换模式。
+- 保留精力条闪烁、效果数值、毒性／孢子提示、持续时间、剩余次数和必要用途说明。
+- 信息定位在物品栏附近，支持中英文、大小和位置调整；旧详情卡配置不再生效。
+
 ## 0.2.6 — native stamina previews
 
 - Bonus stamina now uses PEAK's original lightning icon, white outline and textured fill.

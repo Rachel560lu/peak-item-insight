@@ -13,7 +13,7 @@ internal sealed class EngineSmokeTest
     private readonly bool _enabled = Array.Exists(Environment.GetCommandLineArgs(), a => a == "-insightSmokeTest");
     private int _stage;
     private float _since;
-    private PreviewPanel? _panel;
+    private MinimalPreviewPanel? _panel;
     private HudGhostOverlay? _ghost;
     private HungerRecoveryOverlay? _hunger;
     private StatusRecoveryOverlays? _recoveries;
@@ -28,12 +28,12 @@ internal sealed class EngineSmokeTest
         {
             if (_stage == 0)
             {
-                _panel = PreviewPanel.Create();
+                _panel = MinimalPreviewPanel.Create();
                 var preview = new ItemPreview { Name = "Insight UI self-test / 界面自检" };
                 preview.Statuses.Add(new StatusDelta(CharacterAfflictions.STATUSTYPE.Hunger, .4f, .15f));
                 preview.Statuses.Add(new StatusDelta(CharacterAfflictions.STATUSTYPE.Poison, .1f, .3f));
                 preview.Instructions.Add("Synthetic data. No player or save changes.");
-                _panel.Show(preview, 1, 32, -90);
+                _panel.Show(preview);
                 Canvas.ForceUpdateCanvases();
                 if (!_panel.IsVisible) throw new InvalidOperationException("Panel has no active layout.");
                 SessionTrace.Write("SMOKE_UI_SHOW", "synthetic=true layout=positive");
@@ -55,6 +55,7 @@ internal sealed class EngineSmokeTest
                 _hunger = HungerPulseSmokeTest.Run(_panel.transform);
                 _recoveries = RecoveryRoutingSmokeTest.Run(_panel);
                 _optimized = OptimizationSmokeTest.Run(_panel);
+                MinimalModeSmokeTest.Run(_panel);
                 _since = Time.unscaledTime;
                 _stage = 1;
             }

@@ -74,6 +74,9 @@ internal static class ItemEffectReader
             { preview.CompleteEffects = false; preview.Unsupported.Add(action.GetType().Name); }
         }
         AssessRisks(preview);
+        // These are effect conditions/timings, before generic interaction prompts
+        // are appended by PromptProvider. Keep them in the minimal view too.
+        preview.CompactNotes.AddRange(preview.Instructions);
         if (!preview.CompleteEffects) preview.Diagnostics.Add(Labels.Partial);
         if (preview.PrefabOnly) preview.Diagnostics.Add(Labels.Text("世界物品：基于预制体，实例状态未确认。",
             "World item: prefab data; instance state unverified."));

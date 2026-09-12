@@ -12,7 +12,7 @@ namespace PeakItemInsight.Diagnostics;
 
 internal static class OptimizationSmokeTest
 {
-    internal static StatusIncreaseOverlay Run(PreviewPanel panel)
+    internal static StatusIncreaseOverlay Run(MinimalPreviewPanel panel)
     {
         // Disabled UI-only game components provide native-shaped templates; never
         // create a Character, Item or run any gameplay callbacks.
@@ -221,7 +221,7 @@ internal static class OptimizationSmokeTest
             Require(bounded.SporeRisk == RiskLevel.Absent, "spores independent");
             bounded.PrefabOnly = true; ItemEffectReader.AssessRisks(bounded);
             Require(bounded.SporeRisk == RiskLevel.Unknown, "prefab cannot establish safety");
-            var text = PreviewPanel.FormatBody(mixed);
+            var text = string.Join("\n", MinimalRows.Build(mixed, Labels.Chinese).Select(r => r.Text));
             Require(text.Contains("+10") && text.Contains("-10"), "signed facts retained");
             Require(!text.Contains("→"), "no debug-style projections by default");
             var mushroom = new ItemPreview { CompleteEffects = true };
@@ -311,7 +311,7 @@ internal static class OptimizationSmokeTest
                 "Synthetic values demonstrate recovery and harm, not this item's real effects.");
             mixed.Resources.Add(new ResourceLine(Labels.Uses, "3 / 4"));
             overlay.Render(bar, mixed, healthy, .7f);
-            panel.Show(mixed, 1, 32, -90);
+            panel.Show(mixed);
             return overlay;
         }
         catch { overlay.Dispose(); throw; }
@@ -332,7 +332,7 @@ internal static class OptimizationSmokeTest
                     var preview = new ItemPreview();
                     ItemEffectReader.Read(item!, preview);
                     new PromptProvider().Populate(item!, preview);
-                    var body = PreviewPanel.FormatBody(preview);
+                    var body = preview.Description;
                     Require(!body.Contains(Labels.Partial), "internal partial diagnostic excluded: " + name);
                     Require(body.Contains(chinese ? (name == "Passport" ? "打开护照" : "调整角度") :
                         (name == "Passport" ? "Open your passport" : "adjust its angle")), "localized tool description: " + language + " / " + name);
@@ -354,7 +354,7 @@ internal static class OptimizationSmokeTest
                     foreach (var source in new[] { PreviewSource.Hover, PreviewSource.Held })
                     {
                         var preview = orchestrator.Build(item!, false, true); preview.Source = source;
-                        var body = PreviewPanel.FormatBody(preview);
+                        var body = preview.Description;
                         if (name == "Piton")
                         {
                             Require(new PitonProvider().CanHandle(item!), "piton matched by native item identity");
@@ -386,13 +386,13 @@ internal static class OptimizationSmokeTest
                 Require(uncertain.PoisonRisk == RiskLevel.Unknown && uncertain.SporeRisk == RiskLevel.Unknown,
                     "removing diagnostic does not falsely mark unknown food safe");
             }
-            Require(PreviewPanel.FormatBody(new ItemPreview()).Length == 0, "empty tool card does not add no-preview filler");
+            Require(MinimalRows.Build(new ItemPreview(), Labels.Chinese).Count == 0, "empty tool card does not add no-preview filler");
             SessionTrace.Write("SMOKE_TOOL_CARDS_PASS", "loaded Scout Cannon+Passport; Chinese+English+Auto; localized prompts; diagnostic hidden but retained; risk preserved; no empty-card filler");
             SessionTrace.Write("SMOKE_BEGINNER_TOOLS_PASS", "loaded Piton+Remedy Fungus; native deployment/cloud components; Chinese+English+Auto; hover/held; production description order");
         }
         finally { PresentationOptions.Language.Value = previous; }
     }
-    internal static void ShowEnglish(PreviewPanel panel)
+    internal static void ShowEnglish(MinimalPreviewPanel panel)
     {
         var previous = PresentationOptions.Language!.Value;
         try
@@ -404,8 +404,8 @@ internal static class OptimizationSmokeTest
                 Description = "Synthetic preview fixture: pulse shows estimated cumulative poison." };
             preview.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Poison, .02f, 5, 3));
             ItemEffectReader.AssessRisks(preview);
-            panel.Show(preview, 1, 32, -90);
-            Require(!panel.TitleText.Contains("Held") && panel.BodyText.Contains("Poisonous") && panel.BodyText.Contains("+10") && panel.BodyText.Contains("total over 5 s"), "English card semantics");
+            panel.Show(preview);
+            Require(!panel.LastTargetName.Contains("Held") && preview.PoisonRisk == RiskLevel.Present && panel.BodyText.Contains("+10") && panel.BodyText.Contains("/ 5s") && panel.BodyText.Contains("after 3s"), "English minimal semantics");
             SessionTrace.Write("SMOKE_ENGLISH_PASS", "explicit language restored after formatting");
         }
         finally { PresentationOptions.Language.Value = previous; }
