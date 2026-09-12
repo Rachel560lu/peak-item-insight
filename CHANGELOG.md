@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.11 — 2026-09-13 / In-game preview settings
+
+- Add independent Hover / Held / Both / Off controls for inventory text and stamina previews, with automatic saving.
+- Show setup on the first Airport visit; reopen through the top-right pause-menu entry. Fix pause entry click layering.
+- 新增物品栏文字与精力条预览独立设置，首次进入机场显示，暂停菜单右上角可重新打开，选择自动保存。
+- Add bilingual setup instructions and screenshots. Existing preview typography and stamina rendering remain unchanged.
+
 ## 0.2.9 — 2026-09-12 / Simpler timed effects
 
 - Timed items show one final change per status, using the same snapshot as the stamina preview. Remove raw rates, durations and delay text.

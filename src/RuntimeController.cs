@@ -13,6 +13,8 @@ namespace PeakItemInsight;
 
 internal sealed class RuntimeController
 {
+    private readonly bool _textChannel;
+    internal RuntimeController(bool textChannel = true) { _textChannel = textChannel; }
     private ConfigEntry<bool> _enabled = null!;
     private ConfigEntry<float> _hoverDelay = null!;
     private ConfigEntry<bool> _showDebugIds = null!;
@@ -84,7 +86,8 @@ internal sealed class RuntimeController
             var hovered = _hoverResolver.Resolve();
             var held = HeldResolver.Resolve();
             var selected = PreviewTargetSelection.Select(hovered != null ? _hoverResolver.WorldId : null,
-                held != null ? held.GetInstanceID() : (int?)null, HeldResolver.IsBusy(held));
+                held != null ? held.GetInstanceID() : (int?)null, HeldResolver.IsBusy(held),
+                (_textChannel ? PresentationOptions.TextSource : PresentationOptions.StaminaSource)?.Value ?? PreviewMode.Both);
             var item = selected.Source == PreviewSource.Hover ? hovered : selected.Source == PreviewSource.Held ? held : null;
             var ready = _hoverGate.Advance(selected, Time.unscaledTime, _hoverDelay.Value);
             if (_hoverGate.Changed || _hoverResolver.CurrentTargetType != _lastTargetType)
@@ -113,8 +116,8 @@ internal sealed class RuntimeController
             preview.Source = _target.Source;
             preview.TargetInstanceId = _target.InstanceId;
             EnsureUi();
-            _ghostOverlay.Show(preview);
-            _minimalPanel.Show(preview);
+            if (_textChannel) _minimalPanel.Show(preview);
+            else _ghostOverlay.Show(preview);
             // Commit only after both renderers succeed, so failures can retry.
             if (_visibleItem != _candidate)
             {
@@ -139,9 +142,9 @@ internal sealed class RuntimeController
 
     private void EnsureUi()
     {
-        if (_minimalPanel == null)
+        if (_textChannel && _minimalPanel == null)
             _minimalPanel = MinimalPreviewPanel.Create();
-        if (_ghostOverlay == null)
+        if (!_textChannel && _ghostOverlay == null)
             _ghostOverlay = HudGhostOverlay.Create();
     }
 

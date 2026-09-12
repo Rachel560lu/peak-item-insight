@@ -1,16 +1,15 @@
 {
-  "plugin_version": "0.2.9",
-  "package_version": "0.2.10",
-  "change_type": "documentation_only",
-  "dll_sha256": "298A885666357135F0E4E1CE91DEB71EE0F7602C9FDB2DC846D0A04FF1F7541C",
-  "evidence_document": "docs/release-029.md",
+  "plugin_version": "0.2.11",
+  "package_version": "0.2.11",
+  "change_type": "code_and_documentation",
+  "dll_sha256": "B0866571A99115F1DB430B8522CD3C60904C6B09E3B48AF59E1534D6AA6914EA",
+  "evidence_document": "docs/release-0211.md",
   "public_release_approved": true,
-  "publication_status": "published",
-  "zip_sha256": "F1C95B01E398BEB462C3ADA80314D92FFA446D3372DC42F0226DF922DA859916",
-  "published_url": "https://thunderstore.io/c/peak/p/Rachel560lu/PeakItemInsight/v/0.2.10/",
-  "github_release": "https://github.com/Rachel560lu/peak-item-insight/releases/tag/v0.2.9",
+  "publication_status": "ready",
+  "published_url": "https://thunderstore.io/c/peak/p/Rachel560lu/PeakItemInsight/v/0.2.11/",
+  "github_release": "https://github.com/Rachel560lu/peak-item-insight/releases/tag/v0.2.11",
   "license": "MIT",
-  "offline_checks_passed": 113,
+  "offline_checks_passed": 117,
   "standard_fresh_profile_startup_verified": false,
-  "acceptance_scope": "User requested publication after isolated gameplay. Final version smoke PID 66492 exited 0; 440 timed summary combinations passed. HUD implementation unchanged. Not exhaustive multiplayer validation."
+  "acceptance_scope": "User requested publication with in-game settings screenshots. 117 offline checks passed. Final version smoke PID 37536 exited 0, including native window, pointer-click and existing preview regressions. Not exhaustive multiplayer validation."
 }

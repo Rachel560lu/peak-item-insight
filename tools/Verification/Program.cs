@@ -11,6 +11,30 @@ void Check(string name, Action action)
 void Expect(bool value) { if (!value) throw new Exception("Assertion failed"); }
 void Near(float actual, float expected) => Expect(Math.Abs(actual - expected) < 0.00001f);
 
+Check("source modes independently choose hover or held", () => {
+    Expect(PreviewTargetSelection.Select(1, 2, false, PreviewMode.Hover).InstanceId == 1);
+    Expect(PreviewTargetSelection.Select(1, 2, false, PreviewMode.Held).InstanceId == 2);
+    Expect(PreviewTargetSelection.Select(1, 2, false, PreviewMode.Both).InstanceId == 1);
+    Expect(!PreviewTargetSelection.Select(1, 2, false, PreviewMode.Off).IsValid);
+});
+Check("source mode absent targets never fall back to disabled source", () => {
+    Expect(!PreviewTargetSelection.Select(null, 2, false, PreviewMode.Hover).IsValid);
+    Expect(!PreviewTargetSelection.Select(1, null, false, PreviewMode.Held).IsValid);
+    Expect(PreviewTargetSelection.Select(null, 2, false, PreviewMode.Both).Source == PreviewSource.Held);
+});
+Check("source mode busy held item suppressed including hovered same instance", () => {
+    foreach (var mode in Enum.GetValues<PreviewMode>()) Expect(!PreviewTargetSelection.Select(2, 2, true, mode).IsValid);
+    Expect(PreviewTargetSelection.Select(1, 2, true, PreviewMode.Hover).InstanceId == 1);
+});
+Check("text and stamina modes cover all 16 independent combinations", () => {
+    foreach (var text in Enum.GetValues<PreviewMode>()) foreach (var bar in Enum.GetValues<PreviewMode>()) {
+        var a = PreviewTargetSelection.Select(10, 20, false, text);
+        var b = PreviewTargetSelection.Select(10, 20, false, bar);
+        Expect(a.InstanceId == (text == PreviewMode.Off ? 0 : text == PreviewMode.Held ? 20 : 10));
+        Expect(b.InstanceId == (bar == PreviewMode.Off ? 0 : bar == PreviewMode.Held ? 20 : 10));
+    }
+});
+
 Check("hunger .40 -> .15 after food -.25", () => Near(PreviewMath.Apply(.4f, -.25f, 1), .15f));
 Check("food clamps at zero", () => Near(PreviewMath.Apply(.1f, -.25f, 1), 0));
 Check("healthy food produces no false gain", () => Near(PreviewMath.Apply(0, -.25f, 1), 0));

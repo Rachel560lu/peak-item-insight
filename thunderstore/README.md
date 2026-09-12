@@ -49,6 +49,25 @@ Energy and sports drinks: compact effect summaries and stamina previews before u
 
 ### 调整显示
 
+首次进入机场时会显示设置面板。之后按 **Esc**，点击暂停菜单右上角的 **Item Insight 设置 / Item Insight settings** 即可重新打开。
+
+![暂停菜单设置入口](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/v0.2.11/docs/assets/settings-entry.png)
+
+两项可独立设置，点击即保存，点击「完成 / Done」关闭：
+
+| 设置 | 控制内容 |
+|---|---|
+| 物品栏上方文字 / Text above inventory | 物品栏上方的效果数值、图标和用途说明 |
+| 精力条闪烁预览 / Stamina bar preview | 精力条上预计恢复或增加的状态区域 |
+
+每项支持 **准星（Hover）/ 手持（Held）/ 两者（Both）/ 关闭（Off）**，默认两者。准星仅显示瞄准目标；手持仅显示真正拿在手中的物品；两者优先准星目标，没有目标时显示手持物品，并非同时显示两份提示。关闭只影响对应的一项。
+
+![物品文字和精力条独立设置](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/v0.2.11/docs/assets/settings-panel.png)
+
+例如：文字选 **Hover**、精力条选 **Both**，即可用其他 Mod 显示手持文字，同时保留本 Mod 的手持精力条预览。
+
+也可退出游戏后，在 Config editor 的 **Preview** 分组调整 **InventoryTextSource**（文字）和 **StaminaPreviewSource**（精力条），填入 `Hover`、`Held`、`Both` 或 `Off`。手动修改后重新启动游戏。
+
 首次启动后，退出游戏，在管理器的 **Config editor** 中找到 **dev.rachel.peakiteminsight**：
 
 - **Language：**跟随游戏，或选择中文／英文。
@@ -90,6 +109,25 @@ Close the game before installing or updating. For your first modded run, back up
 Previews do not use items for you. There is no recovery pulse when you have no corresponding hunger or injury. Treat “Unknown” as unknown, not safe; timed effects are estimates.
 
 ### Customize the display
+
+The settings panel appears on your first Airport visit. To reopen it, press **Esc** and click **Item Insight settings** in the top-right corner of the pause menu.
+
+![Settings entry in the pause menu](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/v0.2.11/docs/assets/settings-entry.png)
+
+Change each row independently. Choices save immediately; click **Done** to close.
+
+| Setting | Controls |
+|---|---|
+| Text above inventory | Effect numbers, icons and instructions above your inventory |
+| Stamina bar preview | Predicted recovery and harmful changes on the stamina bar |
+
+Choose **Hover / Held / Both / Off**. Both is the default. Hover shows only the aimed-at item; Held shows only the item actually in your hands. Both prioritizes the aimed-at item and falls back to the held item—it does not display two previews at once. Off disables only that row.
+
+![Independent item text and stamina preview settings](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/v0.2.11/docs/assets/settings-panel.png)
+
+For example, choose **Hover** for text and **Both** for stamina to use another mod for held-item text while keeping this mod's held-item stamina preview.
+
+Alternatively, close the game and edit **InventoryTextSource** (text) and **StaminaPreviewSource** (bar) under **Preview** in Config editor. Accepted values: `Hover`, `Held`, `Both`, `Off`. Restart the game after manual edits.
 
 After the first launch, close the game and find **dev.rachel.peakiteminsight** in your manager's **Config editor**:
 

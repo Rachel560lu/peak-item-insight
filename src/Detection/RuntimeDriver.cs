@@ -20,6 +20,7 @@ internal sealed class RuntimeDriver : MonoBehaviour
             SessionTrace.Write("HEARTBEAT", $"frame={Time.frameCount} scene={SceneManager.GetActiveScene().name} runtime={Plugin.Runtime != null}");
         }
         Plugin.Runtime?.Tick();
+        Plugin.StaminaRuntime?.Tick();
         WorldPreviewTrace.Tick();
         _smokeTest.Tick();
     }

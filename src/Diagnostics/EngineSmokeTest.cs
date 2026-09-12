@@ -21,11 +21,18 @@ internal sealed class EngineSmokeTest
     private bool _captured;
     private float _capturedAt;
     private bool _englishShown;
+    private PreviewSettingsDriver? _settingsProbe;
     public void Tick()
     {
         if (!_enabled || _stage >= 2 || Time.frameCount < 120 || SceneManager.GetActiveScene().name != "Title") return;
         try
         {
+            if (_stage == 1 && _settingsProbe != null)
+            {
+                if (!_settingsProbe.VerifyPauseClick()) return;
+                UnityEngine.Object.Destroy(_settingsProbe.gameObject);
+                _settingsProbe = null;
+            }
             if (_stage == 0)
             {
                 _panel = MinimalPreviewPanel.Create();
@@ -56,6 +63,11 @@ internal sealed class EngineSmokeTest
                 _recoveries = RecoveryRoutingSmokeTest.Run(_panel);
                 _optimized = OptimizationSmokeTest.Run(_panel);
                 MinimalModeSmokeTest.Run(_panel);
+                var settingsProbe = new GameObject("SettingsProbe");
+                _settingsProbe = settingsProbe.AddComponent<PreviewSettingsDriver>();
+                _settingsProbe.enabled = false;
+                _settingsProbe.VerifyPanel();
+                SessionTrace.Write("SMOKE_SETTINGS_PASS", "Chinese+English glyphs; native MenuWindow open/close/input cleanup; shared font material unchanged");
                 _since = Time.unscaledTime;
                 _stage = 1;
             }
@@ -99,6 +111,7 @@ internal sealed class EngineSmokeTest
         }
         catch (Exception e)
         {
+            if (_settingsProbe != null) UnityEngine.Object.Destroy(_settingsProbe.gameObject);
             SessionTrace.Write("ERROR", $"Smoke test: {e}");
             if (_panel != null) UnityEngine.Object.Destroy(_panel.gameObject);
             if (_ghost != null) UnityEngine.Object.Destroy(_ghost.gameObject);

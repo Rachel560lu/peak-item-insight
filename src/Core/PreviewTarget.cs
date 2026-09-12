@@ -3,6 +3,7 @@ using System;
 namespace PeakItemInsight.Core;
 
 internal enum PreviewSource { None, Hover, Held }
+internal enum PreviewMode { Both, Hover, Held, Off }
 
 internal readonly struct PreviewTargetKey : IEquatable<PreviewTargetKey>
 {
@@ -19,10 +20,14 @@ internal static class PreviewTargetSelection
 {
     // Deliberately knows nothing about effects: a hovered tool/unknown item
     // must never show the held food's recovery instead.
-    public static PreviewTargetKey Select(int? hoveredId, int? heldId, bool heldBusy)
+    public static PreviewTargetKey Select(int? hoveredId, int? heldId, bool heldBusy, PreviewMode mode = PreviewMode.Both)
     {
+        if (mode == PreviewMode.Off) return default;
+        var hoveredBusyItem = heldBusy && hoveredId.HasValue && hoveredId == heldId;
+        if (mode == PreviewMode.Held) hoveredId = null;
+        if (mode == PreviewMode.Hover) heldId = null;
         if (hoveredId.HasValue)
-            return heldBusy && hoveredId == heldId ? default : new PreviewTargetKey(PreviewSource.Hover, hoveredId.Value);
+            return hoveredBusyItem ? default : new PreviewTargetKey(PreviewSource.Hover, hoveredId.Value);
         return heldId.HasValue && !heldBusy ? new PreviewTargetKey(PreviewSource.Held, heldId.Value) : default;
     }
 }

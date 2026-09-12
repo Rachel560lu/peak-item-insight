@@ -10,13 +10,14 @@ public sealed class Plugin : BaseUnityPlugin
 {
     public const string PluginGuid = "dev.rachel.peakiteminsight";
     public const string PluginName = "PEAK Item Insight";
-    public const string PluginVersion = "0.2.9";
+    public const string PluginVersion = "0.2.11";
 
     private ConfigEntry<bool> _enabled = null!;
     private ConfigEntry<float> _hoverDelay = null!;
     private ConfigEntry<bool> _showDebugIds = null!;
 
     internal static RuntimeController? Runtime { get; private set; }
+    internal static RuntimeController? StaminaRuntime { get; private set; }
     private GameObject? _runtimeObject;
 
     private void Awake()
@@ -36,13 +37,19 @@ public sealed class Plugin : BaseUnityPlugin
         Core.PresentationOptions.PulseStrength = Config.Bind("UI", "RecoveryStrength", 1f,
             new ConfigDescription("Recovery overlay opacity.", new AcceptableValueRange<float>(.2f, 1f)));
 
+        Core.PresentationOptions.TextSource = Config.Bind("Preview", "InventoryTextSource", Core.PreviewMode.Both, "Inventory text: Hover, Held, Both or Off.");
+        Core.PresentationOptions.StaminaSource = Config.Bind("Preview", "StaminaPreviewSource", Core.PreviewMode.Both, "Stamina preview: Hover, Held, Both or Off.");
+        Core.PresentationOptions.SetupSeen = Config.Bind("UI", "AirportSetupSeen", false, "Airport setup has been shown.");
         Runtime = new RuntimeController();
         Runtime.Initialize(
             _enabled, _hoverDelay, _showDebugIds, Logger);
+        StaminaRuntime = new RuntimeController(false);
+        StaminaRuntime.Initialize(_enabled, _hoverDelay, _showDebugIds, Logger);
 
         _runtimeObject = new GameObject("PeakItemInsight.Runtime");
         DontDestroyOnLoad(_runtimeObject);
         _runtimeObject.AddComponent<Detection.RuntimeDriver>();
+        _runtimeObject.AddComponent<UI.PreviewSettingsDriver>();
         Logger.LogInfo("Persistent Update driver installed.");
 
         Logger.LogInfo($"{PluginName} {PluginVersion} loaded for PEAK {Application.version}");
@@ -55,6 +62,8 @@ public sealed class Plugin : BaseUnityPlugin
             Destroy(_runtimeObject);
         Runtime?.Dispose();
         Runtime = null;
+        StaminaRuntime?.Dispose();
+        StaminaRuntime = null;
     }
 
 }
