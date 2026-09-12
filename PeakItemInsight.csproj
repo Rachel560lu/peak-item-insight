@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <Reference Include="Assembly-CSharp" HintPath="$(PeakManagedDir)\Assembly-CSharp.dll" Private="false" />
+    <Reference Include="Zorro.Core.Runtime" HintPath="$(PeakManagedDir)\Zorro.Core.Runtime.dll" Private="false" />
     <Reference Include="0Harmony" HintPath="C:\Users\midor\AppData\Roaming\r2modmanPlus-local\PEAK\profiles\PeakItemInsight-Test\BepInEx\core\0Harmony.dll" Private="false" />
     <Reference Include="PhotonUnityNetworking" HintPath="$(PeakManagedDir)\PhotonUnityNetworking.dll" Private="false" />
     <Reference Include="UnityEngine" HintPath="$(PeakManagedDir)\UnityEngine.dll" Private="false" />

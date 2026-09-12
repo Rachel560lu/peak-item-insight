@@ -7,11 +7,13 @@ namespace PeakItemInsight.Core;
 
 internal readonly struct MinimalRow
 {
-    public MinimalRow(string text, CharacterAfflictions.STATUSTYPE? status = null, bool lightning = false)
-    { Text = text; Status = status; Lightning = lightning; }
+    public MinimalRow(string text, CharacterAfflictions.STATUSTYPE? status = null, bool lightning = false, int direction = 0)
+    { Text = text; Status = status; Lightning = lightning; Direction = direction; }
     public string Text { get; }
     public CharacterAfflictions.STATUSTYPE? Status { get; }
     public bool Lightning { get; }
+    public int Direction { get; }
+    public string DisplayText => Direction != 0 && (Text.StartsWith("+") || Text.StartsWith("-")) ? Text.Substring(1) : Text;
 }
 
 // Pure presentation of the same snapshot used by the HUD. Never parse card text.
@@ -28,18 +30,19 @@ internal static class MinimalRows
             var text = effect.Clears ? (chinese ? "清除" : "Clear") : (total > 0 ? "+" : "") + Number(total);
             if (effect.Duration > 0) text += chinese ? $" / {Number(effect.Duration)}秒" : $" / {Number(effect.Duration)}s";
             if (effect.Delay > 0) text += chinese ? $" · 延迟{Number(effect.Delay)}秒" : $" · after {Number(effect.Delay)}s";
-            rows.Add(new MinimalRow(text, effect.Type));
+            rows.Add(new MinimalRow(text, effect.Type, direction: effect.Clears ? 0 : Math.Sign(total)));
         }
         if (preview.Effects.Count == 0)
             foreach (var status in preview.Statuses)
             {
                 var delta = (status.After - status.Before) * 100;
-                if (Math.Abs(delta) > .00001f) rows.Add(new MinimalRow((delta > 0 ? "+" : "") + Number(delta), status.Type));
+                if (Math.Abs(delta) > .00001f) rows.Add(new MinimalRow((delta > 0 ? "+" : "") + Number(delta), status.Type, direction: Math.Sign(delta)));
             }
         AddRisk(rows, preview, preview.PoisonRisk, CharacterAfflictions.STATUSTYPE.Poison, chinese);
         AddRisk(rows, preview, preview.SporeRisk, CharacterAfflictions.STATUSTYPE.Spores, chinese);
         if (preview.HasExtraStamina)
-            rows.Add(new MinimalRow("+" + Number(Math.Max(0, preview.ExtraAfter - preview.ExtraBefore) * 100), lightning: true));
+            rows.Add(new MinimalRow("+" + Number(Math.Max(0, preview.ExtraAfter - preview.ExtraBefore) * 100), lightning: true,
+                direction: preview.ExtraAfter > preview.ExtraBefore ? 1 : 0));
         if (preview.InfiniteStamina) rows.Add(new MinimalRow("∞", lightning: true));
         foreach (var note in preview.CompactNotes.Distinct()) rows.Add(new MinimalRow(note));
         foreach (var resource in preview.Resources)

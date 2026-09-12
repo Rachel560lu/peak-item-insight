@@ -405,7 +405,8 @@ internal static class OptimizationSmokeTest
             preview.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Poison, .02f, 5, 3));
             ItemEffectReader.AssessRisks(preview);
             panel.Show(preview);
-            Require(!panel.LastTargetName.Contains("Held") && preview.PoisonRisk == RiskLevel.Present && panel.BodyText.Contains("+10") && panel.BodyText.Contains("/ 5s") && panel.BodyText.Contains("after 3s"), "English minimal semantics");
+            Require(!panel.LastTargetName.Contains("Held") && preview.PoisonRisk == RiskLevel.Present && panel.BodyText.Contains("10") && panel.BodyText.Contains("/ 5s") && panel.BodyText.Contains("after 3s")
+                && panel.GetComponentsInChildren<PreviewDeltaArrow>().Any(a => Mathf.Abs(a.transform.localEulerAngles.z) < .1f), "English minimal semantics: up arrow, magnitude and timing");
             SessionTrace.Write("SMOKE_ENGLISH_PASS", "explicit language restored after formatting");
         }
         finally { PresentationOptions.Language.Value = previous; }

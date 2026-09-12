@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.8 — 2026-09-12 / Native text and inventory positioning
+
+- Fix missing Chinese glyphs and restore the game's rounded font, native status icons and clear up/down effect arrows.
+- Anchor aimed-at item information above the first empty inventory slot; use the backpack position when all three slots are full. Holstered slot highlights no longer misplace the preview.
+- Keep held-item information above its own slot and preserve stamina-bar preview behavior.
+- Replace the old README demos with one new energy-drink gameplay GIF.
+
+- 修复中文方框乱码，恢复原生圆润字体、状态图标与增减三角。
+- 准星物品提示显示在第一个空槽上方，满栏时显示在背包栏上方，不再受收起物品后的高亮影响。
+- 手持提示仍跟随自身槽位；精力条预览保持不变。
+- README 旧演示统一替换为新版能量饮料实机 GIF。
+
 ## 0.2.7 — 2026-09-12 / Minimal interface
 
 - Replace the detailed card with a compact, background-free interface using game fonts and status icons. No mode selection is needed.

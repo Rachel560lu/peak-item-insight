@@ -11,6 +11,7 @@
     <Compile Include="../../src/Core/AuditedPoisonCases.cs" Link="AuditedPoisonCases.cs" />
     <Compile Include="../../src/Core/HungerPulseMath.cs" Link="HungerPulseMath.cs" />
     <Compile Include="../../src/Core/PreviewTarget.cs" Link="PreviewTarget.cs" />
+    <Compile Include="../../src/Core/PreviewAnchor.cs" Link="PreviewAnchor.cs" />
     <Compile Include="../../src/Core/SessionEvidence.cs" Link="SessionEvidence.cs" />
     <Compile Include="../../src/Core/RiskEvidence.cs" Link="RiskEvidence.cs" />
     <Compile Include="../../src/Core/StatusGhostLayout.cs" Link="StatusGhostLayout.cs" />

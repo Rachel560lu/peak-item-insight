@@ -300,6 +300,16 @@ Check("compiled extra renderer uses native visuals not RoundedCard", () => {
         i.Operand is MethodReference m && m.DeclaringType.Name == "NativeVisualCopy" && m.Name == "Create"));
     Expect(!extra.Fields.Any(f => f.FieldType.Name == "RoundedCard"));
 });
+Check("minimal: reference arrows preserve signed facts and timing", () => {
+    var p = new ItemPreview { IsFood = true, HasExtraStamina = true, ExtraAfter = .1f };
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Hunger, -.05f));
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Poison, .025f, 4, 2));
+    var rows = MinimalRows.Build(p, true);
+    Expect(rows[0].Direction == -1 && rows[0].DisplayText == "5" && rows[0].Text == "-5");
+    Expect(rows[1].Direction == 1 && rows[1].DisplayText.StartsWith("10 / 4秒") && rows[1].DisplayText.Contains("延迟2秒"));
+    Expect(rows.Last().Direction == 1 && rows.Last().DisplayText == "10");
+    Expect(new MinimalRow("清除").Direction == 0);
+});
 Check("minimal: food potency retained while HUD recovery is capped", () => {
     var p = new ItemPreview { IsFood = true, PoisonRisk = RiskLevel.Absent, SporeRisk = RiskLevel.Absent };
     p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Hunger, -.15f));
@@ -364,6 +374,47 @@ Check("minimal-only: legacy Detailed setting cannot restore removed card", () =>
     var runtime = mod.Types.Single(t => t.Name == "RuntimeController");
     Expect(runtime.Methods.Single(m => m.Name == "Tick").Body.Instructions.Any(i => i.Operand is MethodReference m &&
         m.DeclaringType.Name == "MinimalPreviewPanel" && m.Name == "Show"));
+});
+Check("minimal native: explicit font chain instead of scene font lottery", () => {
+    using var mod = ModuleDefinition.ReadModule(dll);
+    var view = mod.Types.Single(t => t.Name == "MinimalPreviewPanel");
+    var body = view.Methods.Single(m => m.Name == "AdoptFont").Body.Instructions;
+    Expect(body.Any(i => i.Operand is FieldReference f && f.DeclaringType.Name == "FontFallbackSwapper" && f.Name == "mainBaseFont"));
+    Expect(!body.Any(i => i.Operand is MethodReference m && m.Name == "FindObjectsOfTypeAll"));
+    Expect(body.Any(i => i.Operand is MethodReference m && m.Name == "HasCharacter" && m.Parameters.Count == 3));
+});
+Check("preview anchor: holstered selected slot does not own hovered item", () => {
+    Expect(PreviewAnchor.Select(PreviewSource.Hover, 0, false, true, true, false) == 1);
+});
+Check("preview anchor: all occupancy patterns ignore highlight and temporary held UI", () => {
+    for (var mask = 0; mask < 8; mask++)
+    for (var selected = -1; selected < 4; selected++)
+    foreach (var temporary in new[] { false, true })
+    {
+        var expected = Enumerable.Range(0, 3).FirstOrDefault(i => (mask & (1 << i)) == 0, 3);
+        Expect(PreviewAnchor.Select(PreviewSource.Hover, selected < 0 ? null : selected,
+            (mask & 1) == 0, (mask & 2) == 0, (mask & 4) == 0, temporary) == expected);
+    }
+});
+Check("preview anchor: held and hover transitions restore their own anchors", () => {
+    Expect(PreviewAnchor.Select(PreviewSource.Held, 2, true, false, false, false) == 2);
+    Expect(PreviewAnchor.Select(PreviewSource.Hover, 2, true, false, false, false) == 0);
+    Expect(PreviewAnchor.Select(PreviewSource.Hover, 2, false, false, false, false) == 3);
+    Expect(PreviewAnchor.Select(PreviewSource.Hover, 2, false, true, false, false) == 1);
+    Expect(PreviewAnchor.Select(PreviewSource.Held, 2, false, true, false, false) == 2);
+    Expect(PreviewAnchor.Select(PreviewSource.Held, null, false, false, false, true) == 4);
+    Expect(PreviewAnchor.Select(PreviewSource.None, 0, true, true, true, false) == -1);
+});
+Check("minimal native: selected inventory index, not decorative icon", () => {
+    using var mod = ModuleDefinition.ReadModule(dll);
+    var view = mod.Types.Single(t => t.Name == "MinimalPreviewPanel");
+    var body = view.Methods.Single(m => m.Name == "ResolveAnchor").Body.Instructions;
+    Expect(body.Any(i => i.Operand is FieldReference f && f.Name == "currentSelectedSlot"));
+    Expect(body.Any(i => i.Operand is MethodReference m && m.Name == "get_Value"));
+    Expect(body.Any(i => i.Operand is MethodReference m && m.DeclaringType.Name == "PreviewAnchor" && m.Name == "Select"));
+    Expect(body.Any(i => i.Operand is FieldReference f && f.Name == "backpack" && f.DeclaringType.Name == "GUIManager"));
+    Expect(!view.Methods.Where(m => m.HasBody).SelectMany(m => m.Body.Instructions)
+        .Any(i => i.Operand is FieldReference f && f.Name == "selectedSlotIcon"));
 });
 Console.WriteLine($"RESULT passed={passed} failed={failed}");
 Environment.ExitCode = failed > 0 ? 1 : 0;
