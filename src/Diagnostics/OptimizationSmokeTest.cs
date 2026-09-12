@@ -403,10 +403,11 @@ internal static class OptimizationSmokeTest
                 IsFood = true, Category = "CONSUMABLE", Source = PreviewSource.Held,
                 Description = "Synthetic preview fixture: pulse shows estimated cumulative poison." };
             preview.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Poison, .02f, 5, 3));
+            StatusProjector.Populate(preview, _ => 0, _ => 1, false);
             ItemEffectReader.AssessRisks(preview);
             panel.Show(preview);
-            Require(!panel.LastTargetName.Contains("Held") && preview.PoisonRisk == RiskLevel.Present && panel.BodyText.Contains("10") && panel.BodyText.Contains("/ 5s") && panel.BodyText.Contains("after 3s")
-                && panel.GetComponentsInChildren<PreviewDeltaArrow>().Any(a => Mathf.Abs(a.transform.localEulerAngles.z) < .1f), "English minimal semantics: up arrow, magnitude and timing");
+            Require(!panel.LastTargetName.Contains("Held") && preview.PoisonRisk == RiskLevel.Present && panel.BodyText.Contains("10") && !panel.BodyText.Contains("/ 5s") && !panel.BodyText.Contains("after 3s")
+                && panel.GetComponentsInChildren<PreviewDeltaArrow>().Any(a => Mathf.Abs(a.transform.localEulerAngles.z) < .1f), "English minimal semantics: up arrow and final magnitude, without timing");
             SessionTrace.Write("SMOKE_ENGLISH_PASS", "explicit language restored after formatting");
         }
         finally { PresentationOptions.Language.Value = previous; }

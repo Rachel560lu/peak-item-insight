@@ -60,10 +60,15 @@ internal static class ItemEffectReader
             else if (action is Action_ApplyInfiniteStamina infiniteAction)
             {
                 preview.InfiniteStamina = true;
+                preview.SummarizeEffects = true;
+                preview.CompactInfinity = Labels.Text("临时", "Temporary");
                 preview.Instructions.Add(Labels.Text($"无限精力 {infiniteAction.buffTime:0.#} 秒。", $"Infinite stamina for {infiniteAction.buffTime:0.#} s."));
             }
             else if (action is Action_ApplyMassAffliction mass && mass.ignoreCaster)
+            {
                 preview.Instructions.Add(Labels.Text("效果作用于附近队友，不作用于自己。", "Affects nearby teammates, not yourself."));
+                preview.CompactNotes.Add(Labels.Text("仅附近队友", "Nearby teammates only"));
+            }
             else if (action is Action_ApplyAffliction apply)
             {
                 ReadAffliction(apply.affliction, preview);
@@ -74,9 +79,8 @@ internal static class ItemEffectReader
             { preview.CompleteEffects = false; preview.Unsupported.Add(action.GetType().Name); }
         }
         AssessRisks(preview);
-        // These are effect conditions/timings, before generic interaction prompts
-        // are appended by PromptProvider. Keep them in the minimal view too.
-        preview.CompactNotes.AddRange(preview.Instructions);
+        // Compact labels are populated alongside each effect. Detailed timings
+        // stay in Instructions; do not copy them into the minimal view.
         if (!preview.CompleteEffects) preview.Diagnostics.Add(Labels.Partial);
         if (preview.PrefabOnly) preview.Diagnostics.Add(Labels.Text("世界物品：基于预制体，实例状态未确认。",
             "World item: prefab data; instance state unverified."));
@@ -104,6 +108,8 @@ internal static class ItemEffectReader
                 poison.statusPerSecond, Math.Max(0, poison.totalTime - poison.delayBeforeEffect), poison.delayBeforeEffect));
         else if (affliction is Affliction_FasterBoi speed)
         {
+            preview.SummarizeEffects = true;
+            preview.CompactNotes.Add(Labels.Text("加速", "Speed boost"));
             preview.Instructions.Add(Labels.Text($"暂时加速，持续 {speed.totalTime:0.#} 秒。",
                 $"Temporary speed boost for {speed.totalTime:0.#} s."));
             Add(preview, CharacterAfflictions.STATUSTYPE.Drowsy, -.5f);
@@ -117,6 +123,8 @@ internal static class ItemEffectReader
             preview.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Drowsy, drowsy.statusPerSecond, drowsy.totalTime));
         else if (affliction is Affliction_InfiniteStamina infinite)
         {
+            preview.SummarizeEffects = true;
+            preview.CompactInfinity = Labels.Text("临时", "Temporary");
             preview.InfiniteStamina = true;
             preview.Instructions.Add(Labels.Text($"无限精力 {infinite.totalTime:0.#} 秒（开始攀爬后计时）。", $"Infinite stamina for {infinite.totalTime:0.#} s after climbing starts."));
             var start = preview.Effects.Count;
@@ -128,10 +136,16 @@ internal static class ItemEffectReader
             }
         }
         else if (affliction is Affliction_Invincibility)
+        {
+            preview.SummarizeEffects = true;
+            preview.CompactNotes.Add(Labels.Text("暂时无敌", "Temporary invincibility"));
             preview.Instructions.Add(Labels.Text($"无敌 {affliction.totalTime:0.#} 秒。", $"Invincible for {affliction.totalTime:0.#} s."));
+        }
         else if (affliction is Affliction_RadiateInfiniteStam)
         {
             preview.InfiniteStamina = true;
+            preview.SummarizeEffects = true;
+            preview.CompactInfinity = Labels.Text("范围内", "Within range");
             preview.Instructions.Add(Labels.Text("为范围内角色持续提供无限精力。", "Grants infinite stamina to characters within range."));
         }
         else { preview.CompleteEffects = false; preview.Unsupported.Add(affliction.GetType().Name); }

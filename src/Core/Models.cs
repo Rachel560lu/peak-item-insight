@@ -40,6 +40,9 @@ internal sealed class ItemPreview
     public string Description { get; set; } = "";
     public string CompactUse { get; set; } = "";
     public List<string> CompactNotes { get; } = new List<string>();
+    // Presentation only; never changes effect facts or HUD projections.
+    public bool SummarizeEffects { get; set; }
+    public string CompactInfinity { get; set; } = "";
     public bool IsFood { get; set; }
     public bool CompleteEffects { get; set; }
     public bool PrefabOnly { get; set; }

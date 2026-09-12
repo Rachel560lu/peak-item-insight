@@ -1,16 +1,13 @@
 {
-  "plugin_version": "0.2.8",
-  "package_version": "0.2.8",
+  "plugin_version": "0.2.9",
+  "package_version": "0.2.9",
   "change_type": "code_and_documentation",
-  "dll_sha256": "896C1C825B1097F66031D5FC3FADF38A07A51F6184D1F76FE9AD2BD85C4D4A65",
-  "evidence_document": "docs/release-028.md",
+  "dll_sha256": "298A885666357135F0E4E1CE91DEB71EE0F7602C9FDB2DC846D0A04FF1F7541C",
+  "evidence_document": "docs/release-029.md",
   "public_release_approved": true,
-  "publication_status": "published",
-  "zip_sha256": "5CB0BEF5DBA14F41A8579C015886113D896E35A10858DB026E07BA0ABF442849",
-  "published_url": "https://thunderstore.io/c/peak/p/Rachel560lu/PeakItemInsight/v/0.2.8/",
-  "github_release": "https://github.com/Rachel560lu/peak-item-insight/releases/tag/v0.2.8",
+  "publication_status": "ready",
   "license": "MIT",
-  "offline_checks_passed": 104,
+  "offline_checks_passed": 113,
   "standard_fresh_profile_startup_verified": false,
-  "acceptance_scope": "User accepted native minimal UI and inventory anchor routing in isolated gameplay. 104 offline checks passed; stamina implementation unchanged. Not exhaustive multiplayer or cross-resolution validation."
+  "acceptance_scope": "User requested publication after isolated gameplay. Final version smoke PID 66492 exited 0; 440 timed summary combinations passed. HUD implementation unchanged. Not exhaustive multiplayer validation."
 }

@@ -1,6 +1,6 @@
 {
   "name": "PeakItemInsight",
-  "version_number": "0.2.8",
+  "version_number": "0.2.9",
   "website_url": "https://github.com/Rachel560lu/peak-item-insight",
   "description": "Preview recovery, poison and item effects before use. Compact bilingual effects with native status icons, while aiming at or holding items.",
   "dependencies": [

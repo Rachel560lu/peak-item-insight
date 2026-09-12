@@ -26,11 +26,17 @@ Preview recovery and poison on your stamina bar. Know what you're holding.</p>
 
 ## 实机演示 / Gameplay demo
 
-能量饮料：准星对准与手持时，用极简效果提示和精力条闪烁查看使用后的变化。
+能量饮料与运动饮料：查看简洁的效果提示和精力条变化。
 
-Energy drink: preview effects while aiming and holding, with compact native-style text and a pulsing stamina bar.
+Energy and sports drinks: compact effect summaries and stamina previews before use.
 
-![能量饮料实机演示 / Energy drink gameplay demo](docs/assets/demos/gameplay-028.gif)
+![能量饮料与运动饮料 / Energy and sports drinks](docs/assets/demos/drinks-029.gif)
+
+混合坚果：原装风格的额外精力条闪烁预览。
+
+Trail mix: bonus stamina preview with native-style UI.
+
+![混合坚果额外精力 / Trail mix bonus stamina](docs/assets/demos/trail-mix-029.gif)
 
 ## 中文
 
@@ -48,7 +54,7 @@ Energy drink: preview effects while aiming and holding, with compact native-styl
 - **拿在手里：**没有瞄准其他物品时，显示手持物品的预览。
 - **恢复效果：**预计恢复的饥饿、伤势区域闪绿光，只标出实际可恢复的部分。
 - **额外精力：**使用原生闪电和白框；当前没有额外精力时预览在上方，已有时在下方衔接，仅新增部分闪烁。
-- **有害效果：**毒素、孢子等效果以相应颜色闪烁提示；持续毒性可查看延迟、持续时间和预计累计量。
+- **有害效果：**毒素、孢子等效果以相应颜色闪烁提示；持续效果以箭头、最终预计变化量和状态图标简洁展示。
 - **移开准星：**空手时隐藏预览，手持物品时切回手持预览。
 
 预览不会自动使用物品。没有饥饿或伤势时，对应的恢复区域不会闪烁。提示若显示“未知”，请不要当作“无毒”；持续效果数值是预估值。
@@ -63,7 +69,7 @@ Energy drink: preview effects while aiming and holding, with compact native-styl
 
 默认直接使用极简界面，无需选择模式。
 
-极简模式中的饥饿、伤势等数值是物品本次效果；精力条只闪烁当前能实际改变的部分。毒性等持续效果旁会显示累计时长与延迟；问号代表风险尚未确认。
+纯即时物品显示本次使用效果；持续效果物品显示从当前状态到效果结算后的预计变化，与精力条预览一致。加速、临时无限精力保留短标签。问号代表风险尚未确认。
 
 ### 遇到问题？
 
@@ -90,7 +96,7 @@ Close the game before installing or updating. For your first modded run, back up
 - **Hold an item:** when you are not aiming at another item, see the held item's preview.
 - **Recovery:** the recoverable hunger or injury segment pulses green, showing only the amount you can recover.
 - **Bonus stamina:** native lightning and outline appear above the main bar when you have none, or extend the lower bonus bar when you do. Only the gain pulses.
-- **Harmful effects:** poison, spores and other effects pulse in their corresponding colors. Timed poison includes its delay, duration and estimated total.
+- **Harmful effects:** poison, spores and other effects pulse in their corresponding colors. Timed effects show an arrow, the estimated final change and a status icon.
 - **Look away:** the preview disappears with empty hands or switches back to your held item.
 
 Previews do not use items for you. There is no recovery pulse when you have no corresponding hunger or injury. Treat “Unknown” as unknown, not safe; timed effects are estimates.
@@ -105,7 +111,7 @@ After the first launch, close the game and find **dev.rachel.peakiteminsight** i
 
 The minimal interface is always enabled; no mode selection is needed.
 
-Minimal hunger/injury numbers describe this item's effect per use; the stamina pulse shows the amount your current state can actually change. Timed effects include duration and delay. A question mark means the risk is not confirmed.
+Instant-only items show effects per use. Timed-effect items show the final change from your current state, matching the stamina preview; speed boosts and temporary infinite stamina keep short labels. A question mark means the risk is not confirmed.
 
 ### Need help?
 

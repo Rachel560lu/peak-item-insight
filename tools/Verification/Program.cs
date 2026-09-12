@@ -300,13 +300,15 @@ Check("compiled extra renderer uses native visuals not RoundedCard", () => {
         i.Operand is MethodReference m && m.DeclaringType.Name == "NativeVisualCopy" && m.Name == "Create"));
     Expect(!extra.Fields.Any(f => f.FieldType.Name == "RoundedCard"));
 });
-Check("minimal: reference arrows preserve signed facts and timing", () => {
+Check("minimal: reference arrows preserve signed endpoints without timing", () => {
     var p = new ItemPreview { IsFood = true, HasExtraStamina = true, ExtraAfter = .1f };
+    p.Statuses.Add(new StatusDelta(CharacterAfflictions.STATUSTYPE.Hunger, .05f, 0));
+    p.Statuses.Add(new StatusDelta(CharacterAfflictions.STATUSTYPE.Poison, 0, .1f));
     p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Hunger, -.05f));
     p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Poison, .025f, 4, 2));
     var rows = MinimalRows.Build(p, true);
     Expect(rows[0].Direction == -1 && rows[0].DisplayText == "5" && rows[0].Text == "-5");
-    Expect(rows[1].Direction == 1 && rows[1].DisplayText.StartsWith("10 / 4秒") && rows[1].DisplayText.Contains("延迟2秒"));
+    Expect(rows[1].Direction == 1 && rows[1].DisplayText == "10");
     Expect(rows.Last().Direction == 1 && rows.Last().DisplayText == "10");
     Expect(new MinimalRow("清除").Direction == 0);
 });
@@ -319,18 +321,21 @@ Check("minimal: food potency retained while HUD recovery is capped", () => {
 });
 Check("minimal: timed poison and hunger retained with no duplicate danger", () => {
     var p = new ItemPreview { IsFood = true, PoisonRisk = RiskLevel.Present, SporeRisk = RiskLevel.Absent };
+    p.Statuses.Add(new StatusDelta(CharacterAfflictions.STATUSTYPE.Hunger, .05f, 0));
+    p.Statuses.Add(new StatusDelta(CharacterAfflictions.STATUSTYPE.Poison, 0, .1f));
     p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Hunger, -.05f));
     p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Poison, .025f, 4, 2));
     var zh = MinimalRows.Build(p, true); var en = MinimalRows.Build(p, false);
-    Expect(zh.Count == 2 && zh[0].Text == "-5" && zh[1].Text == "+10 / 4秒 · 延迟2秒");
-    Expect(en[1].Text == "+10 / 4s · after 2s");
+    Expect(zh.Count == 2 && zh[0].Text == "-5" && zh[1].Text == "+10");
+    Expect(en[1].Text == "+10");
 });
-Check("minimal: immediate reduction never cancels delayed harm", () => {
+Check("minimal: delayed harm follows clamped recovery, not raw cancellation", () => {
     var p = new ItemPreview();
     p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Drowsy, -.5f));
     p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Drowsy, .5f, delay: 10));
+    p.Statuses.Add(new StatusDelta(CharacterAfflictions.STATUSTYPE.Drowsy, 0, .5f));
     var rows = MinimalRows.Build(p, false);
-    Expect(rows.Count == 2 && rows[0].Text == "-50" && rows[1].Text == "+50 · after 10s");
+    Expect(rows.Count == 1 && rows[0].Text == "+50");
 });
 Check("minimal: capped poison stays visible", () => {
     var p = new ItemPreview { IsFood = true, PoisonRisk = RiskLevel.Present, SporeRisk = RiskLevel.Absent };
@@ -360,9 +365,9 @@ Check("minimal: no empty view and special instructions preserved", () => {
     var p = new ItemPreview(); Expect(MinimalRows.Build(p, false).Count == 0);
     p.CompactUse = "Drop/throw: stay in cloud"; Expect(MinimalRows.Build(p, false).Single().Text == p.CompactUse);
 });
-Check("minimal: infinite stamina conditions preserved", () => {
-    var p = new ItemPreview { InfiniteStamina = true }; p.CompactNotes.Add("8s after climbing starts");
-    var rows = MinimalRows.Build(p, false); Expect(rows.Count == 2 && rows[0].Lightning && rows[1].Text.Contains("climbing starts"));
+Check("minimal: infinite stamina short label without duplicated duration", () => {
+    var p = new ItemPreview { InfiniteStamina = true, SummarizeEffects = true, CompactInfinity = "Temporary" };
+    var rows = MinimalRows.Build(p, false); Expect(rows.Count == 1 && rows[0].Lightning && rows[0].Text == "Temporary ∞");
 });
 Check("minimal-only: legacy Detailed setting cannot restore removed card", () => {
     using var mod = ModuleDefinition.ReadModule(dll);
@@ -415,6 +420,53 @@ Check("minimal native: selected inventory index, not decorative icon", () => {
     Expect(body.Any(i => i.Operand is FieldReference f && f.Name == "backpack" && f.DeclaringType.Name == "GUIManager"));
     Expect(!view.Methods.Where(m => m.HasBody).SelectMany(m => m.Body.Instructions)
         .Any(i => i.Operand is FieldReference f && f.Name == "selectedSlotIcon"));
+});
+foreach (var before in new[] { 0f, .1f, .25f, .5f })
+Check($"timed summary: energy drink from {before} uses HUD endpoint without mutation", () => {
+    var p = new ItemPreview();
+    var type = CharacterAfflictions.STATUSTYPE.Drowsy;
+    p.Effects.AddRange(new[] { new EffectFact(type, -1), new EffectFact(type, -.5f),
+        new EffectFact(type, -1, 8), new EffectFact(type, .25f, 0, 8) });
+    var after = EffectProjection.Project(before, 1, p.Effects.Select(e => new ProjectedEffect(e.Amount, e.Duration, e.Delay)));
+    p.Statuses.Add(new StatusDelta(type, before, after));
+    var facts = p.Effects.ToArray(); var snapshot = p.Statuses.ToArray();
+    foreach (var chinese in new[] { true, false }) {
+        var rows = MinimalRows.Build(p, chinese);
+        Expect(rows.Count == (before == .25f ? 0 : 1));
+        if (rows.Count > 0) { Near(float.Parse(rows[0].Text, System.Globalization.CultureInfo.InvariantCulture), (.25f - before) * 100); Expect(rows[0].Direction == Math.Sign(.25f - before)); }
+    }
+    Expect(p.Effects.SequenceEqual(facts) && p.Statuses.SequenceEqual(snapshot));
+});
+Check("timed summary: heat pack displays actual cold recovery not 360", () => {
+    var p = new ItemPreview(); var type = CharacterAfflictions.STATUSTYPE.Cold;
+    p.Effects.Add(new EffectFact(type, -.06f, 60));
+    p.Statuses.Add(new StatusDelta(type, .4f, 0));
+    Expect(MinimalRows.Build(p, true).Single().Text == "-40");
+});
+Check("timed summary: poison and hunger remain separate, cap respected", () => {
+    var p = new ItemPreview { IsFood = true, PoisonRisk = RiskLevel.Present, SporeRisk = RiskLevel.Absent };
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Hunger, -.05f));
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Poison, .025f, 4, 2));
+    p.Statuses.Add(new StatusDelta(CharacterAfflictions.STATUSTYPE.Hunger, .02f, 0));
+    p.Statuses.Add(new StatusDelta(CharacterAfflictions.STATUSTYPE.Poison, .98f, 1));
+    var rows = MinimalRows.Build(p, true);
+    Expect(rows.Count == 2 && rows[0].Text == "-2" && rows[1].Text == "+2");
+});
+Check("timed summary: missing snapshot never fabricates cumulative gain", () => {
+    var p = new ItemPreview(); p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Cold, -.06f, 60));
+    Expect(MinimalRows.Build(p, true).Count == 0);
+});
+Check("timed summary: capped poison remains labelled, never false safe", () => {
+    var p = new ItemPreview { IsFood = true, PoisonRisk = RiskLevel.Present, SporeRisk = RiskLevel.Absent };
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Poison, .025f, 4));
+    p.Statuses.Add(new StatusDelta(CharacterAfflictions.STATUSTYPE.Poison, 1, 1));
+    var row = MinimalRows.Build(p, true).Single();
+    Expect(row.Text == "有" && row.Status == CharacterAfflictions.STATUSTYPE.Poison && row.Direction == 0);
+});
+Check("timed summary: zero bonus hidden, range infinity labelled once", () => {
+    var p = new ItemPreview { SummarizeEffects = true, HasExtraStamina = true, ExtraBefore = 1, ExtraAfter = 1,
+        InfiniteStamina = true, CompactInfinity = "范围内" };
+    var row = MinimalRows.Build(p, true).Single(); Expect(row.Lightning && row.Text == "范围内 ∞");
 });
 Console.WriteLine($"RESULT passed={passed} failed={failed}");
 Environment.ExitCode = failed > 0 ? 1 : 0;

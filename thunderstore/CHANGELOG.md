@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.9 — 2026-09-12 / Simpler timed effects
+
+- Timed items show one final change per status, using the same snapshot as the stamina preview. Remove raw rates, durations and delay text.
+- Keep short labels for speed boosts, temporary infinite stamina and mushroom abilities; preserve poison warnings at the status cap.
+- Replace the previous gameplay demo with new energy/sports drink and trail mix recordings.
+- 持续类物品按状态合并显示最终预计变化量，去掉速率、持续时长和延迟；保留临时能力短标签与毒性风险提示。
+- 更新饮料和混合坚果实机 GIF。精力条闪烁、字体及物品栏定位沿用原有实现。
+
 ## 0.2.8 — 2026-09-12 / Native text and inventory positioning
 
 - Fix missing Chinese glyphs and restore the game's rounded font, native status icons and clear up/down effect arrows.

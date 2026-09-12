@@ -38,26 +38,36 @@ internal static class MushroomEffectReader
                 preview.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Poison, -.15f));
                 preview.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Spores, -.15f));
                 preview.Instructions.Add(Labels.Text("并清除持续中毒效果。", "Also clears ongoing poison effects."));
+                preview.CompactNotes.Add(Labels.Text("解除持续中毒", "Stops ongoing poisoning"));
                 break;
             case 8:
                 preview.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Spores, .25f));
                 break;
-            case 0: Describe(preview, "3 秒后获得 4 秒无限精力。", "Infinite stamina for 4 s, after 3 s."); break;
-            case 1: Describe(preview, "3 秒后获得 5 秒加速效果。", "Speed boost for 5 s, after 3 s."); break;
-            case 2: Describe(preview, "3 秒后获得 15 秒低重力效果。", "Low gravity for 15 s, after 3 s."); break;
-            case 3: Describe(preview, "获得 10 秒无敌效果。", "Invincibility for 10 s."); break;
+            case 0:
+                preview.SummarizeEffects = true;
+                preview.CompactInfinity = Labels.Text("临时", "Temporary");
+                preview.Instructions.Add(Labels.Text("3 秒后获得 4 秒无限精力。", "Infinite stamina for 4 s, after 3 s."));
+                break;
+            case 1: Describe(preview, "3 秒后获得 5 秒加速效果。", "Speed boost for 5 s, after 3 s.", "加速", "Speed boost"); break;
+            case 2: Describe(preview, "3 秒后获得 15 秒低重力效果。", "Low gravity for 15 s, after 3 s.", "低重力", "Low gravity"); break;
+            case 3: Describe(preview, "获得 10 秒无敌效果。", "Invincibility for 10 s.", "暂时无敌", "Temporary invincibility"); break;
             case 5:
                 Describe(preview, "3 秒后触发孢子爆炸并被向上弹起；范围伤害未量化。",
-                    "Spore explosion and upward launch after 3 s; area damage not quantified.");
+                    "Spore explosion and upward launch after 3 s; area damage not quantified.", "孢子爆炸／弹起", "Spore blast / launch");
                 preview.CompleteEffects = false;
                 break;
-            case 6: Describe(preview, "3 秒后失明 60 秒。", "Blindness for 60 s, after 3 s."); break;
-            case 7: Describe(preview, "3 秒后跌倒，持续约 8 秒。", "Fall for about 8 s, after 3 s."); break;
-            case 9: Describe(preview, "3 秒后麻木 60 秒。", "Numbness for 60 s, after 3 s."); break;
+            case 6: Describe(preview, "3 秒后失明 60 秒。", "Blindness for 60 s, after 3 s.", "暂时失明", "Temporary blindness"); break;
+            case 7: Describe(preview, "3 秒后跌倒，持续约 8 秒。", "Fall for about 8 s, after 3 s.", "跌倒", "Fall"); break;
+            case 9: Describe(preview, "3 秒后麻木 60 秒。", "Numbness for 60 s, after 3 s.", "暂时麻木", "Temporary numbness"); break;
             default: Unknown(preview); break;
         }
     }
-    private static void Describe(ItemPreview p, string zh, string en) => p.Instructions.Add(Labels.Text(zh, en));
+    private static void Describe(ItemPreview p, string zh, string en, string compactZh, string compactEn)
+    {
+        p.Instructions.Add(Labels.Text(zh, en));
+        p.SummarizeEffects = true;
+        p.CompactNotes.Add(Labels.Text(compactZh, compactEn));
+    }
     private static void Unknown(ItemPreview preview)
     {
         preview.CompleteEffects = false;
