@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.12 — 2026-09-13 / English instructions first
+
+- Move English instructions above Chinese instructions; retain all screenshots and demos.
+- 英文使用说明移至中文上方，保留全部截图与演示。仅更新文档，沿用 0.2.11 DLL。
+
 ## 0.2.11 — 2026-09-13 / In-game preview settings
 
 - Add independent Hover / Held / Both / Off controls for inventory text and stamina previews, with automatic saving.
