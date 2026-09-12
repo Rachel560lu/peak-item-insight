@@ -21,3 +21,13 @@ gameplay-028.gif: source 新能量饮料预览.mp4, 0–5 seconds, 50 frames at 
 Each current README embeds this single GIF. Historical demo assets remain available for older links; they are no longer embedded. The original recording is unchanged and is not included in the mod package.
 
 Thunderstore uses the version-tagged public GitHub asset URL. The ZIP contains only manifest, README, changelog, cover, MIT license and release DLL.
+
+## Publication verified
+
+- Code and README commit `3e32aed6d41b025201e15ec8c3209a65bd7bf3f6` pushed to main; annotated tag v0.2.8 points to it.
+- GitHub Release v0.2.8 published as Latest with the tested ZIP and bilingual release notes.
+- Thunderstore returned Success and the public listing shows Rachel560lu-PeakItemInsight-0.2.8. Existing Mods, Items, Quality Of Life, Client Side and AI Generated categories retained.
+- Both public pages load the new 960x601 gameplay GIF. Each README source embeds exactly one GIF and no legacy demos.
+- Anonymous re-downloads from GitHub and Thunderstore both match the tested ZIP SHA256 byte-for-byte. Public Thunderstore archive passed package verification.
+- GitHub: https://github.com/Rachel560lu/peak-item-insight/releases/tag/v0.2.8
+- Thunderstore: https://thunderstore.io/c/peak/p/Rachel560lu/PeakItemInsight/v/0.2.8/
