@@ -22,13 +22,17 @@ internal sealed class StatusIncreaseOverlay
         internal CanvasGroup AddedPulse = null!, CurrentPulse = null!;
         internal bool OwnGroup, Hidden;
         internal float OriginalAlpha, LastAlpha;
-        internal HungerRecoveryOverlay Recovery = new HungerRecoveryOverlay("ProjectedRecovery");
     }
     private RectTransform? _root;
     private StaminaBar? _bar;
+    private Image? _healthy;
+    private CanvasGroup? _healthyPulse;
     private readonly List<Badge> _badges = new List<Badge>();
     internal bool Visible => _root != null && _root.gameObject.activeInHierarchy;
     internal int AddedCount { get; private set; }
+    internal float HealthyWidth => _healthy != null && _healthy.gameObject.activeInHierarchy ? _healthy.rectTransform.rect.width : 0;
+    internal float ProjectedStatusWidth(CharacterAfflictions.STATUSTYPE type) => _badges.Where(b => TypeOf(b.Native) == type)
+        .Sum(b => (b.Current.gameObject.activeInHierarchy ? b.Current.rect.width : 0) + (b.Added.gameObject.activeInHierarchy ? b.Added.rect.width : 0));
     internal float AddedOpacity => _badges.Count > 0 ? _badges.Max(b => b.AddedPulse.alpha) : 0;
     internal float VisibleAddedWidth => _badges.Where(b => b.Added.gameObject.activeInHierarchy &&
         b.Added.rect.height > .01f && b.AddedPulse.alpha > .01f &&
@@ -42,39 +46,52 @@ internal sealed class StatusIncreaseOverlay
         if (bar == null || bar.fullBar == null || !bar.fullBar.gameObject.activeInHierarchy || bar.afflictions == null ||
             !preview.Statuses.Any(s => Supported(s.Type) && s.After > s.Before + .00001f))
         { Hide(); return false; }
-        Bind(bar);
+        Bind(bar, healthy);
         if (_root == null || _badges.Count == 0) { Hide(); return false; }
         var widths = new float[_badges.Count];
-        var added = new float[_badges.Count];
+        var projected = new float[_badges.Count];
         var full = bar.fullBar;
         var right = full.rect.xMax;
         for (var i = 0; i < _badges.Count; i++)
         {
             var native = _badges[i].Native;
             widths[i] = native.gameObject.activeInHierarchy ? Mathf.Max(0, native.rtf.rect.width) : 0;
+            projected[i] = widths[i];
             var status = StatusRecoveryOverlays.Find(preview, TypeOf(native));
             if (status.HasValue && Supported(status.Value.Type))
             {
-                added[i] = Mathf.Max(0, status.Value.After - status.Value.Before) * full.rect.width;
-                if (widths[i] == 0 && added[i] > 0) added[i] = Mathf.Max(added[i], bar.minAfflictionWidth);
+                projected[i] = StatusGhostLayout.ProjectWidth(widths[i], status.Value.Before, status.Value.After,
+                    full.sizeDelta.x > 0 ? full.sizeDelta.x : full.rect.width, bar.minAfflictionWidth,
+                    native.rtf.rect.width - native.rtf.sizeDelta.x);
             }
             // Respect the actual native row end (including its layout spacing/overflow).
-            if (widths[i] > 0)
+            if (widths[i] > 0 && !native.isPetrify)
             {
                 var corners = new Vector3[4]; native.rtf.GetWorldCorners(corners);
                 right = Mathf.Max(right, full.InverseTransformPoint(corners[2]).x);
             }
         }
-        var ranges = StatusGhostLayout.Build(right, widths, added);
+        // Petrify lives in the extra row, not in the main stamina/status row.
+        var mainCurrent = (float[])widths.Clone();
+        var mainAfter = (float[])projected.Clone();
+        for (var i = 0; i < _badges.Count; i++)
+            if (_badges[i].Native.isPetrify) mainCurrent[i] = mainAfter[i] = 0;
+        var ranges = StatusGhostLayout.BuildProjected(right, mainCurrent, mainAfter);
+        var phase = Mathf.Clamp01((PresentationOptions.Animation ? HungerPulseMath.Alpha(elapsed) : .65f) * PresentationOptions.Strength);
         AddedCount = 0;
         _root.gameObject.SetActive(true);
+        RenderHealthy(bar, preview, healthy, ranges, phase);
         for (var i = 0; i < _badges.Count; i++)
         {
             var badge = _badges[i];
             var range = ranges[i];
+            if (badge.Native.isPetrify)
+            {
+                var corners = new Vector3[4]; badge.Native.rtf.GetWorldCorners(corners);
+                var petrifyRight = full.InverseTransformPoint(corners[2]).x;
+                range = StatusGhostLayout.BuildProjected(petrifyRight, new[] { widths[i] }, new[] { projected[i] })[0];
+            }
             if (!badge.Hidden) { badge.OriginalAlpha = badge.Suppress.alpha; badge.Hidden = true; }
-            var phase = PresentationOptions.Animation ? HungerPulseMath.Alpha(elapsed) : .65f;
-            phase *= PresentationOptions.Strength;
             // Cross-fade the complete row: at the original phase even existing
             // badges retain their original positions, not permanently shifted ones.
             badge.LastAlpha = badge.OriginalAlpha * (1 - phase);
@@ -84,17 +101,13 @@ internal sealed class StatusIncreaseOverlay
             Position(badge.Added, badge.Native, full, range.AddedStart, range.AddedWidth, healthy);
             badge.AddedPulse.alpha = phase;
             if (badge.Added.gameObject.activeSelf) AddedCount++;
-            var delta = StatusRecoveryOverlays.Find(preview, TypeOf(badge.Native));
-            if (delta.HasValue && badge.Fill != null && healthy != null)
-                badge.Recovery.Render(badge.Fill, healthy, delta.Value.Before, delta.Value.After, elapsed);
-            else badge.Recovery.Hide();
         }
         return true;
     }
     internal static bool Supported(CharacterAfflictions.STATUSTYPE type) => true;
     private static CharacterAfflictions.STATUSTYPE TypeOf(BarAffliction badge) => badge.isPetrify ? CharacterAfflictions.STATUSTYPE.Petrify : badge.afflictionType;
 
-    private void Bind(StaminaBar bar)
+    private void Bind(StaminaBar bar, Image? healthy)
     {
         if (_bar == bar && _root != null && _badges.All(b => b.Native != null && b.Suppress != null)) return;
         Dispose(); _bar = bar;
@@ -109,10 +122,17 @@ internal sealed class StatusIncreaseOverlay
         canvas.overrideSorting = true;
         var parentCanvas = bar.fullBar.GetComponentInParent<Canvas>();
         canvas.sortingOrder = (parentCanvas != null ? parentCanvas.sortingOrder : 0) + 1;
+        if (healthy != null)
+        {
+            var rect = new GameObject("ProjectedHealthy", typeof(RectTransform)).GetComponent<RectTransform>();
+            rect.SetParent(_root, false);
+            _healthy = NativeVisualCopy.CopyImage(healthy, rect);
+            _healthyPulse = rect.gameObject.AddComponent<CanvasGroup>();
+        }
         foreach (var native in bar.afflictions.Concat(new[] { bar.petrifyAffliction }).Where(b => b != null).Distinct().OrderBy(b => b.rtf.GetSiblingIndex()))
         {
             var badge = new Badge { Native = native };
-            badge.Current = CopyImages(native.rtf, _root, false);
+            badge.Current = CopyImages(native.rtf, _root, true);
             badge.CurrentPulse = badge.Current.gameObject.AddComponent<CanvasGroup>();
             badge.Added = CopyImages(native.rtf, _root, true);
             badge.AddedPulse = badge.Added.gameObject.AddComponent<CanvasGroup>();
@@ -139,30 +159,42 @@ internal sealed class StatusIncreaseOverlay
     }
     private static RectTransform CopyImages(RectTransform source, Transform parent, bool ghost)
     {
-        var copy = new GameObject(source.name, typeof(RectTransform)).GetComponent<RectTransform>();
-        copy.SetParent(parent, false);
-        copy.anchorMin = source.anchorMin; copy.anchorMax = source.anchorMax;
-        copy.pivot = source.pivot; copy.sizeDelta = source.sizeDelta; copy.anchoredPosition = source.anchoredPosition;
-        copy.localRotation = source.localRotation; copy.localScale = Vector3.one;
-        var sourceImage = source.GetComponent<Image>();
-        if (sourceImage != null)
-        {
-            var image = copy.gameObject.AddComponent<Image>();
-            image.sprite = sourceImage.overrideSprite; image.type = sourceImage.type;
-            image.preserveAspect = sourceImage.preserveAspect;
-            image.fillMethod = sourceImage.fillMethod;
-            // A hidden zero-poison template may have an empty fill. The owned
-            // added segment already expresses the amount through its width.
-            image.fillAmount = ghost ? 1f : sourceImage.fillAmount;
-            image.fillOrigin = sourceImage.fillOrigin; image.fillClockwise = sourceImage.fillClockwise;
-            image.fillCenter = sourceImage.fillCenter; image.pixelsPerUnitMultiplier = sourceImage.pixelsPerUnitMultiplier;
-            var tint = sourceImage.color;
-            image.color = tint; image.raycastTarget = false;
-        }
-        foreach (Transform child in source)
-            if (child is RectTransform rect && !child.name.StartsWith("PeakItemInsight"))
-                CopyImages(rect, copy, ghost);
+        var copy = NativeVisualCopy.Create(source, parent);
+        if (ghost)
+            foreach (var image in copy.GetComponentsInChildren<Image>(true)) image.fillAmount = 1;
         return copy;
+    }
+
+    private void RenderHealthy(StaminaBar bar, ItemPreview preview, Image? healthy, GhostRange[] ranges, float phase)
+    {
+        if (_healthy == null || _healthyPulse == null || healthy == null) return;
+        var full = bar.fullBar;
+        var corners = new Vector3[4]; healthy.rectTransform.GetWorldCorners(corners);
+        var left = full.InverseTransformPoint(corners[0]).x;
+        var end = full.rect.xMax;
+        for (var i = 0; i < ranges.Length; i++)
+            if (!_badges[i].Native.isPetrify && ranges[i].CurrentWidth + ranges[i].AddedWidth > 0)
+                end = Mathf.Min(end, ranges[i].AddedStart);
+        if (preview.StatusBefore.Count > 0)
+        {
+            var sum = 0f;
+            foreach (var entry in preview.StatusBefore)
+            {
+                if (entry.Key == CharacterAfflictions.STATUSTYPE.Petrify) continue;
+                var change = StatusRecoveryOverlays.Find(preview, entry.Key);
+                sum += change.HasValue ? change.Value.After : entry.Value;
+            }
+            var scale = full.sizeDelta.x > 0 ? full.sizeDelta.x : full.rect.width;
+            end = Mathf.Min(end, left + PreviewMath.Capacity(sum) * scale + bar.staminaBarOffset);
+        }
+        var rect = _healthy.rectTransform;
+        rect.anchorMin = rect.anchorMax = Vector2.zero; rect.pivot = new Vector2(0, .5f);
+        var centre = full.InverseTransformPoint(healthy.rectTransform.TransformPoint(healthy.rectTransform.rect.center));
+        rect.anchoredPosition = new Vector2(left - full.rect.xMin, centre.y - full.rect.yMin);
+        rect.sizeDelta = new Vector2(Mathf.Max(0, end - left), Mathf.Abs(full.InverseTransformPoint(corners[1]).y - full.InverseTransformPoint(corners[0]).y));
+        _healthy.color = healthy.color; _healthy.fillAmount = 1;
+        _healthyPulse.alpha = phase;
+        rect.gameObject.SetActive(rect.rect.width > .01f);
     }
     private static void Position(RectTransform copy, BarAffliction native, RectTransform full, float start, float width, Image? healthy)
     {
@@ -194,16 +226,16 @@ internal sealed class StatusIncreaseOverlay
         {
             if (badge.Hidden && badge.Suppress != null && Mathf.Approximately(badge.Suppress.alpha, badge.LastAlpha))
                 badge.Suppress.alpha = badge.OriginalAlpha;
-            badge.Hidden = false; badge.Recovery.Hide();
+            badge.Hidden = false;
         }
     }
     public void Dispose()
     {
         Hide();
         foreach (var badge in _badges)
-        { badge.Recovery.Dispose(); if (badge.OwnGroup && badge.Suppress != null) Object.Destroy(badge.Suppress); }
+        { if (badge.OwnGroup && badge.Suppress != null) Object.Destroy(badge.Suppress); }
         _badges.Clear();
         if (_root != null) Object.Destroy(_root.gameObject);
-        _root = null; _bar = null;
+        _root = null; _bar = null; _healthy = null; _healthyPulse = null;
     }
 }

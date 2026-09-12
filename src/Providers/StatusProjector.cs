@@ -13,9 +13,12 @@ internal static class StatusProjector
         Func<CharacterAfflictions.STATUSTYPE, float> cap, bool locked)
     {
         preview.Statuses.Clear();
+        preview.StatusBefore.Clear();
+        foreach (var type in StatusTypes.Previewable)
+            preview.StatusBefore[type] = current(type);
         foreach (var effects in preview.Effects.GroupBy(e => e.Type))
         {
-            var before = current(effects.Key);
+            var before = preview.StatusBefore[effects.Key];
             var limit = cap(effects.Key);
             var after = EffectProjection.Project(before, limit,
                 effects.Select(e => new ProjectedEffect(e.Amount, e.Duration, e.Delay)), locked);

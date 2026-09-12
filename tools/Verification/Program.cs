@@ -254,5 +254,51 @@ Check("compiled production and asset tests share status projector", () => {
             .SelectMany(m => m.Body.Instructions).Any(i => i.Operand is MethodReference m &&
                 m.DeclaringType.Name == "StatusProjector" && m.Name == "Populate"));
 });
+Check("mixed HUD: hunger 5 to zero and poison zero to 10", () => {
+    var r = StatusGhostLayout.BuildProjected(1000, new[] { 50f, 0f }, new[] {
+        StatusGhostLayout.ProjectWidth(50, .05f, 0, 1000, 12),
+        StatusGhostLayout.ProjectWidth(0, 0, .1f, 1000, 12) });
+    Near(r[0].CurrentWidth, 0); Near(r[0].AddedWidth, 0);
+    Near(r[1].AddedWidth, 100); Near(r[1].AddedStart, 900);
+    Near(PreviewMath.Capacity(0 + .1f), .9f);
+});
+Check("mixed HUD: partial hunger recovery retains exact after value", () => {
+    var r = StatusGhostLayout.BuildProjected(1000, new[] { 150f, 0f }, new[] { 100f, 100f });
+    Near(r[0].CurrentWidth, 100); Near(r[0].CurrentStart, 800); Near(r[1].AddedWidth, 100);
+});
+Check("mixed HUD: existing poison and unaffected injury retained", () => {
+    var r = StatusGhostLayout.BuildProjected(1000, new[] { 100f, 50f, 200f }, new[] { 100f, 0f, 300f });
+    Near(r[0].CurrentWidth, 100); Near(r[1].CurrentWidth, 0);
+    Near(r[2].CurrentWidth, 200); Near(r[2].AddedWidth, 100);
+});
+Check("native badge width: threshold, minimum and stretch padding", () => {
+    Near(StatusGhostLayout.BadgeWidth(.01f, 600, 30, 5), 0);
+    Near(StatusGhostLayout.BadgeWidth(.02f, 600, 30, 5), 35);
+    Near(StatusGhostLayout.BadgeWidth(.1f, 600, 30, 5), 65);
+    Near(StatusGhostLayout.ProjectWidth(37, .02f, .02f, 600, 30, 5), 37);
+});
+Check("mixed HUD: equal net changes still remove hunger and add poison", () => {
+    var r = StatusGhostLayout.BuildProjected(1000, new[] { 50f, 0f }, new[] { 0f, 50f });
+    Near(r[0].CurrentWidth, 0); Near(r[1].AddedWidth, 50);
+});
+Check("mixed HUD: randomized after widths preserved without overlap", () => {
+    var rng = new Random(26);
+    for (var i = 0; i < 10000; i++) {
+        var before = Enumerable.Range(0, 8).Select(_ => (float)rng.NextDouble() * 100).ToArray();
+        var after = Enumerable.Range(0, 8).Select(_ => (float)rng.NextDouble() * 100).ToArray();
+        var r = StatusGhostLayout.BuildProjected(1000, before, after);
+        for (var j = 0; j < r.Length; j++) {
+            Expect(Math.Abs(r[j].CurrentWidth + r[j].AddedWidth - after[j]) < .001f);
+            if (j + 1 < r.Length) Expect(Math.Abs(r[j].CurrentStart + r[j].CurrentWidth - r[j + 1].AddedStart) < .001f);
+        }
+    }
+});
+Check("compiled extra renderer uses native visuals not RoundedCard", () => {
+    using var mod = ModuleDefinition.ReadModule(dll);
+    var extra = mod.Types.Single(t => t.Name == "ExtraStaminaOverlay");
+    Expect(extra.Methods.Where(m => m.HasBody).SelectMany(m => m.Body.Instructions).Any(i =>
+        i.Operand is MethodReference m && m.DeclaringType.Name == "NativeVisualCopy" && m.Name == "Create"));
+    Expect(!extra.Fields.Any(f => f.FieldType.Name == "RoundedCard"));
+});
 Console.WriteLine($"RESULT passed={passed} failed={failed}");
 Environment.ExitCode = failed > 0 ? 1 : 0;

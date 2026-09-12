@@ -16,7 +16,23 @@ Preview recovery and poison on your stamina bar, and see what each item does.
 
 Preview status changes before use, both while aiming and while holding the drink.
 
-![能量饮料预览 / Energy drink preview](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/59c4d3576ab85633872b9402eea37ed00a74d0ae/docs/assets/demos/energy-drink.gif)
+![能量饮料预览 / Energy drink preview](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/c2b4644e7073a084c239e917222b2d3788ef895f/docs/assets/demos/energy-drink.gif)
+
+### 运动饮料：新增额外精力 / Sports drink: new bonus stamina
+
+没有额外精力时，原生风格的预览条显示在主精力条上方。
+
+With no bonus stamina, a native-style preview appears above the main stamina bar.
+
+![运动饮料额外精力预览 / Sports drink bonus stamina preview](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/c2b4644e7073a084c239e917222b2d3788ef895f/docs/assets/demos/sports-drink.gif)
+
+### 运动饮料：衔接已有精力 / Sports drink: extending an existing bonus
+
+已有额外精力时，预览在下方衔接；已有部分保持稳定，仅新增部分闪烁。
+
+With bonus stamina already available, the preview extends the lower bar. Your current amount stays steady while only the gain pulses.
+
+![已有额外精力时的预览 / Preview with existing bonus stamina](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/c2b4644e7073a084c239e917222b2d3788ef895f/docs/assets/demos/sports-drink-existing-bonus.gif)
 
 ### 有毒蘑菇 / Poisonous mushroom
 
@@ -24,7 +40,7 @@ Preview status changes before use, both while aiming and while holding the drink
 
 See hunger recovery alongside the expected poison increase.
 
-![有毒蘑菇预览 / Poisonous mushroom preview](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/59c4d3576ab85633872b9402eea37ed00a74d0ae/docs/assets/demos/poisonous-mushroom.gif)
+![有毒蘑菇预览 / Poisonous mushroom preview](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/c2b4644e7073a084c239e917222b2d3788ef895f/docs/assets/demos/poisonous-mushroom.gif)
 
 ### 有毒莓果 / Poisonous berry
 
@@ -32,15 +48,15 @@ See hunger recovery alongside the expected poison increase.
 
 See poison warnings before eating. The purple pulse previews the expected poison on your stamina bar.
 
-![有毒食物预览 / Poisonous food preview](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/59c4d3576ab85633872b9402eea37ed00a74d0ae/docs/assets/demos/poisonous-food.gif)
+![有毒食物预览 / Poisonous food preview](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/c2b4644e7073a084c239e917222b2d3788ef895f/docs/assets/demos/poisonous-food.gif)
 
-### 绷带 / Bandage
+### 急救箱 / First aid kit
 
-拿起绷带，伤势中可以恢复的部分在原色与健康绿色之间闪烁。
+拿起急救箱，在使用前查看可恢复的伤势区域和物品效果。
 
-Hold a bandage to see the recoverable injury segment pulse between its original color and healthy green.
+Hold a first aid kit to preview recoverable injuries and read its effects before use.
 
-![绷带恢复预览 / Bandage recovery preview](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/59c4d3576ab85633872b9402eea37ed00a74d0ae/docs/assets/demos/bandage.gif)
+![急救箱恢复预览 / First aid kit recovery preview](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/c2b4644e7073a084c239e917222b2d3788ef895f/docs/assets/demos/first-aid-kit.gif)
 
 ### 无毒蘑菇 / Safe mushroom
 
@@ -48,7 +64,23 @@ Hold a bandage to see the recoverable injury segment pulse between its original 
 
 Preview the hunger you can recover before eating.
 
-![食物恢复预览 / Food recovery preview](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/59c4d3576ab85633872b9402eea37ed00a74d0ae/docs/assets/demos/non-poisonous-food.gif)
+![食物恢复预览 / Food recovery preview](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/c2b4644e7073a084c239e917222b2d3788ef895f/docs/assets/demos/non-poisonous-food.gif)
+
+### 特殊道具 / Special items
+
+查看童军道具的用途及使用代价。
+
+Read what a special Scout item does and the cost of using it.
+
+![特殊道具功能介绍 / Special item information](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/c2b4644e7073a084c239e917222b2d3788ef895f/docs/assets/demos/special-item.gif)
+
+### 灵药菇 / Remedy Fungus
+
+简介卡说明投掷或放下后的群体治疗，以及留在治疗云中的用法。
+
+The card explains how to drop or throw it for group healing and stay within its healing cloud.
+
+![灵药菇使用说明 / Remedy Fungus instructions](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/c2b4644e7073a084c239e917222b2d3788ef895f/docs/assets/demos/remedy-fungus.gif)
 
 ### 物品简介 / Item information
 
@@ -56,7 +88,7 @@ Preview the hunger you can recover before eating.
 
 See what an item does, its effects and remaining uses.
 
-![物品简介卡 / Item information card](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/59c4d3576ab85633872b9402eea37ed00a74d0ae/docs/assets/demos/item-description.gif)
+![物品简介卡 / Item information card](https://raw.githubusercontent.com/Rachel560lu/peak-item-insight/c2b4644e7073a084c239e917222b2d3788ef895f/docs/assets/demos/item-description.gif)
 
 ## 中文
 
@@ -73,6 +105,7 @@ See what an item does, its effects and remaining uses.
 - **准星对准物品：**显示该物品的效果预览和简介卡。
 - **拿在手里：**没有瞄准其他物品时，显示手持物品的预览。
 - **恢复效果：**预计恢复的饥饿、伤势区域闪绿光，只标出实际可恢复的部分。
+- **额外精力：**使用原生闪电和白框；当前没有额外精力时预览在上方，已有时在下方衔接，仅新增部分闪烁。
 - **有害效果：**毒素、孢子等效果以相应颜色闪烁提示；持续毒性可查看延迟、持续时间和预计累计量。
 - **移开准星：**空手时隐藏预览，手持物品时切回手持预览。
 
@@ -113,6 +146,7 @@ Close the game before installing or updating. For your first modded run, back up
 - **Aim at an item:** see its effect preview and information card.
 - **Hold an item:** when you are not aiming at another item, see the held item's preview.
 - **Recovery:** the recoverable hunger or injury segment pulses green, showing only the amount you can recover.
+- **Bonus stamina:** native lightning and outline appear above the main bar when you have none, or extend the lower bonus bar when you do. Only the gain pulses.
 - **Harmful effects:** poison, spores and other effects pulse in their corresponding colors. Timed poison includes its delay, duration and estimated total.
 - **Look away:** the preview disappears with empty hands or switches back to your held item.
 

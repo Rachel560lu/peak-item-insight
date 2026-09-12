@@ -45,6 +45,8 @@ internal static class OptimizationSmokeTest
             Require(overlay.Render(bar, mixed, healthy, .7f), "render mixed");
             Canvas.ForceUpdateCanvases();
             Require(overlay.Visible && overlay.AddedCount == 2, "new poison plus existing spore gain");
+            Require(Math.Abs(overlay.ProjectedStatusWidth(CharacterAfflictions.STATUSTYPE.Hunger) - 70) < .01f,
+                "mixed peak shrinks hunger to its after value, not original 100px");
             Require(Math.Abs(overlay.AddedOpacity - 1) < .001f, "harm peak phase");
             overlay.Render(bar, mixed, healthy, 0);
             Require(Math.Abs(overlay.AddedOpacity) < .001f, "harm original phase");
@@ -68,6 +70,34 @@ internal static class OptimizationSmokeTest
                 overlay.Hide(); Require(!overlay.Visible, "status hide: " + type);
             }
             overlay.Dispose(); poison.afflictionType = CharacterAfflictions.STATUSTYPE.Poison;
+            // Reproduce the reported fruit: five hunger removed while ten poison
+            // is added. Assert actual rendered widths at BOTH pulse endpoints.
+            foreach (var source in new[] { PreviewSource.Hover, PreviewSource.Held })
+            {
+                var fruit = new ItemPreview { Source = source };
+                fruit.StatusBefore[CharacterAfflictions.STATUSTYPE.Hunger] = .05f;
+                fruit.StatusBefore[CharacterAfflictions.STATUSTYPE.Poison] = 0;
+                fruit.StatusBefore[CharacterAfflictions.STATUSTYPE.Spores] = .05f;
+                fruit.Statuses.Add(new StatusDelta(CharacterAfflictions.STATUSTYPE.Hunger, .05f, 0));
+                fruit.Statuses.Add(new StatusDelta(CharacterAfflictions.STATUSTYPE.Poison, 0, .1f));
+                overlay.Render(bar, fruit, healthy, .7f); Canvas.ForceUpdateCanvases();
+                Require(overlay.ProjectedStatusWidth(CharacterAfflictions.STATUSTYPE.Hunger) == 0,
+                    "mixed fruit peak removes yellow hunger: " + source);
+                Require(Math.Abs(overlay.ProjectedStatusWidth(CharacterAfflictions.STATUSTYPE.Poison) - 70) < .01f &&
+                    overlay.VisibleAddedWidth > 69 && overlay.HealthyWidth > 580,
+                    "mixed fruit peak has poison geometry AND green recovered area: " + source);
+                fruit.Statuses[0] = new StatusDelta(CharacterAfflictions.STATUSTYPE.Hunger, .15f, .1f);
+                fruit.StatusBefore[CharacterAfflictions.STATUSTYPE.Hunger] = .15f;
+                overlay.Render(bar, fruit, healthy, .7f);
+                Require(Math.Abs(overlay.ProjectedStatusWidth(CharacterAfflictions.STATUSTYPE.Hunger) - 70) < .01f,
+                    "mixed fruit partial recovery retains only ten hunger: " + source);
+                overlay.Render(bar, fruit, healthy, 0);
+                Require(overlay.AddedOpacity == 0 && hunger.GetComponent<CanvasGroup>().alpha == 1,
+                    "original pulse phase restores native hunger: " + source);
+                overlay.Hide(); Require(hunger.rtf.rect.width == 100, "native hunger width untouched");
+            }
+            SessionTrace.Write("SMOKE_MIXED_HUD_PASS", "hover+held; full+partial hunger recovery; simultaneous poison; real rendered widths; green fill; original phase+cleanup");
+            overlay.Dispose();
             // Previously untested native state: zero poison => inactive slot,
             // collapsed layout and empty Filled image. Assert actual geometry,
             // not only a counter incremented from the requested status delta.
@@ -84,7 +114,22 @@ internal static class OptimizationSmokeTest
             poison.rtf.sizeDelta = new Vector2(0, 26); poisonImage.type = UnityEngine.UI.Image.Type.Simple;
             poisonImage.fillAmount = 1;
             overlay.Render(bar, mixed, healthy, .7f);
-            var extraTemplate = Image("ExtraTemplate", host.transform, 0, 0, new Color(1,.8f,.1f));
+            var wrapper = new GameObject("ExtraWrapper", typeof(RectTransform)).GetComponent<RectTransform>();
+            wrapper.SetParent(host.transform, false); wrapper.anchorMin = wrapper.anchorMax = wrapper.pivot = Vector2.zero;
+            wrapper.anchoredPosition = new Vector2(0, -50); wrapper.sizeDelta = Vector2.zero;
+            var extraTemplate = Image("ExtraTemplate", wrapper, 0, 0, Color.green);
+            var outline = Image("NativeOutline", wrapper, -6, 20, Color.white);
+            var icon = Image("NativeLightning", wrapper, -35, 20, Color.green);
+            var shadow = new GameObject("OriginalRoundedShadow", typeof(RectTransform));
+            shadow.SetActive(false); shadow.transform.SetParent(outline.transform, false);
+            var shadowRect = shadow.GetComponent<RectTransform>();
+            shadowRect.anchorMin = Vector2.zero; shadowRect.anchorMax = Vector2.one;
+            shadowRect.sizeDelta = new Vector2(-4, 0);
+            shadow.AddComponent<UnityEngine.UI.ProceduralImage.ProceduralImage>();
+            var corners = shadow.AddComponent<UniformModifier>();
+            JsonUtility.FromJsonOverwrite("{\"radius\":7}", corners);
+            shadow.SetActive(true);
+            bar.extraBar = wrapper; bar.extraBarOutline = outline.rectTransform; bar.extraStaminaIcon = icon;
             bar.extraBarStamina = extraTemplate.rectTransform; extraTemplate.gameObject.SetActive(false);
             var extraOverlay = new ExtraStaminaOverlay();
             try
@@ -92,7 +137,7 @@ internal static class OptimizationSmokeTest
                 full.sizeDelta = new Vector2(700, 180);
                 full.pivot = new Vector2(.5f, .5f);
                 full.localScale = new Vector3(1.2f, .8f, 1);
-                extraTemplate.rectTransform.sizeDelta = new Vector2(0, 200);
+                extraTemplate.rectTransform.sizeDelta = new Vector2(0, 26);
                 foreach (var source in new[] { PreviewSource.Hover, PreviewSource.Held })
                 {
                     var bonus = new ItemPreview { Source = source, HasExtraStamina = true, ExtraBefore = 0, ExtraAfter = .2f };
@@ -100,11 +145,14 @@ internal static class OptimizationSmokeTest
                     Require(extraOverlay.ExtraVisible && !extraTemplate.gameObject.activeSelf, "extra gain with inactive native template: " + source);
                     Require(Math.Abs(extraOverlay.ExtraBounds.height - 26) < .01f && Math.Abs(extraOverlay.ExtraBounds.width - 140) < .01f,
                         "bonus uses visible fill height, not tall container or stale hidden template: " + source);
-                    var mainTop = full.InverseTransformPoint(healthy.rectTransform.TransformPoint(new Vector3(healthy.rectTransform.rect.xMin, healthy.rectTransform.rect.yMax)));
-                    Require(Math.Abs(extraOverlay.ExtraBounds.yMin - mainTop.y - 8) < .01f && extraOverlay.TrackVisible,
-                        "bonus track immediately above main fill with nonzero pivot: " + source);
+                    var mainTop = full.InverseTransformPoint(healthy.rectTransform.TransformPoint(new Vector3(0, healthy.rectTransform.rect.yMax)));
+                    var mainBottom = full.InverseTransformPoint(healthy.rectTransform.TransformPoint(new Vector3(0, healthy.rectTransform.rect.yMin)));
+                    Require(extraOverlay.RowBounds.yMin > mainTop.y && extraOverlay.TrackVisible && extraOverlay.IconVisible,
+                        "zero real bonus places complete frame and lightning ABOVE main bar: " + source);
+                    Require(wrapper.sizeDelta == Vector2.zero && outline.enabled && icon.enabled,
+                        "upper preview leaves collapsed native wrapper and graphics unchanged");
                     extraTemplate.rectTransform.sizeDelta = new Vector2(70, 26);
-                    extraTemplate.rectTransform.anchoredPosition = new Vector2(12, 40);
+                    extraTemplate.rectTransform.anchoredPosition = new Vector2(12, 0);
                     extraTemplate.gameObject.SetActive(true);
                     bonus.ExtraBefore = .1f; bonus.ExtraAfter = .4f;
                     extraOverlay.Render(bar, bonus, healthy, .7f);
@@ -112,16 +160,59 @@ internal static class OptimizationSmokeTest
                     Require(Math.Abs(extraOverlay.ExtraBounds.xMin - nativeLeft.x - 70) < .01f &&
                         Math.Abs(extraOverlay.ExtraBounds.center.y - nativeLeft.y) < .01f, "existing bonus row alignment: " + source);
                     Require(extraTemplate.rectTransform.sizeDelta == new Vector2(70, 26), "native bonus geometry unchanged");
-                    extraTemplate.gameObject.SetActive(false); extraTemplate.rectTransform.sizeDelta = new Vector2(0, 200);
+                    Require(extraOverlay.RowBounds.yMax < mainBottom.y && !outline.enabled && !icon.enabled,
+                        "existing real bonus switches below with one visible native-style row");
+                    wrapper.anchoredPosition = Vector2.zero;
+                    extraOverlay.Render(bar, bonus, healthy, .7f);
+                    Require(extraOverlay.RowBounds.yMax < mainBottom.y && wrapper.anchoredPosition == Vector2.zero,
+                        "overlapping native anchor is cleared by preview offset without moving native row");
+                    wrapper.anchoredPosition = new Vector2(0, -50);
+                    bonus.ExtraBefore = 0;
+                    extraOverlay.Render(bar, bonus, healthy, .7f);
+                    Require(extraOverlay.RowBounds.yMin > mainTop.y && outline.enabled && icon.enabled,
+                        "bonus depletion returns above and restores native graphics while wrapper remains visible");
+                    extraOverlay.Render(bar, bonus, healthy, .7f);
+                    Require(extraOverlay.RowBounds.yMin > mainTop.y && extraOverlay.RowBounds.yMin < mainTop.y + 15,
+                        "repeated upper render does not accumulate vertical offset");
+                    extraTemplate.gameObject.SetActive(false); extraTemplate.rectTransform.sizeDelta = new Vector2(0, 26);
                     bonus.ExtraBefore = bonus.ExtraAfter;
                     extraOverlay.Render(bar, bonus, healthy, .7f); Require(!extraOverlay.ExtraVisible, "extra cap: " + source);
+                    Require(outline.enabled && icon.enabled && extraTemplate.enabled, "native graphic flags restored on cap");
                     bonus.InfiniteStamina = true; extraOverlay.Render(bar, bonus, healthy, .7f);
                     Require(extraOverlay.InfiniteVisible, "infinite stamina: " + source);
                     extraOverlay.Hide(); Require(!extraOverlay.InfiniteVisible && !extraOverlay.ExtraVisible && !extraOverlay.TrackVisible, "extra hide");
                 }
             }
             finally { extraOverlay.Dispose(); full.sizeDelta = new Vector2(700, 26); full.pivot = Vector2.zero; full.localScale = Vector3.one; }
-            SessionTrace.Write("SMOKE_BONUS_GEOMETRY_PASS", "fullHeight=180 hiddenTemplateHeight=200 visibleHeight=26 gainWidth=140 gap=8; scaled parent+nonzero pivot+native row+hover/held+hide; synthetic HUD");
+            // Actual serialized native row: settled wrapper 45px tall, Back
+            // stretched vertically with sizeDelta.y=-12, fill x=46, outline x=40.
+            wrapper.sizeDelta = Vector2.zero; wrapper.gameObject.SetActive(false);
+            extraTemplate.rectTransform.anchorMin = Vector2.zero;
+            extraTemplate.rectTransform.anchorMax = new Vector2(0, 1);
+            extraTemplate.rectTransform.sizeDelta = new Vector2(0, -12);
+            extraTemplate.rectTransform.anchoredPosition = new Vector2(46, 0);
+            outline.rectTransform.anchorMin = Vector2.zero;
+            outline.rectTransform.anchorMax = new Vector2(0, 1);
+            outline.rectTransform.sizeDelta = new Vector2(20, 0);
+            outline.rectTransform.anchoredPosition = new Vector2(40, 0);
+            var nativeLayout = new ExtraStaminaOverlay();
+            try
+            {
+                nativeLayout.Render(bar, new ItemPreview { HasExtraStamina = true, ExtraAfter = .2f }, healthy, .7f);
+                Canvas.ForceUpdateCanvases();
+                Require(nativeLayout.ExtraVisible && nativeLayout.IconVisible && nativeLayout.TrackVisible &&
+                    Math.Abs(nativeLayout.ExtraBounds.height - 33) < .01f && Math.Abs(nativeLayout.ExtraBounds.width - 140) < .01f,
+                    "serialized native anchors produce 33px visible fill despite negative sizeDelta height");
+                var copiedCorners = nativeLayout.OutlineImage!.GetComponentInChildren<UniformModifier>(true);
+                Require(copiedCorners != null && JsonUtility.ToJson(copiedCorners) == JsonUtility.ToJson(corners),
+                    "native ProceduralImage UniformModifier serialized radius preserved");
+                nativeLayout.Hide(); Require(outline.enabled && icon.enabled && !wrapper.gameObject.activeSelf,
+                    "original collapsed wrapper and graphic flags restored");
+            }
+            finally { nativeLayout.Dispose(); }
+            SessionTrace.Write("SMOKE_NATIVE_BONUS_LAYOUT_PASS", "game level3 verified: native wrapper45, Back vertical stretch -12=>33px, x46, outline x40; UniformModifier radius preserved; no gameplay controllers cloned");
+            SessionTrace.Write("SMOKE_BONUS_GEOMETRY_PASS", "zero bonus above; existing bonus below; overlap clearance; depletion restores graphics; no position drift; native outline+icon; gainWidth=140; scaled parent+nonzero pivot+hover/held+cap+hide; synthetic HUD");
+            CheckNativeBonus(healthy, bar, host.transform);
             var bounded = new ItemPreview { CompleteEffects = true, IsFood = true };
             bounded.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Poison, .2f));
             bounded.Statuses.Add(new StatusDelta(CharacterAfflictions.STATUSTYPE.Poison, 2, 2));
@@ -319,6 +410,54 @@ internal static class OptimizationSmokeTest
         }
         finally { PresentationOptions.Language.Value = previous; }
     }
+    private static void CheckNativeBonus(Image healthy, StaminaBar fixture, Transform parent)
+    {
+        var native = Resources.FindObjectsOfTypeAll<StaminaBar>().FirstOrDefault(b => b != fixture && b.extraBar != null &&
+            b.extraBarStamina != null && b.extraBarOutline != null && b.extraStaminaIcon != null &&
+            !b.transform.name.StartsWith("Synthetic"));
+        if (native == null)
+        {
+            SessionTrace.Write("SMOKE_NATIVE_BONUS_ASSETS_PENDING", "Title does not load original in-level HUD; serialized game hierarchy audited offline; native layout+modifier tests passed; original sprite binding/visual appearance needs in-level acceptance");
+            return;
+        }
+        var root = NativeVisualCopy.Create(native!.extraBar, parent,
+            native.petrifyAffliction != null ? native.petrifyAffliction.rtf : null);
+        root.name = "SyntheticOriginalExtraHud";
+        var previousRoot = fixture.extraBar; var previousFill = fixture.extraBarStamina;
+        var previousOutline = fixture.extraBarOutline; var previousIcon = fixture.extraStaminaIcon;
+        var overlay = new ExtraStaminaOverlay();
+        try
+        {
+            fixture.extraBar = root;
+            fixture.extraBarStamina = NativeVisualCopy.Find(native.extraBar, root, native.extraBarStamina)!;
+            fixture.extraBarOutline = NativeVisualCopy.Find(native.extraBar, root, native.extraBarOutline)!;
+            fixture.extraStaminaIcon = NativeVisualCopy.Find(native.extraBar, root, native.extraStaminaIcon.rectTransform)!.GetComponent<Image>();
+            root.gameObject.SetActive(false); root.sizeDelta = Vector2.zero;
+            var nativeFill = HudGhostOverlay.NativeFill(native.extraBarStamina, null);
+            var nativeOutline = native.extraBarOutline.GetComponentInChildren<Image>(true);
+            Require(nativeFill != null && nativeOutline != null, "original extra HUD fill+outline images exist");
+            overlay.Render(fixture, new ItemPreview { HasExtraStamina = true, ExtraBefore = 0, ExtraAfter = .2f }, healthy, .7f);
+            Canvas.ForceUpdateCanvases();
+            Require(overlay.ExtraVisible && overlay.IconVisible && overlay.TrackVisible && overlay.ExtraBounds.height > 1,
+                "original extra visual hierarchy renders despite collapsed source");
+            Require(overlay.IconImage!.sprite == native.extraStaminaIcon.sprite &&
+                overlay.IconImage.GetType() == native.extraStaminaIcon.GetType() &&
+                overlay.OutlineImage!.sprite == nativeOutline!.sprite && overlay.OutlineImage.material == nativeOutline.material,
+                "original lightning+outline assets and component types preserved");
+            Require(root.sizeDelta == Vector2.zero && !root.gameObject.activeSelf, "original fixture never enabled or resized");
+            Require(overlay.ExtraBounds.width > 130 && overlay.ExtraBounds.width < 150,
+                "original extra bar gain is exactly twenty percent of synthetic 700px scale");
+            overlay.Hide(); Require(!overlay.ExtraVisible && !overlay.IconVisible, "native-style extra cleanup");
+            SessionTrace.Write("SMOKE_NATIVE_BONUS_ASSETS_PASS", $"fill={nativeFill!.GetType().Name}:{nativeFill.sprite?.name} outline={nativeOutline!.GetType().Name}:{nativeOutline.sprite?.name} icon={native.extraStaminaIcon.sprite?.name}; loaded original visuals, inactive wrapper, owned clone only");
+        }
+        finally
+        {
+            overlay.Dispose(); Object.Destroy(root.gameObject);
+            fixture.extraBar = previousRoot; fixture.extraBarStamina = previousFill;
+            fixture.extraBarOutline = previousOutline; fixture.extraStaminaIcon = previousIcon;
+        }
+    }
+
     private static void Require(bool condition, string label)
     { if (!condition) throw new InvalidOperationException("Optimization smoke: " + label); }
     private static BarAffliction Badge(Transform parent, CharacterAfflictions.STATUSTYPE type, float x, float width, Color colour)

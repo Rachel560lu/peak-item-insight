@@ -10,7 +10,7 @@ public sealed class Plugin : BaseUnityPlugin
 {
     public const string PluginGuid = "dev.rachel.peakiteminsight";
     public const string PluginName = "PEAK Item Insight";
-    public const string PluginVersion = "0.2.5";
+    public const string PluginVersion = "0.2.6";
 
     private ConfigEntry<bool> _enabled = null!;
     private ConfigEntry<float> _hoverDelay = null!;

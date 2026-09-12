@@ -1,15 +1,13 @@
 {
-  "plugin_version": "0.2.5",
-  "package_version": "0.2.5",
+  "plugin_version": "0.2.6",
+  "package_version": "0.2.6",
   "change_type": "code_and_documentation",
-  "dll_sha256": "F963AE469375E72CD88665931E650642E0F3A55A5DA43904CA184CB47593C5CC",
-  "evidence_document": "docs/release-025.md",
+  "dll_sha256": "8AE11E865FE1D6C0DF8746467F3A0EEAF81B9F276351EDC31BB301117AFD8BA7",
+  "evidence_document": "docs/release-026.md",
   "public_release_approved": true,
-  "publication_status": "published",
-  "zip_sha256": "14E26331AEFE41FD10AD7C11D2740C5F67DC19C5B1CE980122EA5CF935EACB6A",
-  "published_url": "https://thunderstore.io/c/peak/p/Rachel560lu/PeakItemInsight/v/0.2.5/",
+  "publication_status": "prepared",
   "license": "MIT",
-  "offline_checks_passed": 81,
+  "offline_checks_passed": 88,
   "standard_fresh_profile_startup_verified": false,
-  "acceptance_scope": "User-reported in-game acceptance and supplied poison/safe-food/card demonstrations; not exhaustive all-item or multiplayer validation."
+  "acceptance_scope": "User-supplied gameplay recordings show new bonus above, existing bonus below, first aid and special-item cards. Final 0.2.6 isolated engine smoke passed. Not exhaustive all-item or multiplayer validation."
 }

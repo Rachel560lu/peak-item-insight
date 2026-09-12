@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.6 — 2026-09-12 / Native stamina previews
+
+- Use PEAK's original lightning icon, white outline and textured fill for bonus-stamina previews.
+- Show a new bonus above the main bar; extend an existing bonus below it. Only the gain pulses, with space between the bars.
+- Preview hunger recovery and poison increases together, including full and partial hunger recovery.
+- Add sports-drink, special-item and Remedy Fungus gameplay GIFs to both bilingual READMEs. Replace the bandage demo with a first aid kit.
+
+- 额外精力预览使用原生闪电、白框和填充；无额外精力时显示在上方，已有时在下方衔接。
+- 饥饿恢复与毒性增加同步预览，正确显示完全恢复和部分恢复。
+- 更新运动饮料、特殊道具和灵药菇演示，以急救箱替换绷带演示。
+
 ## 0.2.5 — 2026-09-12 / UI fixes and refreshed demos
 
 - Size bonus-stamina previews from the visible native fill, not the HUD container or a hidden placeholder. Add a stable thin track; preserve game-owned UI.

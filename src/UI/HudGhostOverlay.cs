@@ -80,19 +80,23 @@ internal sealed class HudGhostOverlay : MonoBehaviour
         var healthy = bar != null ? NativeFill(bar.staminaBar, null) : null;
         var hunger = FindNativeStatus(bar, CharacterAfflictions.STATUSTYPE.Hunger);
         var injury = FindNativeStatus(bar, CharacterAfflictions.STATUSTYPE.Injury);
-        _recovery.Render(_preview!, healthy, hunger, injury, Time.unscaledTime - _pulseStart);
+        var projected = _increases.Render(bar, _preview!, healthy, Time.unscaledTime - _pulseStart);
+        if (projected) _recovery.Hide();
+        else _recovery.Render(_preview!, healthy, hunger, injury, Time.unscaledTime - _pulseStart);
         foreach (var type in StatusTypes.Previewable)
         {
             if (type == CharacterAfflictions.STATUSTYPE.Hunger || type == CharacterAfflictions.STATUSTYPE.Injury) continue;
             if (!_otherRecoveries.TryGetValue(type, out var overlay))
                 _otherRecoveries[type] = overlay = new HungerRecoveryOverlay(type.ToString());
-            RenderRecovery(overlay, bar, healthy, type);
+            if (projected) overlay.Hide();
+            else RenderRecovery(overlay, bar, healthy, type);
         }
-        _increases.Render(bar, _preview!, healthy, Time.unscaledTime - _pulseStart);
         _extra.Render(bar, _preview!, healthy, Time.unscaledTime - _pulseStart);
         if (Time.unscaledTime >= _nextTrace)
         {
             _nextTrace = Time.unscaledTime + 2;
+            if (projected)
+                SessionTrace.Write("HUD_PROJECTED_ROW", $"item={_preview!.ItemId} source={_preview.Source} hungerWidth={_increases.ProjectedStatusWidth(CharacterAfflictions.STATUSTYPE.Hunger):0.##} poisonWidth={_increases.ProjectedStatusWidth(CharacterAfflictions.STATUSTYPE.Poison):0.##} healthyWidth={_increases.HealthyWidth:0.##} phase={_increases.AddedOpacity:0.##}");
             TraceRecovery(CharacterAfflictions.STATUSTYPE.Hunger, "HUNGER", hunger, healthy, _recovery.Hunger);
             TraceRecovery(CharacterAfflictions.STATUSTYPE.Injury, "INJURY", injury, healthy, _recovery.Injury);
             var poison = StatusRecoveryOverlays.Find(_preview!, CharacterAfflictions.STATUSTYPE.Poison);

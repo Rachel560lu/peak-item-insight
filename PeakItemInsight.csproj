@@ -25,6 +25,7 @@
     <Reference Include="PhotonUnityNetworking" HintPath="$(PeakManagedDir)\PhotonUnityNetworking.dll" Private="false" />
     <Reference Include="UnityEngine" HintPath="$(PeakManagedDir)\UnityEngine.dll" Private="false" />
     <Reference Include="UnityEngine.CoreModule" HintPath="$(PeakManagedDir)\UnityEngine.CoreModule.dll" Private="false" />
+    <Reference Include="UnityEngine.JSONSerializeModule" HintPath="$(PeakManagedDir)\UnityEngine.JSONSerializeModule.dll" Private="false" />
     <Reference Include="UnityEngine.UI" HintPath="$(PeakManagedDir)\UnityEngine.UI.dll" Private="false" />
     <Reference Include="UnityEngine.UIModule" HintPath="$(PeakManagedDir)\UnityEngine.UIModule.dll" Private="false" />
     <Reference Include="UnityEngine.TextRenderingModule" HintPath="$(PeakManagedDir)\UnityEngine.TextRenderingModule.dll" Private="false" />

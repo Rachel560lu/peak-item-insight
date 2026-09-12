@@ -51,6 +51,9 @@ internal sealed class ItemPreview
     public float ExtraBefore { get; set; }
     public float ExtraAfter { get; set; }
     public List<StatusDelta> Statuses { get; } = new List<StatusDelta>();
+    // Numeric snapshot includes unchanged statuses. UI minimum badge widths are
+    // decoration, never extra affliction or extra capacity loss.
+    public Dictionary<CharacterAfflictions.STATUSTYPE, float> StatusBefore { get; } = new Dictionary<CharacterAfflictions.STATUSTYPE, float>();
     public List<ResourceLine> Resources { get; } = new List<ResourceLine>();
     public List<string> Instructions { get; } = new List<string>();
     public List<string> Warnings { get; } = new List<string>();
