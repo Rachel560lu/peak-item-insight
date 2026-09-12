@@ -1,5 +1,7 @@
 # v0.2.9 release evidence
 
+Published to GitHub and Thunderstore. Public Thunderstore ZIP and GitHub asset digest match local SHA256 `CB6E007C9A272911EB68BC7BEA6BD52450F82BF7743B74663FA5BA3AB83455E2`.
+
 - User authorized GitHub and Thunderstore publication after isolated gameplay, with two replacement recordings.
 - Build: zero warnings/errors; 113 offline checks passed.
 - Final version isolated smoke: PID 66492, exit 0; temporary steam_appid.txt cleaned up.
