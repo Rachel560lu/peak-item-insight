@@ -5,7 +5,7 @@
   "dll_sha256": "69DB24B27DD7758E9E2EF675F860111B0A3157EF229B7425A717C1FA6294F16C",
   "evidence_document": "docs/release-0213.md",
   "public_release_approved": true,
-  "publication_status": "github_published_thunderstore_pending",
+  "publication_status": "published",
   "license": "MIT",
   "offline_checks_passed": 138,
   "native_smoke_pid": 11820,
@@ -13,5 +13,8 @@
   "acceptance_scope": "Final 0.2.13 build passed 138 verifier checks. Native probe final PID 11820 passed detailed prose, four-language glyphs, three scales, cached layouts, settings input cleanup, pointer clicks and existing HUD regressions. User requested publication after isolated testing. Not exhaustive all-item, post-consumption or multiplayer validation.",
   "zip_sha256": "CE694E650062C67393860CB76DCC810BD36E652F2DFF173906AFE7B646A7098B",
   "github_release": "https://github.com/Rachel560lu/peak-item-insight/releases/tag/v0.2.13",
-  "github_asset_sha256": "sha256:ce694e650062c67393860cb76dcc810bd36e652f2dff173906afe7b646a7098b"
+  "github_asset_sha256": "sha256:ce694e650062c67393860cb76dcc810bd36e652f2dff173906afe7b646a7098b",
+  "thunderstore_release": "https://thunderstore.io/c/peak/p/Rachel560lu/PeakItemInsight/v/0.2.13/",
+  "thunderstore_zip_sha256": "CE694E650062C67393860CB76DCC810BD36E652F2DFF173906AFE7B646A7098B",
+  "thunderstore_published_at": "2026-09-14T14:59:04.962925Z"
 }
