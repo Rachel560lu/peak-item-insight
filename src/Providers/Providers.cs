@@ -21,9 +21,9 @@ internal sealed class DirectStatusProvider : IItemPreviewProvider
         var character = Character.localCharacter;
         if (character == null || character.refs.afflictions == null) return;
         if (character.data.isSkeleton || character.isZombie || character.isScoutmaster)
-        { preview.Warnings.Add(Labels.SpecialState); return; }
+        { preview.Warnings.Add(Labels.SpecialState); preview.DetailNotes.Add(Labels.SpecialState); return; }
         if (ItemDataReader.TryGetInt(item, DataEntryKey.ItemUses, out var uses) && uses == 0)
-        { preview.Warnings.Add(Labels.EmptyItem); return; }
+        { preview.Warnings.Add(Labels.EmptyItem); preview.DetailNotes.Add(Labels.EmptyItem); return; }
 
         var afflictions = character.refs.afflictions;
         StatusProjector.Populate(preview,
@@ -98,16 +98,31 @@ internal sealed class PromptProvider : IItemPreviewProvider
 
 internal static class Labels
 {
-    internal static bool Chinese => PresentationOptions.Language?.Value == "Chinese" ||
-        PresentationOptions.Language?.Value != "English" &&
-        (LocalizedText.CURRENT_LANGUAGE == LocalizedText.Language.SimplifiedChinese ||
-         LocalizedText.CURRENT_LANGUAGE == LocalizedText.Language.TraditionalChinese);
-    internal static string Text(string zh, string en) => Chinese ? zh : en;
+    internal static string Language => LanguageCatalog.Resolve(PresentationOptions.Language?.Value, LocalizedText.CURRENT_LANGUAGE.ToString());
+    internal static bool Chinese => Language == "Chinese";
+    internal static string RequiredGlyphs => Chinese ? "饥" : Language == "Turkish" ? "çğıİöşüÇĞÖŞÜ" : Language == "Spanish" ? "áéíóúüñÁÉÍÓÚÜÑ¿¡" : "";
+    internal static string Text(string zh, string en) => LanguageCatalog.Text(Language, en, zh);
+    internal static string Format(FormattableString zh, FormattableString en) => LanguageCatalog.Format(Language, zh, en);
+    internal static LocalizedText.Language NativeLanguage
+    {
+        get
+        {
+            var configured = PresentationOptions.Language?.Value;
+            if (configured == null || configured == "Auto") return LocalizedText.CURRENT_LANGUAGE;
+            switch (Language)
+            {
+                case "Chinese": return LocalizedText.Language.SimplifiedChinese;
+                case "Turkish": return LocalizedText.Language.Turkish;
+                case "Spanish": return LocalizedText.Language.SpanishSpain;
+                default: return LocalizedText.Language.English;
+            }
+        }
+    }
     internal static string ItemName(Item item)
     {
         if (item.UIData == null) return Text("未知物品", "Unknown item");
         if (PresentationOptions.Language?.Value == "Auto" || PresentationOptions.Language == null) return item.GetName();
-        var language = Chinese ? LocalizedText.Language.SimplifiedChinese : LocalizedText.Language.English;
+        var language = NativeLanguage;
         var key = LocalizedText.GetNameIndex(item.UIData.itemName);
         return LocalizedText.GetText(key, language);
     }
@@ -124,8 +139,7 @@ internal static class Labels
             return Text("丢下或投掷，碰撞破裂后释放治疗云，为范围内的自己和队友治疗伤势，并清除毒素与孢子。留在云内可持续获得治疗；不是直接食用。",
                 "Drop or throw; it bursts on impact into a healing cloud for you and nearby teammates. It heals injury and removes poison and spores. Stay in the cloud for continued healing; do not eat it.");
         var key = LocalizedText.GetDescriptionIndex(item.UIData.itemName);
-        var language = PresentationOptions.Language?.Value == "English" ? LocalizedText.Language.English :
-            PresentationOptions.Language?.Value == "Chinese" ? LocalizedText.Language.SimplifiedChinese : LocalizedText.CURRENT_LANGUAGE;
+        var language = NativeLanguage;
         if (LocalizedText.mainTable != null && LocalizedText.mainTable.ContainsKey(key))
             return LocalizedText.GetText(key, language);
         return "";
@@ -146,8 +160,7 @@ internal static class Labels
         // UIData stores localization KEYS, not text to display. Resolve without
         // GetText(key, true)'s silent English fallback when Chinese is selected.
         var key = prompt.Trim().ToUpperInvariant();
-        var language = PresentationOptions.Language?.Value == "English" ? LocalizedText.Language.English :
-            PresentationOptions.Language?.Value == "Chinese" ? LocalizedText.Language.SimplifiedChinese : LocalizedText.CURRENT_LANGUAGE;
+        var language = NativeLanguage;
         var index = (int)language;
         if (LocalizedText.platformSpecificTable != null && LocalizedText.platformSpecificTable.TryGetValue(key, out var platform) &&
             index >= 0 && index < platform.Count && !string.IsNullOrWhiteSpace(platform[index])) return platform[index];
@@ -156,37 +169,33 @@ internal static class Labels
             var translated = LocalizedText.GetText(key, language);
             if (!string.IsNullOrWhiteSpace(translated)) return translated;
         }
-        if (!Chinese) return prompt.Trim();
         switch (key)
         {
-            case "OPEN": return "打开";
-            case "PLACE": return "放置";
-            case "CHANGE ANGLE": return "调整角度";
+            case "OPEN": return Text("打开", "Open");
+            case "PLACE": return Text("放置", "Place");
+            case "CHANGE ANGLE": return Text("调整角度", "Change Angle");
         }
-        // Preserve already localized text, never leak untranslated action keys.
+        // Preserve already localized text; Chinese must not leak raw action keys.
+        if (!Chinese) return prompt.Trim();
         return prompt.Any(c => c >= '\u3400' && c <= '\u9fff') ? prompt.Trim() : "";
     }
     public static string Source(PreviewSource source) => source == PreviewSource.Held
-        ? (Chinese ? "手持" : "Held") : (Chinese ? "准星" : "Hover");
-    public static string Uses => Chinese ? "剩余次数" : "Uses";
-    public static string Remaining => Chinese ? "剩余" : "Remaining";
-    public static string Fuel => Chinese ? "燃料" : "Fuel";
-    public static string Cooked => Chinese ? "烹饪" : "Cooked";
-    public static string No => Chinese ? "否" : "No";
-    public static string PitonInstruction => Chinese
-        ? "放置在可攀爬墙面，抓住它休息并恢复精力；同时限1人。普通岩钉可反复休息，没有固定使用次数。注意：地图自带的锈蚀岩钉会断裂。"
-        : "Place on a climbable wall and grab it to rest and recover stamina. One scout at a time. A normal piton has no rest-use limit. Beware: rusty pitons found on the map can break.";
-    public static string NoPreview => Chinese ? "未检测到可预览的效果。" : "No previewable effect detected.";
-    public static string NoChange => Chinese ? "当前状态下无净精力变化；各状态变化见上方。" : "No net stamina change at current state; see individual effects above.";
-    public static string EmptyItem => Chinese ? "已无剩余使用次数。" : "No uses remaining.";
-    public static string SpecialState => Chinese ? "特殊角色状态：无法可靠预测。" : "Special character state: exact preview unavailable.";
-    public static string Conditional => Chinese ? "持续/取消/消耗触发的条件效果未完整计入。" : "Conditional held/cancel/consume effects are not fully included.";
-    public static string Partial => Chinese ? "部分效果尚未识别。" : "Some effects are not yet supported.";
-    public static string ExtraStamina => Chinese ? "额外精力" : "Extra stamina";
+        ? Text("手持", "Held") : Text("准星", "Hover");
+    public static string Uses => Text("剩余次数", "Uses");
+    public static string Remaining => Text("剩余", "Remaining");
+    public static string Fuel => Text("燃料", "Fuel");
+    public static string Cooked => Text("烹饪", "Cooked");
+    public static string No => Text("否", "No");
+    public static string PitonInstruction => Text("放置在可攀爬墙面，抓住它休息并恢复精力；同时限1人。普通岩钉可反复休息，没有固定使用次数。注意：地图自带的锈蚀岩钉会断裂。", "Place on a climbable wall and grab it to rest and recover stamina. One scout at a time. A normal piton has no rest-use limit. Beware: rusty pitons found on the map can break.");
+    public static string NoPreview => Text("未检测到可预览的效果。", "No previewable effect detected.");
+    public static string NoChange => Text("当前状态下无净精力变化；各状态变化见上方。", "No net stamina change at current state; see individual effects above.");
+    public static string EmptyItem => Text("已无剩余使用次数。", "No uses remaining.");
+    public static string SpecialState => Text("特殊角色状态：无法可靠预测。", "Special character state: exact preview unavailable.");
+    public static string Conditional => Text("持续/取消/消耗触发的条件效果未完整计入。", "Conditional held/cancel/consume effects are not fully included.");
+    public static string Partial => Text("部分效果尚未识别。", "Some effects are not yet supported.");
+    public static string ExtraStamina => Text("额外精力", "Extra stamina");
 
-    public static string ReachesLimit(CharacterAfflictions.STATUSTYPE type) => Chinese
-        ? $"{Status(type)}将达到上限"
-        : $"{Status(type)} reaches its limit";
+    public static string ReachesLimit(CharacterAfflictions.STATUSTYPE type) => Format($"{Status(type)}将达到上限", $"{Status(type)} reaches its limit");
 
     public static string Status(CharacterAfflictions.STATUSTYPE type)
     {
@@ -210,14 +219,17 @@ internal static class Labels
 
         switch (type)
         {
-            case CharacterAfflictions.STATUSTYPE.Injury: return "Injury";
-            case CharacterAfflictions.STATUSTYPE.Hunger: return "Hunger";
-            case CharacterAfflictions.STATUSTYPE.Cold: return "Cold";
-            case CharacterAfflictions.STATUSTYPE.Poison: return "Poison";
-            case CharacterAfflictions.STATUSTYPE.Curse: return "Curse";
-            case CharacterAfflictions.STATUSTYPE.Drowsy: return "Drowsy";
-            case CharacterAfflictions.STATUSTYPE.Weight: return "Weight";
-            case CharacterAfflictions.STATUSTYPE.Hot: return "Heat";
+            case CharacterAfflictions.STATUSTYPE.Injury: return Text("伤势", "Injury");
+            case CharacterAfflictions.STATUSTYPE.Hunger: return Text("饥饿", "Hunger");
+            case CharacterAfflictions.STATUSTYPE.Cold: return Text("寒冷", "Cold");
+            case CharacterAfflictions.STATUSTYPE.Poison: return Text("毒素", "Poison");
+            case CharacterAfflictions.STATUSTYPE.Curse: return Text("诅咒", "Curse");
+            case CharacterAfflictions.STATUSTYPE.Drowsy: return Text("困倦", "Drowsy");
+            case CharacterAfflictions.STATUSTYPE.Weight: return Text("负重", "Weight");
+            case CharacterAfflictions.STATUSTYPE.Hot: return Text("炎热", "Heat");
+            case CharacterAfflictions.STATUSTYPE.Spores: return Text("孢子", "Spores");
+            case CharacterAfflictions.STATUSTYPE.Petrify: return Text("石化", "Petrify");
+            case CharacterAfflictions.STATUSTYPE.Thorns: return Text("荆棘", "Thorns");
             default: return type.ToString();
         }
     }

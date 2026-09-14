@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.13 — 2026-09-14 / Optional readable detailed descriptions
+
+- Add Minimal / Detailed description selection in the pause-menu settings; stamina preview controls remain independent.
+- Detailed cards show the item icon beside its name, known cooking count and adjustable background transparency.
+- Describe immediate effects, per-second changes, duration and delayed side effects in plain language with status icons. Combine redundant drowsiness clearing; omit unavailable information.
+- Add Turkish and Spanish translations alongside Chinese and English.
+- Stop refreshing hidden settings, limit prediction refreshes, reuse unchanged text layouts and release settings UI focus on close.
+- 新增可选详细模式、名称旁物品图标、烹饪次数与背景透明度设置；精力条预览仍可独立调整。
+- 详细版使用文字配图标，明确即时／每秒效果、持续时间及延迟副作用；合并重复困倦恢复，省略不存在的信息。
+- 保留中英文并新增土耳其语、西班牙语；减少隐藏设置和重复布局的刷新，关闭设置时清理其 UI 焦点。
+
 ## 0.2.12 — 2026-09-13 / English instructions first
 
 - Move English instructions above Chinese instructions; retain all screenshots and demos.

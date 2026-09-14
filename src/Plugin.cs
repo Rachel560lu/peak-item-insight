@@ -10,7 +10,7 @@ public sealed class Plugin : BaseUnityPlugin
 {
     public const string PluginGuid = "dev.rachel.peakiteminsight";
     public const string PluginName = "PEAK Item Insight";
-    public const string PluginVersion = "0.2.11";
+    public const string PluginVersion = "0.2.13";
 
     private ConfigEntry<bool> _enabled = null!;
     private ConfigEntry<float> _hoverDelay = null!;
@@ -27,8 +27,13 @@ public sealed class Plugin : BaseUnityPlugin
         _hoverDelay = Config.Bind("General", "HoverDelaySeconds", 0.12f,
             new ConfigDescription("Delay before a preview appears.", new AcceptableValueRange<float>(0f, 1f)));
         _showDebugIds = Config.Bind("Debug", "ShowDebugIds", false, "Show stable item IDs in the tooltip.");
+        Core.PresentationOptions.DescriptionStyle = Config.Bind("UI", "DescriptionStyle", Core.DescriptionStyle.Minimal,
+            "Inventory description style: Minimal or Detailed. Independent of stamina preview.");
         Core.PresentationOptions.Language = Config.Bind("UI", "Language", "Auto",
-            new ConfigDescription("Display language; Auto follows the game.", new AcceptableValueList<string>("Auto", "Chinese", "English")));
+            new ConfigDescription("Display language; Auto follows the game.", new AcceptableValueList<string>("Auto", "Chinese", "English", "Turkish", "Spanish")));
+        Core.PresentationOptions.DetailedBackgroundOpacity = Config.Bind("UI", "DetailedBackgroundOpacity", .92f,
+            new ConfigDescription("Detailed card background opacity: 0 transparent, 1 opaque. Text and icons are unaffected.",
+                new AcceptableValueRange<float>(0f, 1f)));
         Core.PresentationOptions.MinimalScale = Config.Bind("UI", "MinimalScale", 1f,
             new ConfigDescription("Minimal display scale.", new AcceptableValueRange<float>(.5f, 2f)));
         Core.PresentationOptions.MinimalOffsetX = Config.Bind("UI", "MinimalOffsetX", 0f, "Minimal horizontal offset from inventory.");

@@ -1,0 +1,111 @@
+# English source template	Translation
+Unknown item	Objeto desconocido
+MYSTICAL	MÍSTICO
+CONSUMABLE	CONSUMIBLE
+UTILITY	HERRAMIENTA
+Temporary	Temporal
+Infinite stamina for {0:0.#} s.	Resistencia infinita durante {0:0.#} s.
+Affects nearby teammates, not yourself.	Afecta a los compañeros cercanos; no te afecta a ti.
+Nearby teammates only	Solo compañeros cercanos
+World item: prefab data; instance state unverified.	Objeto del mundo: datos base; estado de esta instancia sin verificar.
+Pulse includes estimated timed totals; excludes natural recovery, environment and existing buffs.	El parpadeo incluye estimaciones de efectos temporales; excluye recuperación natural, entorno y mejoras activas.
+Treats injuries; actual recovery depends on your current injury.	Cura heridas; la recuperación depende de tu lesión actual.
+Speed boost	Más velocidad
+Temporary speed boost for {0:0.#} s.	Más velocidad durante {0:0.#} s.
+Infinite stamina for {0:0.#} s after climbing starts.	Resistencia infinita durante {0:0.#} s desde que empiezas a escalar.
+Temporary invincibility	Invulnerabilidad temporal
+Invincible for {0:0.#} s.	Invulnerable durante {0:0.#} s.
+Within range	Dentro del alcance
+Grants infinite stamina to characters within range.	Otorga resistencia infinita a los personajes dentro del alcance.
+Also clears ongoing poison effects.	También elimina los efectos de veneno continuos.
+Stops ongoing poisoning	Detiene el envenenamiento continuo
+Infinite stamina for 4 s, after 3 s.	Resistencia infinita durante 4 s, tras 3 s.
+Speed boost for 5 s, after 3 s.	Más velocidad durante 5 s, tras 3 s.
+Low gravity for 15 s, after 3 s.	Gravedad reducida durante 15 s, tras 3 s.
+Low gravity	Gravedad reducida
+Invincibility for 10 s.	Invulnerabilidad durante 10 s.
+Spore explosion and upward launch after 3 s; area damage not quantified.	Explosión de esporas e impulso hacia arriba tras 3 s; daño de área sin cuantificar.
+Spore blast / launch	Explosión de esporas / impulso
+Blindness for 60 s, after 3 s.	Ceguera durante 60 s, tras 3 s.
+Temporary blindness	Ceguera temporal
+Fall for about 8 s, after 3 s.	Caída durante unos 8 s, tras 3 s.
+Fall	Caída
+Numbness for 60 s, after 3 s.	Entumecimiento durante 60 s, tras 3 s.
+Temporary numbness	Entumecimiento temporal
+This level's mushroom effect is unconfirmed.	El efecto del hongo de este nivel no está confirmado.
+Place the cannon and adjust its angle to launch scouts or items.	Coloca el cañón y ajusta su ángulo para lanzar exploradores u objetos.
+Open your passport.	Abre tu pasaporte.
+Drop or throw; it bursts on impact into a healing cloud for you and nearby teammates. It heals injury and removes poison and spores. Stay in the cloud for continued healing; do not eat it.	Suéltalo o lánzalo; al impactar crea una nube curativa para ti y tus compañeros cercanos. Cura heridas y elimina veneno y esporas. Quédate dentro para seguir curándote; no lo comas.
+Wall rest point · one scout; normal pitons reusable, rusty pitons break.	Descanso en pared · un explorador; pitones normales reutilizables, los oxidados se rompen.
+Drop/throw: stay in cloud to heal yourself and teammates; clears poison/spores.	Soltar/lanzar: quédate en la nube para curarte y curar a tus compañeros; elimina veneno/esporas.
+Place and aim: launch scouts/items.	Colocar y apuntar: lanza exploradores/objetos.
+Open	Abrir
+Place	Colocar
+Change Angle	Ajustar ángulo
+Held	En mano
+Hover	Al apuntar
+Uses	Usos
+Remaining	Restante
+Fuel	Combustible
+Cooked	Cocción
+No	No
+Place on a climbable wall and grab it to rest and recover stamina. One scout at a time. A normal piton has no rest-use limit. Beware: rusty pitons found on the map can break.	Colócalo en una pared escalable y agárralo para descansar y recuperar resistencia. Un explorador a la vez. Los pitones normales no tienen límite de descansos. Cuidado: los pitones oxidados del mapa pueden romperse.
+No previewable effect detected.	No se detectó ningún efecto que mostrar.
+No net stamina change at current state; see individual effects above.	Sin cambio neto de resistencia en el estado actual; consulta los efectos individuales arriba.
+No uses remaining.	No quedan usos.
+Special character state: exact preview unavailable.	Estado especial del personaje: no se puede mostrar una predicción exacta.
+Conditional held/cancel/consume effects are not fully included.	Los efectos condicionales al sostener/cancelar/consumir no están incluidos por completo.
+Some effects are not yet supported.	Algunos efectos aún no son compatibles.
+Extra stamina	Resistencia extra
+{0} reaches its limit	{0} alcanza su límite
+Injury	Lesión
+Hunger	Hambre
+Cold	Frío
+Poison	Veneno
+Spores	Esporas
+Curse	Maldición
+Drowsy	Somnolencia
+Weight	Peso
+Heat	Calor
+Petrify	Petrificación
+Thorns	Espinas
+Clear	Eliminar
+Present	Presente
+Item Insight settings	Ajustes de Item Insight
+Both: aimed item first, otherwise held item. Changes save immediately.	Ambos: primero el objeto apuntado; si no, el de la mano. Se guarda al instante.
+Done	Listo
+Text above inventory	Texto sobre el inventario
+Stamina bar preview	Vista previa de resistencia
+Both	Ambos
+Off	Desactivado
+Description style	Estilo de descripción
+Minimal	Mínimo
+Detailed	Detallado
+Invincibility	Invulnerabilidad
+{0:0.#} s	{0:0.#} s
+After {0:0.#} s	Tras {0:0.#} s
+After effect ends	Al terminar el efecto
+{0:0.#} s after effect ends	{0:0.#} s después de terminar el efecto
+Timer starts when climbing.	El tiempo empieza a contar al escalar.
+Detailed background transparency	Transparencia del fondo detallado
+
+For {0:0.#} s	Durante {0:0.#} s
+{0:0.#} s after the effect ends, 	{0:0.#} s después de terminar el efecto, 
+After the effect ends, 	Al terminar el efecto, 
+After {0:0.#} s, 	Tras {0:0.#} s, 
+After climbing starts, 	Al empezar a escalar, 
+Immediately clear {0}	Elimina {0} inmediatamente
+clear {0}	elimina {0}
+reduce {0} by {1} each second	reduce {0} en {1} cada segundo
+increase {0} by {1} each second	aumenta {0} en {1} cada segundo
+Immediately reduce {0} by {1}	Reduce {0} en {1} inmediatamente
+Immediately increase {0} by {1}	Aumenta {0} en {1} inmediatamente
+reduce {0} by {1}	reduce {0} en {1}
+increase {0} by {1}	aumenta {0} en {1}
+Immediately clear {0}, then keep clearing it	Elimina {0} inmediatamente y sigue eliminándolo
+Gain infinite stamina	Otorga resistencia infinita
+Gain a speed boost	Otorga un aumento de velocidad
+Gain invincibility	Otorga invencibilidad
+Gain {0} extra stamina	Otorga {0} de resistencia adicional
+Contains {0}	Contiene {0}
+Unknown {0} effects	Efectos de {0} desconocidos

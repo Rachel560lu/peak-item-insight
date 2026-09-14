@@ -21,6 +21,9 @@ internal static class MinimalRows
 {
     private static string Number(float value) => value.ToString("0.#", CultureInfo.InvariantCulture);
     public static List<MinimalRow> Build(ItemPreview preview, bool chinese)
+        => Build(preview, chinese ? "清除" : "Clear", chinese ? "有" : "Present");
+
+    public static List<MinimalRow> Build(ItemPreview preview, string clear, string present)
     {
         var rows = new List<MinimalRow>();
         var summary = preview.SummarizeEffects || preview.Effects.Any(e => e.Timed);
@@ -39,7 +42,7 @@ internal static class MinimalRows
             {
                 if (!effect.Clears && Math.Abs(effect.Amount) < .00001f) continue;
                 var total = effect.Amount * 100;
-                var text = effect.Clears ? (chinese ? "清除" : "Clear") : (total > 0 ? "+" : "") + Number(total);
+                var text = effect.Clears ? clear : (total > 0 ? "+" : "") + Number(total);
                 rows.Add(new MinimalRow(text, effect.Type, direction: effect.Clears ? 0 : Math.Sign(total)));
             }
             if (preview.Effects.Count == 0)
@@ -49,8 +52,8 @@ internal static class MinimalRows
                     if (Math.Abs(delta) > .00001f) rows.Add(new MinimalRow((delta > 0 ? "+" : "") + Number(delta), status.Type, direction: Math.Sign(delta)));
                 }
         }
-        AddRisk(rows, preview, preview.PoisonRisk, CharacterAfflictions.STATUSTYPE.Poison, chinese);
-        AddRisk(rows, preview, preview.SporeRisk, CharacterAfflictions.STATUSTYPE.Spores, chinese);
+        AddRisk(rows, preview, preview.PoisonRisk, CharacterAfflictions.STATUSTYPE.Poison, present);
+        AddRisk(rows, preview, preview.SporeRisk, CharacterAfflictions.STATUSTYPE.Spores, present);
         if (preview.HasExtraStamina && (!summary || preview.ExtraAfter - preview.ExtraBefore >= .0005f))
             rows.Add(new MinimalRow("+" + Number(Math.Max(0, preview.ExtraAfter - preview.ExtraBefore) * 100), lightning: true,
                 direction: preview.ExtraAfter > preview.ExtraBefore ? 1 : 0));
@@ -64,12 +67,12 @@ internal static class MinimalRows
         return rows;
     }
 
-    private static void AddRisk(List<MinimalRow> rows, ItemPreview preview, RiskLevel risk, CharacterAfflictions.STATUSTYPE type, bool chinese)
+    private static void AddRisk(List<MinimalRow> rows, ItemPreview preview, RiskLevel risk, CharacterAfflictions.STATUSTYPE type, string present)
     {
         if (risk == RiskLevel.Absent || !preview.IsFood && risk != RiskLevel.Present) return;
         if (risk == RiskLevel.Present && (preview.SummarizeEffects || preview.Effects.Any(e => e.Timed)
             ? rows.Any(r => r.Status == type && r.Direction > 0)
             : preview.Effects.Any(e => e.Type == type && e.Amount > 0))) return;
-        rows.Add(new MinimalRow(risk == RiskLevel.Present ? (chinese ? "有" : "Present") : "?", type));
+        rows.Add(new MinimalRow(risk == RiskLevel.Present ? present : "?", type));
     }
 }

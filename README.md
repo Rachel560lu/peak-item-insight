@@ -73,6 +73,8 @@ Change each row independently. Choices save immediately; click **Done** to close
 
 | Setting | Controls |
 |---|---|
+| Description style | Minimal (default) or Detailed card with a rounded background |
+| Detailed background transparency | 0–100%; changes only the detailed card fill, keeping text and icons opaque |
 | Text above inventory | Effect numbers, icons and instructions above your inventory |
 | Stamina bar preview | Predicted recovery and harmful changes on the stamina bar |
 
@@ -86,11 +88,11 @@ Alternatively, close the game and edit **InventoryTextSource** (text) and **Stam
 
 After the first launch, close the game and find **dev.rachel.peakiteminsight** in your manager's **Config editor**:
 
-- **Language:** follow the game, or choose Chinese / English.
-- **MinimalScale / MinimalOffsetX / MinimalOffsetY:** resize and reposition the minimal display.
+- **Language:** use `Auto` to follow the game, or choose `Chinese` / `English` / `Turkish` / `Spanish`. Auto supports both Spanish regions; manual Spanish uses Spain’s native item text. Missing mod translations fall back to English.
+- **MinimalScale / MinimalOffsetX / MinimalOffsetY:** resize and reposition the inventory description in either style.
 - **AnimateRecovery:** turn pulsing on or off; off uses a steady preview color.
 
-The minimal interface is always enabled; no mode selection is needed.
+Press **Esc → Item Insight settings → Description style** to choose **Minimal / Detailed**. Detailed cards show the item icon beside its name, known cooking count, plain-language effects with status icons, per-second changes, durations, delayed side effects and necessary use conditions. Missing information is omitted. The stamina preview remains independent; choose **Off** to keep only the description card. You can also edit **UI.DescriptionStyle** (Minimal / Detailed) in Config editor.
 
 Instant-only items show effects per use. Timed-effect items show the final change from your current state, matching the stamina preview; speed boosts and temporary infinite stamina keep short labels. A question mark means the risk is not confirmed.
 
@@ -130,10 +132,12 @@ To uninstall, close the game and disable or remove **PeakItemInsight** in your m
 
 ![暂停菜单设置入口](docs/assets/settings-entry.png)
 
-两项可独立设置，点击即保存，点击「完成 / Done」关闭：
+简介样式和两项预览可独立设置，点击即保存，点击「完成 / Done」关闭：
 
 | 设置 | 控制内容 |
 |---|---|
+| 物品简介样式 / Description style | 极简（默认）或带圆角背景框的详细卡片 |
+| 详细背景透明度 / Detailed background transparency | 0–100%；只调整详细卡片底色，文字和图标保持不透明 |
 | 物品栏上方文字 / Text above inventory | 物品栏上方的效果数值、图标和用途说明 |
 | 精力条闪烁预览 / Stamina bar preview | 精力条上预计恢复或增加的状态区域 |
 
@@ -147,11 +151,11 @@ To uninstall, close the game and disable or remove **PeakItemInsight** in your m
 
 首次启动后，退出游戏，在管理器的 **Config editor** 中找到 **dev.rachel.peakiteminsight**：
 
-- **Language：**跟随游戏，或选择中文／英文。
-- **MinimalScale / MinimalOffsetX / MinimalOffsetY：**调整极简模式大小与位置。
+- **Language：**默认 `Auto` 跟随游戏，或选择中文（Chinese）／英文（English）／土耳其语（Turkish）／西班牙语（Spanish）。自动模式支持两种西班牙语地区；手动 Spanish 使用游戏的西班牙地区物品译文。缺失的 mod 翻译回退到英文。
+- **MinimalScale / MinimalOffsetX / MinimalOffsetY：**调整两种物品简介样式的大小与位置。
 - **AnimateRecovery：**开启或关闭闪烁；关闭后使用固定颜色预览。
 
-默认直接使用极简界面，无需选择模式。
+按 **Esc → Item Insight 设置 → 物品简介样式** 选择 **极简 / 详细**。详细卡片显示名称旁的物品图标、已有的烹饪次数、文字配状态图标的效果说明、每秒变化、持续时间、延迟副作用，以及必要的使用／触发条件；没有的信息直接省略。精力条预览仍可独立关闭，选择 **Off** 即可只保留描述卡片。也可在 Config editor 中调整 **UI.DescriptionStyle**（Minimal / Detailed）。
 
 纯即时物品显示本次使用效果；持续效果物品显示从当前状态到效果结算后的预计变化，与精力条预览一致。加速、临时无限精力保留短标签。问号代表风险尚未确认。
 

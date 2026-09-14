@@ -6,6 +6,9 @@
   <ItemGroup>
     <Compile Include="../../src/Core/Models.cs" Link="Models.cs" />
     <Compile Include="../../src/Core/MinimalRows.cs" Link="MinimalRows.cs" />
+    <Compile Include="../../src/Core/DetailedRows.cs" Link="DetailedRows.cs" />
+    <Compile Include="../../src/Core/LanguageCatalog.cs" Link="LanguageCatalog.cs" />
+    <EmbeddedResource Include="../../src/Localization/*.tsv" LogicalName="PeakItemInsight.Localization.%(Filename)%(Extension)" />
     <Compile Include="../../src/Core/PreviewMath.cs" Link="PreviewMath.cs" />
     <Compile Include="../../src/Core/EffectProjection.cs" Link="EffectProjection.cs" />
     <Compile Include="../../src/Core/AuditedPoisonCases.cs" Link="AuditedPoisonCases.cs" />

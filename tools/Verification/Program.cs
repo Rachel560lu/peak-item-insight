@@ -11,6 +11,199 @@ void Check(string name, Action action)
 void Expect(bool value) { if (!value) throw new Exception("Assertion failed"); }
 void Near(float actual, float expected) => Expect(Math.Abs(actual - expected) < 0.00001f);
 
+Check("language routing follows game and honors manual overrides", () => {
+    Expect(LanguageCatalog.Resolve("Auto", "Turkish") == "Turkish");
+    Expect(LanguageCatalog.Resolve("Auto", "SpanishSpain") == "Spanish");
+    Expect(LanguageCatalog.Resolve("Auto", "SpanishLatam") == "Spanish");
+    Expect(LanguageCatalog.Resolve(null, "TraditionalChinese") == "Chinese");
+    Expect(LanguageCatalog.Resolve("English", "Turkish") == "English");
+    Expect(LanguageCatalog.Resolve("Spanish", "English") == "Spanish");
+    Expect(LanguageCatalog.Resolve("Turkish", "SimplifiedChinese") == "Turkish");
+    Expect(LanguageCatalog.Resolve("Auto", "French") == "English");
+});
+Check("embedded translations and fallback preserve existing languages", () => {
+    Expect(LanguageCatalog.Text("Turkish", "Hunger") == "Açlık");
+    Expect(LanguageCatalog.Text("Spanish", "Injury") == "Lesión");
+    Expect(LanguageCatalog.Text("Turkish", "New untranslated label") == "New untranslated label");
+    Expect(LanguageCatalog.Text("Spanish", "New untranslated label") == "New untranslated label");
+    Expect(LanguageCatalog.Text("English", "Clear", "清除") == "Clear");
+    Expect(LanguageCatalog.Text("Chinese", "Clear", "清除") == "清除");
+});
+Check("localized duration templates keep formatted numeric arguments", () => {
+    var prior = System.Globalization.CultureInfo.CurrentCulture;
+    try {
+        System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+        float seconds = 4.5f;
+        Expect(LanguageCatalog.Format("Turkish", $"无限精力 {seconds:0.#} 秒。", $"Infinite stamina for {seconds:0.#} s.") == "4.5 sn boyunca sınırsız dayanıklılık.");
+        Expect(LanguageCatalog.Format("Spanish", $"无限精力 {seconds:0.#} 秒。", $"Infinite stamina for {seconds:0.#} s.") == "Resistencia infinita durante 4.5 s.");
+        Expect(LanguageCatalog.Format("English", $"无限精力 {seconds:0.#} 秒。", $"Infinite stamina for {seconds:0.#} s.") == "Infinite stamina for 4.5 s.");
+        Expect(LanguageCatalog.Format("Chinese", $"无限精力 {seconds:0.#} 秒。", $"Infinite stamina for {seconds:0.#} s.") == "无限精力 4.5 秒。");
+    } finally { System.Globalization.CultureInfo.CurrentCulture = prior; }
+});
+Check("localized risk rows never turn unknown poison into safe", () => {
+    foreach (var language in new[] { "Turkish", "Spanish" }) {
+        var p = new ItemPreview { IsFood = true, PoisonRisk = RiskLevel.Unknown, SporeRisk = RiskLevel.Absent };
+        var clear = LanguageCatalog.Text(language, "Clear");
+        var present = LanguageCatalog.Text(language, "Present");
+        var row = MinimalRows.Build(p, clear, present).Single();
+        Expect(row.Text == "?" && row.Status == CharacterAfflictions.STATUSTYPE.Poison);
+        p.PoisonRisk = RiskLevel.Present;
+        Expect(MinimalRows.Build(p, clear, present).Single().Text == present);
+        p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Injury, -5, clears: true));
+        Expect(MinimalRows.Build(p, clear, present).Any(r => r.Text == clear));
+    }
+});
+
+Check("detailed: missing durations and side effects produce no placeholders", () => {
+    var p = new ItemPreview { Name = "Food", IsFood = true, PoisonRisk = RiskLevel.Absent, SporeRisk = RiskLevel.Absent };
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Hunger, -.15f));
+    foreach (var lang in new[] { "Chinese", "English", "Turkish", "Spanish" }) {
+        var rows = DetailedRows.Build(p, lang);
+        Expect(rows.Count == 2 && rows[0].Title);
+        Expect(rows[1].Text.Contains("15") && rows[1].NamesStatus && rows[1].Timing == "");
+        Expect(rows.All(r => r.Status != CharacterAfflictions.STATUSTYPE.Poison));
+    }
+    p.Diagnostics.Add("unsupported internals");
+    Expect(DetailedRows.Build(p, "English").Count == 2);
+});
+Check("detailed: recovery and delayed poison retain rate, duration and sequence", () => {
+    var p = new ItemPreview { Name = "Food", IsFood = true, PoisonRisk = RiskLevel.Present, SporeRisk = RiskLevel.Absent };
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Hunger, -.15f));
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Poison, .025f, 4, 2));
+    var rows = DetailedRows.Build(p, "English");
+    Expect(rows.Count == 3 && rows[1].Text == "Immediately reduce hunger by 15");
+    Expect(rows[2].Text == "After 2 s, increase poison by 2.5 each second" && rows[2].Timing == "For 4 s");
+    Expect(rows.Count(r => r.Status == CharacterAfflictions.STATUSTYPE.Poison) == 1);
+    Near(p.Effects[1].Amount, .025f);
+});
+Check("detailed: delayed instantaneous effect is not interpreted as a rate", () => {
+    var p = new ItemPreview { Name = "Drink" };
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Drowsy, .25f, delay: 11));
+    var row = DetailedRows.Build(p, "English").Last();
+    Expect(row.Text == "After 11 s, increase drowsiness by 25" && row.Timing == "");
+});
+Check("detailed: after-effect penalty is explicit and conditional", () => {
+    var p = new ItemPreview { Name = "Drink" };
+    p.Buffs.Add(new BuffFact(BuffKind.Speed, 11));
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Drowsy, .25f, delay: 11, trigger: EffectTrigger.EffectEnd));
+    var rows = DetailedRows.Build(p, "Chinese");
+    Expect(rows[1].Buff == BuffKind.Speed && rows[1].Text == "获得加速" && rows[1].Timing == "持续 11 秒");
+    Expect(rows.Last().Text == "效果结束后，增加 25 困倦" && rows.Last().Timing == "");
+    p.Effects.Clear();
+    Expect(DetailedRows.Build(p, "Chinese").Count == 2);
+});
+Check("detailed: effect-end offset is preserved separately from predicted delay", () => {
+    var p = new ItemPreview { Name = "Candy" };
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Drowsy, .01f, 5, 13,
+        trigger: EffectTrigger.EffectEnd, endDelay: 2));
+    var row = DetailedRows.Build(p, "English").Last();
+    Expect(row.Text == "2 s after the effect ends, increase drowsiness by 1 each second" && row.Timing == "For 5 s");
+});
+Check("detailed: infinite stamina carries real timing and climbing condition", () => {
+    var p = new ItemPreview { Name = "Candy", InfiniteStamina = true };
+    p.Buffs.Add(new BuffFact(BuffKind.InfiniteStamina, 11, trigger: EffectTrigger.Climbing));
+    p.DetailConditions.Add("Timer starts when climbing.");
+    var rows = DetailedRows.Build(p, "English");
+    Expect(rows.Count == 3 && rows[1].Lightning && rows[1].Text == "Gain infinite stamina" && rows[1].Timing == "For 11 s");
+    Expect(rows.Last().Text == "Timer starts when climbing.");
+});
+Check("detailed: clearing statuses hides sentinel quantities and absent risks", () => {
+    var p = new ItemPreview { Name = "Medicine", PoisonRisk = RiskLevel.Absent, SporeRisk = RiskLevel.Absent };
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Poison, -5, clears: true));
+    var row = DetailedRows.Build(p, "English").Last();
+    Expect(row.Text == "Immediately clear poison" && row.Timing == "");
+});
+Check("detailed: unknown risks remain visible even without numeric effects", () => {
+    var p = new ItemPreview { Name = "Food", IsFood = true, PoisonRisk = RiskLevel.Unknown, SporeRisk = RiskLevel.Absent };
+    var rows = DetailedRows.Build(p, "English");
+    Expect(rows.Count == 2 && rows.Last().Text == "Unknown poison effects" && rows.Last().Status == CharacterAfflictions.STATUSTYPE.Poison);
+});
+Check("detailed: empty cards hidden and useful utility condition retained", () => {
+    var p = new ItemPreview { Name = "Item" };
+    Expect(DetailedRows.Build(p, "English").Count == 0);
+    p.CompactUse = "Drop/throw: stay in cloud";
+    p.Description = "A much longer duplicate description.";
+    p.DetailConditions.Add("Nearby teammates only.");
+    var rows = DetailedRows.Build(p, "English");
+    Expect(rows.Count == 2 && rows.Last().Text.Contains(p.CompactUse) && !rows.Last().Text.Contains(p.Description));
+});
+Check("detailed: cooking facts visible only in detailed cards and omitted when missing", () => {
+    var p = new ItemPreview { Name = "Chicken", IsFood = true, PoisonRisk = RiskLevel.Absent, SporeRisk = RiskLevel.Absent };
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Hunger, -.15f));
+    Expect(DetailedRows.Build(p, "English").Count == 2);
+    p.Resources.Add(new ResourceLine("Cooked", "x2", ResourceKind.Cooked));
+    Expect(DetailedRows.Build(p, "English").Last().Text == "Cooked: x2");
+    Expect(MinimalRows.Build(p, false).Count == 1);
+    p.Resources.Clear();
+    Expect(DetailedRows.Build(p, "English").Count == 2);
+});
+Check("detailed: duration and end-effect labels follow existing language selection", () => {
+    var p = new ItemPreview { Name = "Drink" };
+    p.Buffs.Add(new BuffFact(BuffKind.Speed, 11, 2));
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Drowsy, .25f, delay: 11, trigger: EffectTrigger.EffectEnd));
+    Expect(DetailedRows.Build(p, "Turkish")[1].Text == "2 sn sonra, Hız artışı sağlar" && DetailedRows.Build(p, "Turkish")[1].Timing == "11 sn boyunca");
+    Expect(DetailedRows.Build(p, "Spanish").Last().Text == "Al terminar el efecto, aumenta Somnolencia en 25");
+});
+
+Check("detailed prose: energy drink merges full clearing but keeps delayed penalty and facts", () => {
+    var p = new ItemPreview { Name = "Energy Drink" };
+    p.Buffs.Add(new BuffFact(BuffKind.Speed, 8));
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Hot, -.3f));
+    // Deliberately put the rate before its immediate clears, as serialized order may vary.
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Drowsy, -1, 8));
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Drowsy, -1));
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Drowsy, -.5f));
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Drowsy, .25f, delay: 8, trigger: EffectTrigger.EffectEnd));
+    var facts = p.Effects.ToArray();
+    var rows = DetailedRows.Build(p, "Chinese");
+    Expect(rows.Count == 5);
+    Expect(rows[3].Text == "立即清除困倦，随后持续消除困倦" && rows[3].Timing == "持续 8 秒");
+    Expect(rows[4].Text == "效果结束后，增加 25 困倦");
+    Expect(p.Effects.SequenceEqual(facts));
+    foreach (var language in new[] { "Turkish", "Spanish" }) {
+        var localized = DetailedRows.Build(p, language);
+        Expect(localized[3].Text != DetailedRows.Build(p, "English")[3].Text);
+    }
+});
+Check("detailed prose: lollipop states per-second penalty and climbing trigger", () => {
+    var p = new ItemPreview { Name = "Big Lollipop", InfiniteStamina = true };
+    p.Buffs.Add(new BuffFact(BuffKind.InfiniteStamina, 8, trigger: EffectTrigger.Climbing));
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Hunger, -.05f));
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Drowsy, .03333334f, 10, 8, trigger: EffectTrigger.EffectEnd));
+    var rows = DetailedRows.Build(p, "Chinese");
+    Expect(rows[1].Text == "获得无限精力" && rows[1].Timing == "持续 8 秒");
+    Expect(rows[3].Text == "效果结束后，每秒增加 3.3 困倦" && rows[3].Timing == "持续 10 秒");
+    Expect(rows.Last().Text == "开始攀爬后计时。");
+});
+Check("detailed prose: heat pack keeps a rate instead of a cumulative or capped amount", () => {
+    var p = new ItemPreview { Name = "Heat Pack" };
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Cold, -.06f, 60));
+    var row = DetailedRows.Build(p, "Chinese").Last();
+    Expect(row.Text == "每秒减少 6 寒冷" && row.Timing == "持续 60 秒" && row.NamesStatus);
+});
+Check("detailed prose: partial recovery, opposite signs and different timing stay distinct", () => {
+    var p = new ItemPreview { Name = "Drink" };
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Drowsy, -.2f));
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Drowsy, -.1f));
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Drowsy, .25f));
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Drowsy, -.5f, delay: 3));
+    var rows = DetailedRows.Build(p, "English");
+    Expect(rows.Count == 4);
+    Expect(rows[1].Text == "Immediately reduce drowsiness by 30");
+    Expect(rows[2].Text == "After 3 s, reduce drowsiness by 50");
+    Expect(rows[3].Text == "Immediately increase drowsiness by 25");
+    Expect(rows.All(r => !r.Text.Contains("clear")));
+});
+Check("detailed prose: timed recovery and statuses with larger caps are not falsely cleared", () => {
+    var p = new ItemPreview { Name = "Recovery" };
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Drowsy, -.1f, 60));
+    p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Poison, -1));
+    var rows = DetailedRows.Build(p, "English");
+    Expect(rows.Any(r => r.Text == "Immediately reduce poison by 100"));
+    Expect(rows.Any(r => r.Text == "reduce drowsiness by 10 each second"));
+    Expect(rows.All(r => !r.Text.Contains("clear")));
+});
+
 Check("source modes independently choose hover or held", () => {
     Expect(PreviewTargetSelection.Select(1, 2, false, PreviewMode.Hover).InstanceId == 1);
     Expect(PreviewTargetSelection.Select(1, 2, false, PreviewMode.Held).InstanceId == 2);
@@ -151,6 +344,28 @@ Check("installed API: LateUpdate actually contains currentHovered writes", () =>
 });
 var root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../"));
 var dll = Path.Combine(root, "bin/Release/netstandard2.1/PeakItemInsight.dll");
+Check("production DLL embeds complete matching catalogs with intact placeholders", () => {
+    using var mod = ModuleDefinition.ReadModule(dll);
+    Dictionary<string, string> ReadCatalog(string language) {
+        var resource = mod.Resources.OfType<EmbeddedResource>().Single(r => r.Name == "PeakItemInsight.Localization." + language + ".tsv");
+        using var reader = new StreamReader(resource.GetResourceStream());
+        var entries = new Dictionary<string, string>();
+        string? line;
+        while ((line = reader.ReadLine()) != null) {
+            if (line.Length == 0 || line.StartsWith("#")) continue;
+            var parts = line.Split('\t');
+            Expect(parts.Length == 2 && parts[0].Length > 0 && parts[1].Length > 0);
+            entries.Add(parts[0], parts[1]);
+            string[] Placeholders(string text) => System.Text.RegularExpressions.Regex.Matches(text, @"\{\d+(?::[^}]+)?\}").Select(m => m.Value).Order().ToArray();
+            Expect(Placeholders(parts[0]).SequenceEqual(Placeholders(parts[1])));
+        }
+        return entries;
+    }
+    var turkish = ReadCatalog("Turkish"); var spanish = ReadCatalog("Spanish");
+    Expect(turkish.Count > 0 && turkish.Keys.Order().SequenceEqual(spanish.Keys.Order()));
+    Expect(turkish["Present"] == "Var" && spanish["Present"] == "Presente");
+    Expect(turkish["Stops ongoing poisoning"].Length > 0 && spanish["Stops ongoing poisoning"].Length > 0);
+});
 Check("compiled live HUD routes through recovery pair, not old rectangles", () => {
     using var mod = ModuleDefinition.ReadModule(dll);
     var hud = mod.Types.Single(t => t.Name == "HudGhostOverlay");
@@ -393,9 +608,10 @@ Check("minimal: infinite stamina short label without duplicated duration", () =>
     var p = new ItemPreview { InfiniteStamina = true, SummarizeEffects = true, CompactInfinity = "Temporary" };
     var rows = MinimalRows.Build(p, false); Expect(rows.Count == 1 && rows[0].Lightning && rows[0].Text == "Temporary ∞");
 });
-Check("minimal-only: legacy Detailed setting cannot restore removed card", () => {
+Check("description styles: original background available without restoring legacy card behavior", () => {
     using var mod = ModuleDefinition.ReadModule(dll);
-    Expect(!mod.Types.Any(t => t.Name == "PreviewPanel" || t.Name == "RoundedCard"));
+    Expect(!mod.Types.Any(t => t.Name == "PreviewPanel"));
+    Expect(mod.Types.Any(t => t.Name == "RoundedCard"));
     var plugin = mod.Types.Single(t => t.Name == "Plugin");
     var strings = plugin.Methods.Where(m => m.HasBody).SelectMany(m => m.Body.Instructions)
         .Where(i => i.OpCode == OpCodes.Ldstr).Select(i => (string)i.Operand).ToArray();

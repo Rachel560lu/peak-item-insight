@@ -3,6 +3,16 @@ using Mono.Cecil.Cil;
 
 var assemblyPath = args.FirstOrDefault(a => a.EndsWith(".dll")) ?? @"D:\SteamLibrary\steamapps\common\PEAK\PEAK_Data\Managed\Assembly-CSharp.dll";
 var module = ModuleDefinition.ReadModule(assemblyPath);
+var references = args.FirstOrDefault(a => a.StartsWith("--references="))?.Substring(13);
+if (references != null)
+{
+    foreach (var type in module.GetTypes())
+    foreach (var method in type.Methods.Where(m => m.HasBody))
+    foreach (var instruction in method.Body.Instructions)
+        if (instruction.Operand is MemberReference member && member.FullName.Contains(references))
+            Console.WriteLine($"{method.FullName}: {instruction}");
+    return;
+}
 var fieldsOnly = args.Contains("--fields");
 var methodFilter = args.FirstOrDefault(a => a.StartsWith("--method="))?.Substring(9);
 var exact = args.Contains("--exact");

@@ -21,14 +21,14 @@ internal static class MinimalModeSmokeTest
             p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Hunger, -.05f));
             p.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Poison, .025f, 4, 2));
             StatusProjector.Populate(p, type => type == CharacterAfflictions.STATUSTYPE.Hunger ? .05f : 0, _ => 1, false);
-            foreach (var lang in new[] { "Chinese", "English" })
+            foreach (var lang in new[] { "Chinese", "English", "Turkish", "Spanish" })
             foreach (var source in new[] { PreviewSource.Held, PreviewSource.Hover })
             foreach (var zoom in new[] { .5f, 1f, 2f })
             {
                 PresentationOptions.Language.Value = lang; PresentationOptions.MinimalScale.Value = zoom; p.Source = source;
                 p.Resources.Clear();
-                p.Resources.Add(new ResourceLine(lang == "Chinese" ? "剩余次数" : "uses", "4 / 4", ResourceKind.Uses));
-                p.Resources.Add(new ResourceLine(lang == "Chinese" ? "剩余" : "remaining", "100%", ResourceKind.Remaining));
+                p.Resources.Add(new ResourceLine(PeakItemInsight.Providers.Labels.Uses, "4 / 4", ResourceKind.Uses));
+                p.Resources.Add(new ResourceLine(PeakItemInsight.Providers.Labels.Remaining, "100%", ResourceKind.Remaining));
                 active.Hide(); view.Show(p); Canvas.ForceUpdateCanvases();
                 Require(view.IsVisible && !active.IsVisible, "only active preview visible");
                 Require(view.VisibleRows == (source == PreviewSource.Hover ? 5 : 4), "hover identity, effects and resource glyphs");
@@ -64,8 +64,8 @@ internal static class MinimalModeSmokeTest
                 var clamped = MinimalPreviewPanel.ClampToScreen(area, new Vector2(area.xMax, area.yMax), new Vector2(220, 240));
                 Require(clamped.x + 110 <= area.xMax - 16 && clamped.y + 240 <= area.yMax - 16, "screen edge containment");
             }
-            SessionTrace.Write("SMOKE_MINIMAL_NATIVE_PASS", $"font={FontFallbackSwapper.instance.mainBaseFont.name}; exact Chinese/English glyphs; delta arrows; 16:9/16:10/21:9 anchor clamp");
-            SessionTrace.Write("SMOKE_MINIMAL_PASS", "Chinese+English; hover+held; scales .5/1/2; mixed timed poison; hide/rebind; TMP geometry; empty view. Native in-game anchoring needs visual acceptance.");
+            SessionTrace.Write("SMOKE_MINIMAL_NATIVE_PASS", $"font={FontFallbackSwapper.instance.mainBaseFont.name}; exact Chinese/English/Turkish/Spanish glyphs; delta arrows; 16:9/16:10/21:9 anchor clamp");
+            SessionTrace.Write("SMOKE_MINIMAL_PASS", "Chinese+English+Turkish+Spanish; hover+held; scales .5/1/2; mixed timed poison; hide/rebind; TMP geometry; empty view. Native in-game anchoring needs visual acceptance.");
         }
         finally
         {

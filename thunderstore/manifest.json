@@ -1,8 +1,8 @@
 {
   "name": "PeakItemInsight",
-  "version_number": "0.2.12",
+  "version_number": "0.2.13",
   "website_url": "https://github.com/Rachel560lu/peak-item-insight",
-  "description": "Preview recovery, poison and item effects before use. Compact bilingual effects with native status icons, while aiming at or holding items.",
+  "description": "Preview item effects with native HUD icons. Optional detailed descriptions with timings, side effects and cooking info, plus adjustable background transparency.",
   "dependencies": [
     "BepInEx-BepInExPack_PEAK-5.4.2403"
   ]

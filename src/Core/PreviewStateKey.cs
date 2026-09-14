@@ -21,7 +21,9 @@ internal readonly struct PreviewStateKey : IEquatable<PreviewStateKey>
     {
         var uses = ItemDataReader.TryGetInt(item, DataEntryKey.ItemUses, out var itemUses) ? itemUses : -1;
         var cooked = ItemDataReader.TryGetInt(item, DataEntryKey.CookedAmount, out var cookedAmount) ? cookedAmount : -1;
-        var hash = 17;
+        var hash = unchecked(17 * 31 + (int)PeakItemInsight.Providers.Labels.NativeLanguage);
+        hash = unchecked(hash * 31 + PeakItemInsight.Providers.Labels.Language.GetHashCode());
+        hash = unchecked(hash * 31 + (int)(PresentationOptions.DescriptionStyle?.Value ?? DescriptionStyle.Minimal));
         var character = Character.localCharacter;
         var afflictions = character != null ? character.refs.afflictions : null;
         if (afflictions != null)

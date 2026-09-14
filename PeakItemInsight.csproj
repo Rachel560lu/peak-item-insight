@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <PackageReference Include="BepInEx.Core" Version="5.4.21" />
+    <EmbeddedResource Include="src/Localization/*.tsv" LogicalName="PeakItemInsight.Localization.%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>

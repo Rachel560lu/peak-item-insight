@@ -1,0 +1,2 @@
+# TSV trigger templates intentionally include trailing separator spaces.
+src/Localization/*.tsv text eol=lf whitespace=-blank-at-eol

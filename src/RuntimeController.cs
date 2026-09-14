@@ -28,7 +28,7 @@ internal sealed class RuntimeController
     private readonly PreviewTargetGate _hoverGate = new PreviewTargetGate();
     private PreviewTargetKey _target;
     private int _scene, _character, _gui;
-    private PreviewStateKey _lastState;
+
     private string _lastTargetType = "";
     private bool _hasTicked;
     private float _nextErrorLog;
@@ -107,9 +107,11 @@ internal sealed class RuntimeController
             if (_candidate == null || !ready)
                 return;
 
-            var state = PreviewStateKey.Capture(_candidate);
-            if (_candidate == _visibleItem && state.Equals(_lastState) && Time.unscaledTime < _nextRefresh)
+            // Affliction values drift every frame. They must not bypass the refresh budget.
+            // Target changes still render immediately; uses/cooking/status changes follow within 250 ms.
+            if (_candidate == _visibleItem && Time.unscaledTime < _nextRefresh)
                 return;
+
 
             var preview = _orchestrator.Build(_candidate, _showDebugIds.Value,
                 selected.Source == PreviewSource.Hover && _hoverResolver.CurrentTargetType == "FakeItem");
@@ -125,7 +127,7 @@ internal sealed class RuntimeController
                 WorldPreviewTrace.Preview(_candidate, preview, _target.InstanceId);
             }
             _visibleItem = _candidate;
-            _lastState = state;
+
             _nextRefresh = Time.unscaledTime + .25f;
         }
         catch (Exception exception)
@@ -152,7 +154,7 @@ internal sealed class RuntimeController
     {
         if (_visibleItem != null) SessionTrace.Write("HIDE");
         _visibleItem = null;
-        _lastState = default;
+
         if (_minimalPanel != null)
             _minimalPanel.Hide();
         if (_ghostOverlay != null)

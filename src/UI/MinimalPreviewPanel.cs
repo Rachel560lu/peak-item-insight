@@ -15,17 +15,30 @@ internal sealed class MinimalPreviewPanel : MonoBehaviour
         public RectTransform Rect = null!;
         public TextMeshProUGUI Text = null!;
         public Image Icon = null!;
+        public RawImage ItemIcon = null!;
         public PreviewDeltaArrow Arrow = null!;
+        public TextMeshProUGUI Timing = null!;
+        public PreviewSymbol Clock = null!, Symbol = null!;
+        public Shadow Shadow = null!;
+        public bool Title;
     }
     private RectTransform _panel = null!;
     private CanvasGroup _group = null!;
+    private RoundedCard _background = null!;
+    private bool _detailed;
+    internal bool HasBackground => IsVisible && _background.enabled;
     private readonly List<Row> _rows = new List<Row>();
     private TMP_FontAsset? _font;
     private PreviewSource _source;
     private int _screenWidth, _screenHeight;
+    private readonly Vector3[] _corners = new Vector3[4];
+    private TMP_FontAsset? _checkedFont;
+    private string _checkedLanguage = "";
+    private float _layoutScale;
+    internal int LayoutPasses { get; private set; }
     internal bool IsVisible => _panel != null && _panel.gameObject.activeInHierarchy;
     internal string LastTargetName { get; private set; } = "";
-    internal string BodyText => string.Join("\n", _rows.Where(r => r.Rect.gameObject.activeSelf).Select(r => r.Text.text));
+    internal string BodyText => string.Join("\n", _rows.Where(r => r.Rect.gameObject.activeSelf).Select(r => r.Text.text + (r.Timing.gameObject.activeSelf ? " · " + r.Timing.text : "")));
     internal int VisibleRows => _rows.Count(r => r.Rect.gameObject.activeSelf);
 
     public static MinimalPreviewPanel Create()
@@ -40,8 +53,12 @@ internal sealed class MinimalPreviewPanel : MonoBehaviour
         var view = root.AddComponent<MinimalPreviewPanel>();
         view._group = root.GetComponent<CanvasGroup>();
         view._group.blocksRaycasts = false; view._group.interactable = false;
-        var panel = new GameObject("MinimalEffects", typeof(RectTransform));
+        var panel = new GameObject("InventoryDescription", typeof(RectTransform), typeof(RoundedCard));
         view._panel = panel.GetComponent<RectTransform>();
+        view._background = panel.GetComponent<RoundedCard>();
+        view._background.raycastTarget = false;
+        view._background.color = new Color(.13f, .16f, .16f, .92f);
+        view._background.enabled = false;
         view._panel.SetParent(root.transform, false);
         view._panel.anchorMin = view._panel.anchorMax = new Vector2(.5f, .5f);
         view._panel.pivot = new Vector2(.5f, 0);
@@ -52,7 +69,10 @@ internal sealed class MinimalPreviewPanel : MonoBehaviour
     {
         _source = preview.Source;
         LastTargetName = preview.Name;
-        var lines = MinimalRows.Build(preview, Labels.Chinese);
+        _detailed = PresentationOptions.DescriptionStyle?.Value == DescriptionStyle.Detailed;
+        _background.enabled = _detailed;
+        if (_detailed) { ShowDetailed(preview); return; }
+        var lines = MinimalRows.Build(preview, Labels.Text("清除", "Clear"), Labels.Text("有", "Present"));
         if (lines.Count == 0) { Hide(); return; }
         if (preview.Source == PreviewSource.Hover) lines.Add(new MinimalRow(preview.Name));
         // Never display a default-font frame while native resources are loading.
@@ -62,6 +82,14 @@ internal sealed class MinimalPreviewPanel : MonoBehaviour
             if (i == _rows.Count) _rows.Add(CreateRow());
             var row = _rows[i]; var data = lines[i];
             row.Rect.gameObject.SetActive(true);
+            row.ItemIcon.gameObject.SetActive(false);
+            row.ItemIcon.texture = null;
+            row.Title = false;
+            row.Text.fontStyle = FontStyles.Normal;
+            row.Shadow.enabled = false;
+            row.Timing.gameObject.SetActive(false);
+            row.Clock.gameObject.SetActive(false);
+            row.Symbol.gameObject.SetActive(false);
             var native = NativeIcon(data);
             row.Icon.sprite = native != null ? native.sprite : null;
             row.Icon.color = native != null ? new Color(native.color.r, native.color.g, native.color.b, 1) : Color.white;
@@ -83,6 +111,63 @@ internal sealed class MinimalPreviewPanel : MonoBehaviour
         LayoutRows(); Position();
     }
 
+    private void ShowDetailed(ItemPreview preview)
+    {
+        var lines = DetailedRows.Build(preview, Labels.Language);
+        if (lines.Count == 0 || !AdoptFont()) { Hide(); return; }
+        var layoutChanged = !IsVisible || _rows.Count(r => r.Rect.gameObject.activeSelf) != lines.Count ||
+            _screenWidth != Screen.width || _screenHeight != Screen.height ||
+            _layoutScale != Mathf.Clamp(PresentationOptions.MinimalScale?.Value ?? 1, .5f, 2);
+        for (var i = 0; i < lines.Count; i++)
+        {
+            if (i == _rows.Count) _rows.Add(CreateRow());
+            var row = _rows[i]; var data = lines[i];
+            var expectedNative = NativeIcon(new MinimalRow("", data.Status, data.Lightning));
+            var expectedFallback = !data.NamesStatus && (expectedNative == null || expectedNative.sprite == null)
+                ? data.Status.HasValue ? " " + Labels.Status(data.Status.Value) : data.Lightning ? " " + Labels.ExtraStamina : "" : "";
+            layoutChanged |= row.Title != data.Title || row.Text.text != data.Text + expectedFallback ||
+                row.Timing.text != data.Timing || row.Text.font != _font || row.Timing.font != _font ||
+                row.Shadow.enabled == false || row.Icon.sprite != (expectedNative != null ? expectedNative.sprite : null) ||
+                row.ItemIcon.texture != (data.Title ? preview.Icon : null) ||
+                row.Symbol.gameObject.activeSelf != (data.Buff.HasValue && !data.Lightning);
+            row.Rect.gameObject.SetActive(true);
+            row.Title = data.Title;
+            row.ItemIcon.texture = data.Title ? preview.Icon : null;
+            row.ItemIcon.gameObject.SetActive(data.Title && preview.Icon != null);
+            if (row.ItemIcon.texture != null)
+            {
+                var texture = row.ItemIcon.texture;
+                var aspect = (float)texture.width / Mathf.Max(1,texture.height);
+                row.ItemIcon.rectTransform.sizeDelta = aspect >= 1 ? new Vector2(38,38/aspect) : new Vector2(38*aspect,38);
+            }
+            row.Arrow.gameObject.SetActive(false);
+            var native = NativeIcon(new MinimalRow("", data.Status, data.Lightning));
+            row.Icon.sprite = native != null ? native.sprite : null;
+            row.Icon.color = native != null ? new Color(native.color.r, native.color.g, native.color.b, 1) : Color.white;
+            row.Icon.gameObject.SetActive(row.Icon.sprite != null);
+            row.Symbol.gameObject.SetActive(data.Buff.HasValue && !data.Lightning);
+            if (data.Buff.HasValue)
+            {
+                var kind = data.Buff == BuffKind.Speed ? PreviewSymbolKind.Shoe : PreviewSymbolKind.Shield;
+                if (row.Symbol.Kind != kind) { row.Symbol.Kind = kind; row.Symbol.SetVerticesDirty(); }
+            }
+            var fallback = !data.NamesStatus && row.Icon.sprite == null ? data.Status.HasValue ? " " + Labels.Status(data.Status.Value)
+                : data.Lightning ? " " + Labels.ExtraStamina : "" : "";
+            row.Text.text = data.Text + fallback;
+            row.Text.color = data.Title ? new Color(.98f,.97f,.88f) : new Color(.96f,.96f,.91f);
+            row.Text.fontStyle = data.Title ? FontStyles.Bold : FontStyles.Normal;
+            row.Shadow.enabled = true;
+            row.Timing.text = data.Timing;
+            row.Timing.gameObject.SetActive(data.Timing.Length > 0);
+            row.Clock.gameObject.SetActive(data.Timing.Length > 0);
+            if (_font != null) { row.Text.font = _font; row.Timing.font = _font; }
+        }
+        for (var i = lines.Count; i < _rows.Count; i++) _rows[i].Rect.gameObject.SetActive(false);
+        _panel.gameObject.SetActive(true);
+        if (layoutChanged) LayoutRows();
+        Position();
+    }
+
     private Row CreateRow()
     {
         var rect = new GameObject("Effect", typeof(RectTransform)).GetComponent<RectTransform>();
@@ -96,16 +181,37 @@ internal sealed class MinimalPreviewPanel : MonoBehaviour
         icon.transform.SetParent(rect, false); icon.raycastTarget = false; icon.preserveAspect = true;
         icon.rectTransform.anchorMin = icon.rectTransform.anchorMax = new Vector2(.5f, 1);
         icon.rectTransform.sizeDelta = new Vector2(30, 30);
+        var itemIcon = new GameObject("ItemIcon", typeof(RectTransform), typeof(RawImage)).GetComponent<RawImage>();
+        itemIcon.transform.SetParent(rect,false); itemIcon.raycastTarget = false; itemIcon.color = Color.white;
+        itemIcon.rectTransform.anchorMin = itemIcon.rectTransform.anchorMax = new Vector2(.5f,1);
         var arrow = new GameObject("DeltaDirection", typeof(RectTransform), typeof(PreviewDeltaArrow)).GetComponent<PreviewDeltaArrow>();
         arrow.transform.SetParent(rect, false); arrow.raycastTarget = false;
         arrow.rectTransform.anchorMin = arrow.rectTransform.anchorMax = new Vector2(.5f, 1);
         arrow.rectTransform.sizeDelta = new Vector2(20, 18);
-        return new Row { Rect = rect, Text = text, Icon = icon, Arrow = arrow };
+        var timing = new GameObject("Timing", typeof(RectTransform), typeof(TextMeshProUGUI)).GetComponent<TextMeshProUGUI>();
+        timing.transform.SetParent(rect, false); timing.raycastTarget = false; timing.richText = false;
+        timing.textWrappingMode = TextWrappingModes.Normal; timing.alignment = TextAlignmentOptions.MidlineLeft;
+        timing.color = new Color(.82f,.85f,.81f);
+        timing.rectTransform.anchorMin = timing.rectTransform.anchorMax = new Vector2(.5f,1);
+        var clock = new GameObject("Clock", typeof(RectTransform), typeof(PreviewSymbol)).GetComponent<PreviewSymbol>();
+        clock.transform.SetParent(rect, false); clock.raycastTarget = false; clock.Kind = PreviewSymbolKind.Clock;
+        clock.color = timing.color; clock.rectTransform.anchorMin = clock.rectTransform.anchorMax = new Vector2(.5f,1);
+        clock.rectTransform.sizeDelta = new Vector2(20,20);
+        var symbol = new GameObject("BuffIcon", typeof(RectTransform), typeof(PreviewSymbol)).GetComponent<PreviewSymbol>();
+        symbol.transform.SetParent(rect, false); symbol.raycastTarget = false;
+        symbol.rectTransform.anchorMin = symbol.rectTransform.anchorMax = new Vector2(.5f,1);
+        symbol.rectTransform.sizeDelta = new Vector2(26,26);
+        var shadow = text.gameObject.AddComponent<Shadow>();
+        shadow.effectColor = new Color(0,0,0,.8f); shadow.effectDistance = new Vector2(1,-1);
+        return new Row { Rect = rect, Text = text, Icon = icon, ItemIcon = itemIcon, Arrow = arrow, Timing = timing, Clock = clock, Symbol = symbol, Shadow = shadow };
     }
 
     private void LayoutRows()
     {
+        LayoutPasses++;
         _screenWidth = Screen.width; _screenHeight = Screen.height;
+        _layoutScale = Mathf.Clamp(PresentationOptions.MinimalScale?.Value ?? 1, .5f, 2);
+        if (_detailed) { LayoutDetailed(); return; }
         var area = ((RectTransform)transform).rect;
         var scale = Mathf.Clamp(PresentationOptions.MinimalScale?.Value ?? 1, .5f, 2);
         _panel.localScale = Vector3.one * scale;
@@ -118,6 +224,7 @@ internal sealed class MinimalPreviewPanel : MonoBehaviour
             foreach (var row in _rows.Where(r => r.Rect.gameObject.activeSelf))
             {
                 row.Text.fontSize = size;
+                row.Icon.rectTransform.sizeDelta = new Vector2(30,30);
                 var adornments = (row.Icon.gameObject.activeSelf ? 38 : 0) + (row.Arrow.gameObject.activeSelf ? 28 : 0);
                 width = Mathf.Max(width, Mathf.Min(maxWidth, row.Text.GetPreferredValues(row.Text.text).x + adornments + 4));
             }
@@ -142,6 +249,58 @@ internal sealed class MinimalPreviewPanel : MonoBehaviour
         _panel.sizeDelta = new Vector2(width, total);
     }
 
+    private void LayoutDetailed()
+    {
+        var area = ((RectTransform)transform).rect;
+        var scale = Mathf.Clamp(PresentationOptions.MinimalScale?.Value ?? 1, .5f, 2);
+        var width = Mathf.Min(400, (area.width - 32) / scale);
+        var contentWidth = width - 32;
+        float total = 0;
+        for (var size = 24; size >= 18; size--)
+        {
+            total = 16;
+            foreach (var row in _rows.Where(r => r.Rect.gameObject.activeSelf))
+            {
+                row.Text.fontSize = row.Title ? size + 2 : size;
+                row.Timing.fontSize = size - 2;
+                var iconWidth = row.ItemIcon.gameObject.activeSelf ? 50 : row.Icon.gameObject.activeSelf || row.Symbol.gameObject.activeSelf ? 34 : 0;
+                var timed = row.Timing.gameObject.activeSelf;
+                var timingWidth = timed ? Mathf.Min(contentWidth * .6f, row.Timing.GetPreferredValues(row.Timing.text).x + 2) : 0;
+                var valueWidth = contentWidth - iconWidth - (timed ? timingWidth + 30 : 0);
+                // Long labels or end-effect conditions get a second timing line.
+                var stacked = timed && row.Text.GetPreferredValues(row.Text.text).x > valueWidth;
+                if (stacked) valueWidth = contentWidth - iconWidth;
+                var valueHeight = Mathf.Max(row.ItemIcon.gameObject.activeSelf ? 42 : 30, row.Text.GetPreferredValues(row.Text.text, valueWidth, 0).y + 4);
+                if (stacked) timingWidth = contentWidth - iconWidth - 26;
+                var timingHeight = timed ? Mathf.Max(24, row.Timing.GetPreferredValues(row.Timing.text, timingWidth, 0).y + 4) : 0;
+                var height = stacked ? valueHeight + timingHeight : Mathf.Max(valueHeight,timingHeight);
+                row.Rect.sizeDelta = new Vector2(contentWidth,height);
+                row.Rect.anchoredPosition = new Vector2(0,-total);
+                row.Text.alignment = TextAlignmentOptions.MidlineLeft;
+                row.Text.rectTransform.sizeDelta = new Vector2(valueWidth,valueHeight);
+                row.Text.rectTransform.anchoredPosition = new Vector2(-contentWidth/2 + iconWidth + valueWidth/2,-valueHeight/2);
+                row.Icon.rectTransform.anchoredPosition = new Vector2(-contentWidth/2+13,-valueHeight/2);
+                row.Icon.rectTransform.sizeDelta = new Vector2(26,26);
+                row.Symbol.rectTransform.anchoredPosition = row.Icon.rectTransform.anchoredPosition;
+                row.ItemIcon.rectTransform.anchoredPosition = new Vector2(-contentWidth/2+19,-valueHeight/2);
+                if (timed)
+                {
+                    var timingLeft = stacked ? -contentWidth/2 + iconWidth : contentWidth/2 - timingWidth - 26;
+                    var timingY = stacked ? -valueHeight-timingHeight/2 : -height/2;
+                    row.Clock.rectTransform.anchoredPosition = new Vector2(timingLeft+10,timingY);
+                    row.Timing.rectTransform.sizeDelta = new Vector2(timingWidth,timingHeight);
+                    row.Timing.rectTransform.anchoredPosition = new Vector2(timingLeft+26+timingWidth/2,timingY);
+                }
+                total += height + (row.Title ? 10 : 6);
+            }
+            total += 10;
+            if (total * scale <= area.height - 160) break;
+        }
+        // Preserve all rows even with unusually many effects and a large user scale.
+        _panel.localScale = Vector3.one * Mathf.Min(scale, Mathf.Max(.1f,(area.height-160)/total));
+        _panel.sizeDelta = new Vector2(width,total);
+    }
+
     private static Image? NativeIcon(MinimalRow data)
     {
         var bar = GUIManager.instance != null ? GUIManager.instance.bar : null;
@@ -158,12 +317,18 @@ internal sealed class MinimalPreviewPanel : MonoBehaviour
         _font = fonts != null ? fonts.mainBaseFont : GUIManager.instance != null ? GUIManager.instance.interactNameText?.font : null;
         // The native base font delegates Chinese to the game's fallback chain.
         // Query that chain; never replace it or select arbitrary scene UI fonts.
-        return _font != null && (!Labels.Chinese || _font.HasCharacter('饥', true, true));
+        if (_font == null) return false;
+        if (_checkedFont != _font || _checkedLanguage != Labels.Language)
+        {
+            foreach (var c in Labels.RequiredGlyphs) if (!_font.HasCharacter(c, true, true)) return false;
+            _checkedFont = _font; _checkedLanguage = Labels.Language;
+        }
+        return true;
     }
 
     private Rect Bounds(RectTransform rect)
     {
-        var corners = new Vector3[4]; rect.GetWorldCorners(corners);
+        var corners = _corners; rect.GetWorldCorners(corners);
         var canvas = rect.GetComponentInParent<Canvas>();
         var camera = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.worldCamera : null;
         var min = new Vector2(float.MaxValue, float.MaxValue); var max = new Vector2(float.MinValue, float.MinValue);
@@ -184,6 +349,7 @@ internal sealed class MinimalPreviewPanel : MonoBehaviour
     }
     private void Position()
     {
+        if (_detailed) _background.color = new Color(.13f,.16f,.16f,Mathf.Clamp01(PresentationOptions.DetailedBackgroundOpacity?.Value ?? .92f));
         var gui = GUIManager.instance;
         _group.alpha = gui != null && gui.hudCanvasGroup != null ? gui.hudCanvasGroup.alpha : 1;
         var area = ((RectTransform)transform).rect;
@@ -226,7 +392,7 @@ internal sealed class MinimalPreviewPanel : MonoBehaviour
 
     private float TextTop(TextMeshProUGUI text)
     {
-        text.ForceMeshUpdate();
+        if (text.havePropertiesChanged) text.ForceMeshUpdate();
         var world = text.transform.TransformPoint(text.textBounds.max);
         var canvas = text.GetComponentInParent<Canvas>();
         var camera = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.worldCamera : null;

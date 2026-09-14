@@ -38,6 +38,7 @@ internal static class MushroomEffectReader
                 preview.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Poison, -.15f));
                 preview.Effects.Add(new EffectFact(CharacterAfflictions.STATUSTYPE.Spores, -.15f));
                 preview.Instructions.Add(Labels.Text("并清除持续中毒效果。", "Also clears ongoing poison effects."));
+                preview.DetailConditions.Add(Labels.Text("并清除持续中毒效果。", "Also clears ongoing poison effects."));
                 preview.CompactNotes.Add(Labels.Text("解除持续中毒", "Stops ongoing poisoning"));
                 break;
             case 8:
@@ -46,11 +47,16 @@ internal static class MushroomEffectReader
             case 0:
                 preview.SummarizeEffects = true;
                 preview.CompactInfinity = Labels.Text("临时", "Temporary");
+                preview.Buffs.Add(new BuffFact(BuffKind.InfiniteStamina, 4, 3));
                 preview.Instructions.Add(Labels.Text("3 秒后获得 4 秒无限精力。", "Infinite stamina for 4 s, after 3 s."));
                 break;
-            case 1: Describe(preview, "3 秒后获得 5 秒加速效果。", "Speed boost for 5 s, after 3 s.", "加速", "Speed boost"); break;
+            case 1:
+                preview.Buffs.Add(new BuffFact(BuffKind.Speed, 5, 3));
+                Describe(preview, "3 秒后获得 5 秒加速效果。", "Speed boost for 5 s, after 3 s.", "加速", "Speed boost"); break;
             case 2: Describe(preview, "3 秒后获得 15 秒低重力效果。", "Low gravity for 15 s, after 3 s.", "低重力", "Low gravity"); break;
-            case 3: Describe(preview, "获得 10 秒无敌效果。", "Invincibility for 10 s.", "暂时无敌", "Temporary invincibility"); break;
+            case 3:
+                preview.Buffs.Add(new BuffFact(BuffKind.Invincibility, 10));
+                Describe(preview, "获得 10 秒无敌效果。", "Invincibility for 10 s.", "暂时无敌", "Temporary invincibility"); break;
             case 5:
                 Describe(preview, "3 秒后触发孢子爆炸并被向上弹起；范围伤害未量化。",
                     "Spore explosion and upward launch after 3 s; area damage not quantified.", "孢子爆炸／弹起", "Spore blast / launch");
@@ -65,6 +71,7 @@ internal static class MushroomEffectReader
     private static void Describe(ItemPreview p, string zh, string en, string compactZh, string compactEn)
     {
         p.Instructions.Add(Labels.Text(zh, en));
+        if (p.Buffs.Count == 0) p.DetailNotes.Add(Labels.Text(zh, en));
         p.SummarizeEffects = true;
         p.CompactNotes.Add(Labels.Text(compactZh, compactEn));
     }
@@ -72,5 +79,6 @@ internal static class MushroomEffectReader
     {
         preview.CompleteEffects = false;
         preview.Warnings.Add(Labels.Text("本局蘑菇效果尚未确认。", "This level's mushroom effect is unconfirmed."));
+        preview.DetailNotes.Add(Labels.Text("本局蘑菇效果尚未确认。", "This level's mushroom effect is unconfirmed."));
     }
 }

@@ -21,6 +21,7 @@ internal sealed class EngineSmokeTest
     private bool _captured;
     private float _capturedAt;
     private bool _englishShown;
+    private DescriptionStyle? _previousStyle;
     private PreviewSettingsDriver? _settingsProbe;
     public void Tick()
     {
@@ -35,6 +36,8 @@ internal sealed class EngineSmokeTest
             }
             if (_stage == 0)
             {
+                _previousStyle = PresentationOptions.DescriptionStyle!.Value;
+                PresentationOptions.DescriptionStyle.Value = DescriptionStyle.Minimal;
                 _panel = MinimalPreviewPanel.Create();
                 var preview = new ItemPreview { Name = "Insight UI self-test / 界面自检" };
                 preview.Statuses.Add(new StatusDelta(CharacterAfflictions.STATUSTYPE.Hunger, .4f, .15f));
@@ -63,11 +66,12 @@ internal sealed class EngineSmokeTest
                 _recoveries = RecoveryRoutingSmokeTest.Run(_panel);
                 _optimized = OptimizationSmokeTest.Run(_panel);
                 MinimalModeSmokeTest.Run(_panel);
+                DetailedModeSmokeTest.Run(_panel);
                 var settingsProbe = new GameObject("SettingsProbe");
                 _settingsProbe = settingsProbe.AddComponent<PreviewSettingsDriver>();
                 _settingsProbe.enabled = false;
                 _settingsProbe.VerifyPanel();
-                SessionTrace.Write("SMOKE_SETTINGS_PASS", "Chinese+English glyphs; native MenuWindow open/close/input cleanup; shared font material unchanged");
+                SessionTrace.Write("SMOKE_SETTINGS_PASS", "Chinese+English+Turkish+Spanish glyphs; native MenuWindow open/close/input cleanup; shared font material unchanged");
                 _since = Time.unscaledTime;
                 _stage = 1;
             }
@@ -96,6 +100,7 @@ internal sealed class EngineSmokeTest
                 if (_panel.IsVisible) throw new InvalidOperationException("Panel failed to hide.");
                 UnityEngine.Object.Destroy(_panel.gameObject);
                 UnityEngine.Object.Destroy(_ghost.gameObject);
+                if (_previousStyle.HasValue) PresentationOptions.DescriptionStyle!.Value = _previousStyle.Value;
                 SessionTrace.Write("SMOKE_UI_PASS", "show+hide; visual readability and native HUD still require acceptance");
                 _stage = 2;
                 if (Array.Exists(Environment.GetCommandLineArgs(), a => a == "-insightSmokeTestExit"))
@@ -112,6 +117,7 @@ internal sealed class EngineSmokeTest
         catch (Exception e)
         {
             if (_settingsProbe != null) UnityEngine.Object.Destroy(_settingsProbe.gameObject);
+            if (_previousStyle.HasValue) PresentationOptions.DescriptionStyle!.Value = _previousStyle.Value;
             SessionTrace.Write("ERROR", $"Smoke test: {e}");
             if (_panel != null) UnityEngine.Object.Destroy(_panel.gameObject);
             if (_ghost != null) UnityEngine.Object.Destroy(_ghost.gameObject);

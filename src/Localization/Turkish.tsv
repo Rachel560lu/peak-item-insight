@@ -1,0 +1,111 @@
+# English source template	Translation
+Unknown item	Bilinmeyen eşya
+MYSTICAL	MİSTİK
+CONSUMABLE	TÜKETİLEBİLİR
+UTILITY	ARAÇ
+Temporary	Geçici
+Infinite stamina for {0:0.#} s.	{0:0.#} sn boyunca sınırsız dayanıklılık.
+Affects nearby teammates, not yourself.	Yalnızca yakındaki takım arkadaşlarını etkiler, seni etkilemez.
+Nearby teammates only	Yalnızca yakındaki takım arkadaşları
+World item: prefab data; instance state unverified.	Dünyadaki eşya: temel eşya verileri; bu eşyanın mevcut durumu doğrulanmadı.
+Pulse includes estimated timed totals; excludes natural recovery, environment and existing buffs.	Yanıp sönme, süreli etkilerin tahmini toplamını içerir; doğal iyileşme, çevre ve mevcut güçlendirmeler dahil değildir.
+Treats injuries; actual recovery depends on your current injury.	Yaraları iyileştirir; iyileşme miktarı mevcut yaralanmana bağlıdır.
+Speed boost	Hız artışı
+Temporary speed boost for {0:0.#} s.	{0:0.#} sn boyunca geçici hız artışı.
+Infinite stamina for {0:0.#} s after climbing starts.	Tırmanmaya başladıktan sonra {0:0.#} sn boyunca sınırsız dayanıklılık.
+Temporary invincibility	Geçici yenilmezlik
+Invincible for {0:0.#} s.	{0:0.#} sn boyunca yenilmezlik.
+Within range	Menzil içinde
+Grants infinite stamina to characters within range.	Menzildeki karakterlere sürekli sınırsız dayanıklılık sağlar.
+Also clears ongoing poison effects.	Devam eden zehir etkilerini de kaldırır.
+Stops ongoing poisoning	Devam eden zehirlenmeyi durdurur
+Infinite stamina for 4 s, after 3 s.	3 sn sonra 4 sn boyunca sınırsız dayanıklılık.
+Speed boost for 5 s, after 3 s.	3 sn sonra 5 sn boyunca hız artışı.
+Low gravity for 15 s, after 3 s.	3 sn sonra 15 sn boyunca düşük yerçekimi.
+Low gravity	Düşük yerçekimi
+Invincibility for 10 s.	10 sn boyunca yenilmezlik.
+Spore explosion and upward launch after 3 s; area damage not quantified.	3 sn sonra spor patlaması ve yukarı fırlatma; alan hasarı hesaplanmadı.
+Spore blast / launch	Spor patlaması / fırlatma
+Blindness for 60 s, after 3 s.	3 sn sonra 60 sn boyunca körlük.
+Temporary blindness	Geçici körlük
+Fall for about 8 s, after 3 s.	3 sn sonra yaklaşık 8 sn boyunca yere düşme.
+Fall	Yere düşme
+Numbness for 60 s, after 3 s.	3 sn sonra 60 sn boyunca uyuşukluk.
+Temporary numbness	Geçici uyuşukluk
+This level's mushroom effect is unconfirmed.	Bu bölümdeki mantarın etkisi henüz doğrulanmadı.
+Place the cannon and adjust its angle to launch scouts or items.	İzcileri veya eşyaları fırlatmak için topu yerleştir ve açısını ayarla.
+Open your passport.	Pasaportunu aç.
+Drop or throw; it bursts on impact into a healing cloud for you and nearby teammates. It heals injury and removes poison and spores. Stay in the cloud for continued healing; do not eat it.	Bırak veya fırlat; çarpınca patlayarak sen ve yakındaki takım arkadaşların için bir iyileştirme bulutu oluşturur. Yaraları iyileştirir, zehri ve sporları temizler. İyileşmenin sürmesi için bulutta kal; yenmez.
+Wall rest point · one scout; normal pitons reusable, rusty pitons break.	Duvarda dinlenme noktası · tek izci; normal pitonlar tekrar kullanılabilir, paslı pitonlar kırılır.
+Drop/throw: stay in cloud to heal yourself and teammates; clears poison/spores.	Bırak/fırlat: kendini ve takım arkadaşlarını iyileştirmek için bulutta kal; zehri/sporları temizler.
+Place and aim: launch scouts/items.	Yerleştir ve nişan al: izcileri/eşyaları fırlat.
+Open	Aç
+Place	Yerleştir
+Change Angle	Açıyı ayarla
+Held	Elde
+Hover	Nişan
+Uses	Kullanım
+Remaining	Kalan
+Fuel	Yakıt
+Cooked	Pişirme
+No	Hayır
+Place on a climbable wall and grab it to rest and recover stamina. One scout at a time. A normal piton has no rest-use limit. Beware: rusty pitons found on the map can break.	Tırmanılabilir bir duvara yerleştir ve dinlenip dayanıklılık kazanmak için tutun. Aynı anda tek izci kullanabilir. Normal pitonla sınırsız kez dinlenebilirsin. Dikkat: haritadaki paslı pitonlar kırılabilir.
+No previewable effect detected.	Önizlenebilir bir etki bulunamadı.
+No net stamina change at current state; see individual effects above.	Mevcut durumda net dayanıklılık değişimi yok; ayrı etkiler yukarıda.
+No uses remaining.	Kullanım hakkı kalmadı.
+Special character state: exact preview unavailable.	Özel karakter durumu: kesin önizleme yapılamıyor.
+Conditional held/cancel/consume effects are not fully included.	Elde tutma/iptal/tüketme koşullarına bağlı etkiler tam olarak dahil edilmedi.
+Some effects are not yet supported.	Bazı etkiler henüz desteklenmiyor.
+Extra stamina	Ek dayanıklılık
+{0} reaches its limit	{0} üst sınırına ulaşır
+Injury	Yaralanma
+Hunger	Açlık
+Cold	Soğuk
+Poison	Zehir
+Spores	Sporlar
+Curse	Lanet
+Drowsy	Uykululuk
+Weight	Ağırlık
+Heat	Sıcaklık
+Petrify	Taşlaşma
+Thorns	Dikenler
+Clear	Temizle
+Present	Var
+Item Insight settings	Item Insight ayarları
+Both: aimed item first, otherwise held item. Changes save immediately.	İkisi: önce nişan alınan eşya, yoksa eldeki eşya. Ayarlar hemen kaydedilir.
+Done	Tamam
+Text above inventory	Envanter üstü metin
+Stamina bar preview	Dayanıklılık önizlemesi
+Both	İkisi
+Off	Kapalı
+Description style	Açıklama biçimi
+Minimal	Sade
+Detailed	Ayrıntılı
+Invincibility	Yenilmezlik
+{0:0.#} s	{0:0.#} sn
+After {0:0.#} s	{0:0.#} sn sonra
+After effect ends	Etki sona erince
+{0:0.#} s after effect ends	Etki bittikten {0:0.#} sn sonra
+Timer starts when climbing.	Süre tırmanmaya başlayınca işler.
+Detailed background transparency	Ayrıntılı arka plan saydamlığı
+
+For {0:0.#} s	{0:0.#} sn boyunca
+{0:0.#} s after the effect ends, 	Etki bittikten {0:0.#} sn sonra, 
+After the effect ends, 	Etki bittikten sonra, 
+After {0:0.#} s, 	{0:0.#} sn sonra, 
+After climbing starts, 	Tırmanmaya başladıktan sonra, 
+Immediately clear {0}	{0} etkisini hemen temizler
+clear {0}	{0} etkisini temizler
+reduce {0} by {1} each second	{0} seviyesini saniyede {1} azaltır
+increase {0} by {1} each second	{0} seviyesini saniyede {1} artırır
+Immediately reduce {0} by {1}	{0} seviyesini hemen {1} azaltır
+Immediately increase {0} by {1}	{0} seviyesini hemen {1} artırır
+reduce {0} by {1}	{0} seviyesini {1} azaltır
+increase {0} by {1}	{0} seviyesini {1} artırır
+Immediately clear {0}, then keep clearing it	{0} etkisini hemen temizler, ardından temizlemeye devam eder
+Gain infinite stamina	Sınırsız dayanıklılık sağlar
+Gain a speed boost	Hız artışı sağlar
+Gain invincibility	Yenilmezlik sağlar
+Gain {0} extra stamina	{0} ek dayanıklılık sağlar
+Contains {0}	{0} içerir
+Unknown {0} effects	{0} etkileri bilinmiyor

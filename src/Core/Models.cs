@@ -19,6 +19,19 @@ internal readonly struct StatusDelta
 
 internal enum ResourceKind { Other, Uses, Remaining, Fuel, Cooked }
 
+internal enum EffectTrigger { Use, EffectEnd, Climbing }
+internal enum BuffKind { InfiniteStamina, Speed, Invincibility }
+
+internal readonly struct BuffFact
+{
+    public BuffFact(BuffKind kind, float duration = 0, float delay = 0, EffectTrigger trigger = EffectTrigger.Use)
+    { Kind = kind; Duration = duration; Delay = delay; Trigger = trigger; }
+    public BuffKind Kind { get; }
+    public float Duration { get; }
+    public float Delay { get; }
+    public EffectTrigger Trigger { get; }
+}
+
 internal readonly struct ResourceLine
 {
     public ResourceLine(string label, string value, ResourceKind kind = ResourceKind.Other)
@@ -49,6 +62,10 @@ internal sealed class ItemPreview
     public RiskLevel PoisonRisk { get; set; }
     public RiskLevel SporeRisk { get; set; }
     public List<EffectFact> Effects { get; } = new List<EffectFact>();
+    // Structured presentation metadata; does not alter HUD projections.
+    public List<BuffFact> Buffs { get; } = new List<BuffFact>();
+    public List<string> DetailConditions { get; } = new List<string>();
+    public List<string> DetailNotes { get; } = new List<string>();
     public List<string> Unsupported { get; } = new List<string>();
     public ushort ItemId { get; set; }
     public PreviewSource Source { get; set; }
@@ -72,12 +89,15 @@ internal sealed class ItemPreview
 
 internal readonly struct EffectFact
 {
-    public EffectFact(CharacterAfflictions.STATUSTYPE type, float amount, float duration = 0, float delay = 0, bool clears = false)
-    { Type = type; Amount = amount; Duration = duration; Delay = delay; Clears = clears; }
+    public EffectFact(CharacterAfflictions.STATUSTYPE type, float amount, float duration = 0, float delay = 0, bool clears = false,
+        EffectTrigger trigger = EffectTrigger.Use, float endDelay = 0)
+    { Type = type; Amount = amount; Duration = duration; Delay = delay; Clears = clears; Trigger = trigger; EndDelay = endDelay; }
     public CharacterAfflictions.STATUSTYPE Type { get; }
     public float Amount { get; }
     public float Duration { get; }
     public float Delay { get; }
     public bool Clears { get; }
+    public EffectTrigger Trigger { get; }
+    public float EndDelay { get; }
     public bool Timed => Duration > 0 || Delay > 0;
 }
