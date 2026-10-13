@@ -24,7 +24,7 @@ internal sealed class RuntimeDriver : MonoBehaviour
             _heartbeatTime = now; _heartbeatFrame = Time.frameCount;
             var character = Character.localCharacter;
             var gui = GUIManager.instance;
-            SessionTrace.Write("HEARTBEAT", $"frame={Time.frameCount} scene={SceneManager.GetActiveScene().name} runtime={Plugin.Runtime != null} fps={fps:0.0} localPlayer={Player.localPlayer != null} userIdReady={(character != null && character.data.userID != 0)} slotBlocked={(character != null && character.input.itemSwitchBlocked)} modal={(gui != null && gui.windowBlockingInput)}");
+            SessionTrace.Write("HEARTBEAT", $"frame={Time.frameCount} scene={SceneManager.GetActiveScene().name} runtime={Plugin.Runtime != null} fps={fps:0.0} localPlayer={Player.localPlayer != null} characterDataReady={(character != null && character.data != null)} slotBlocked={(character != null && character.input.itemSwitchBlocked)} modal={(gui != null && gui.windowBlockingInput)}");
         }
         Plugin.Runtime?.Tick();
         Plugin.StaminaRuntime?.Tick();
