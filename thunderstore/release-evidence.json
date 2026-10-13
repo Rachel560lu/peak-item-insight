@@ -5,11 +5,13 @@
   "dll_sha256": "3AAD07A7F760D917FE440D80CBF36AFD56117FB23E3A968057CE9A554461AA8A",
   "evidence_document": "docs/release-0214.md",
   "public_release_approved": true,
-  "publication_status": "candidate",
+  "publication_status": "github_published_thunderstore_pending",
   "license": "MIT",
   "offline_checks_passed": 138,
   "native_smoke_pid": 62028,
   "standard_fresh_profile_startup_verified": false,
   "acceptance_scope": "PR #6 fixed the PEAK 2.6.b CharacterData.userID type break. The 0.2.14 source differs from the in-game-tested PR DLL only by the plugin version string. Release build has zero warnings/errors and 138 offline checks pass. Normal Steam gameplay with the PR DLL logged Hover and Held PREVIEW events without plugin errors; actual preview layout was not independently captured. Not exhaustive all-item, post-consumption or multiplayer validation.",
-  "zip_sha256": "6AFEB3D6E08F525D88D908D7FE8E4977F00E72A5638D9612284E3FBDBD24E131"
+  "zip_sha256": "6AFEB3D6E08F525D88D908D7FE8E4977F00E72A5638D9612284E3FBDBD24E131",
+  "github_release": "https://github.com/Rachel560lu/peak-item-insight/releases/tag/v0.2.14",
+  "github_asset_sha256": "sha256:6afeb3d6e08f525d88d908d7fe8e4977f00e72a5638d9612284e3fbdbd24e131"
 }
