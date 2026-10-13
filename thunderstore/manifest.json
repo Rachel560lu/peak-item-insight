@@ -1,6 +1,6 @@
 {
   "name": "PeakItemInsight",
-  "version_number": "0.2.13",
+  "version_number": "0.2.14",
   "website_url": "https://github.com/Rachel560lu/peak-item-insight",
   "description": "Preview item effects with native HUD icons. Optional detailed descriptions with timings, side effects and cooking info, plus adjustable background transparency.",
   "dependencies": [

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.14 — 2026-10-13 / PEAK 2.6.b compatibility
+
+- Restore item previews after PEAK changed `CharacterData.userID` from a number to a string. The runtime heartbeat now checks that character data is available without reading the changed field.
+- No changes to item predictions, UI layout, settings, or dependencies.
+- 修复 PEAK 2.6.b 将 `CharacterData.userID` 改为字符串后物品预览不更新的问题；心跳检查改为确认角色数据可用。
+- 物品效果计算、界面布局、设置和依赖均未改变。
+
 ## 0.2.13 — 2026-09-14 / Optional readable detailed descriptions
 
 - Add Minimal / Detailed description selection in the pause-menu settings; stamina preview controls remain independent.
